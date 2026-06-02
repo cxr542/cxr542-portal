@@ -40,3 +40,7 @@ npm run lint
 
 - [docs/deployment-process.md](docs/deployment-process.md)
 - [docs/module-specs.md](docs/module-specs.md)
+
+- ci/cd smoke test
+
+- CI/CD smoke test commit
