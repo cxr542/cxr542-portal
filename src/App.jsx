@@ -17,7 +17,6 @@ import { RELEASE_NOTES_LABEL, latestReleaseVersion } from './constants/releaseNo
 import { useNavLabels } from './hooks/useNavLabels';
 import { useNavOrder } from './hooks/useNavOrder';
 import { getHomeSnapshots } from './utils/homeSnapshots';
-import { readList, writeList } from './utils/storage';
 import {
   fetchWikiAdminConfig,
   isAiSynapseWikiWebDemoEmbed,
@@ -33,11 +32,7 @@ import {
   AI_SYNAPSE_WIKI_GITHUB_PAGES_URL,
   AI_SYNAPSE_WIKI_REPO_URL,
 } from './utils/aiSynapseWikiDev';
-import {
-  isTodayShoesWebDemoEmbed,
-  TODAY_SHOES_APP_URL,
-  TODAY_SHOES_GITHUB_PAGES_URL,
-} from './utils/todayShoesDev';
+import { TODAY_SHOES_APP_URL } from './utils/todayShoesDev';
 import {
   GEMINI_TUNER_APP_URL,
   GEMINI_TUNER_GITHUB_PAGES_URL,
@@ -52,10 +47,6 @@ const HOW_MANY_POINTS_APP_URL = '/how-many-points/index.html';
 const WHO_ARE_YOU_APP_URL = '/who-are-you/index.html';
 const MARATHON_LOG_APP_URL = '/marathon-log/index.html';
 
-const STORAGE_KEYS = {
-  shoes: 'cxr542-today-shoes-v1',
-};
-
 function readSidebarCollapsed() {
   try {
     return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1';
@@ -64,16 +55,11 @@ function readSidebarCollapsed() {
   }
 }
 
-function formatDate(iso) {
-  return new Date(iso).toLocaleString('ko-KR');
-}
-
 function findNavItem(id) {
   return PORTAL_NAV_ITEMS.find((item) => item.id === id);
 }
 
 function moduleHasEmbed(id) {
-  if (id === 'today-shoes' && isTodayShoesWebDemoEmbed()) return true;
   if (id === 'ai-synapse-wiki' && isAiSynapseWikiWebDemoEmbed()) return true;
   if (id === 'gemini-tuner' && isGeminiTunerWebDemoEmbed()) return true;
   return Boolean(findNavItem(id)?.embedPath);
@@ -161,99 +147,36 @@ function VisionFontModule({ onGoHome }) {
   );
 }
 
-function TodayShoesMvpModule({ onGoHome }) {
-  const external = findNavItem('today-shoes');
-  const [items, setItems] = useState(() => readList(STORAGE_KEYS.shoes));
-  const [model, setModel] = useState('');
-  const [feeling, setFeeling] = useState('');
-  const [tag, setTag] = useState('');
-
-  const addItem = (e) => {
-    e.preventDefault();
-    if (!model.trim()) return;
-    const next = [{ id: `shoe-${Date.now()}`, model: model.trim(), feeling: feeling.trim(), tag: tag.trim(), createdAt: new Date().toISOString() }, ...items];
-    setItems(next);
-    writeList(STORAGE_KEYS.shoes, next);
-    setModel('');
-    setFeeling('');
-    setTag('');
-  };
-
-  return (
-    <>
-      <ModuleLinkBar
-        hint={
-          <>
-            포털에서 착화 메모를 남기고, 사진·AI 분석은{' '}
-            <strong>{external?.externalLabel || 'Expo 앱'}</strong>과 연결됩니다.
-          </>
-        }
-        actions={
-          <>
-            <button type="button" className="btn-ghost" onClick={onGoHome}>
-              ← 포털 홈
-            </button>
-            {external?.externalUrl ? (
-              <a className="btn-primary" href={external.externalUrl} target="_blank" rel="noopener noreferrer">
-                Expo 앱 열기
-              </a>
-            ) : null}
-          </>
-        }
-      />
-      <section className="module-panel">
-      <h2>today-shoes</h2>
-      <form className="grid-form" onSubmit={addItem}>
-        <input className="field" placeholder="신발 모델" value={model} onChange={(e) => setModel(e.target.value)} />
-        <input className="field" placeholder="착화 느낌" value={feeling} onChange={(e) => setFeeling(e.target.value)} />
-        <input className="field" placeholder="태그 (예: 러닝/출근)" value={tag} onChange={(e) => setTag(e.target.value)} />
-        <button className="btn-primary" type="submit">기록 추가</button>
-      </form>
-      <ul className="list">
-        {items.map((item) => (
-          <li key={item.id}>
-            <strong>{item.model}</strong>
-            <span>{item.feeling || '느낌 미입력'} / {item.tag || '태그 없음'}</span>
-            <small>{formatDate(item.createdAt)}</small>
-          </li>
-        ))}
-      </ul>
-    </section>
-    </>
-  );
-}
-
 function TodayShoesModule({ onGoHome }) {
-  if (isTodayShoesWebDemoEmbed()) {
-    return (
-      <section className="module-embed">
-        <div className="module-embed__bar module-link-bar">
-          <p className="hint module-link-bar__hint" style={{ margin: 0 }}>
-            개발 환경 전용 · <strong>오늘뭐신지 웹 데모</strong>(신발장 · 사진 등록 · AI 분석). 운영 포털은 착화
-            메모 MVP를 사용합니다.{' '}
-            <a href={TODAY_SHOES_GITHUB_PAGES_URL} target="_blank" rel="noopener noreferrer">
-              Expo GitHub Pages
-            </a>
-          </p>
-          <div className="module-link-bar__actions">
-            <button type="button" className="btn-ghost" onClick={onGoHome}>
-              ← 포털 홈
-            </button>
-            <a className="btn-primary" href={TODAY_SHOES_APP_URL} target="_blank" rel="noopener noreferrer">
-              전체 화면으로 열기
-            </a>
-          </div>
+  return (
+    <section className="module-embed">
+      <div className="module-embed__bar module-link-bar">
+        <p className="hint module-link-bar__hint" style={{ margin: 0 }}>
+          <strong>신발장</strong>에 3각도 사진을 등록하고 Gemini·기본 분석으로 특성을 정리합니다. 데이터는{' '}
+          <strong>이 포털 도메인</strong>에 저장되며, 예전 포털 MVP 메모는 앱 안에서 가져올 수 있습니다.
+        </p>
+        <div className="module-link-bar__actions">
+          <button type="button" className="btn-ghost" onClick={onGoHome}>
+            ← 포털 홈
+          </button>
+          <a
+            className="btn-primary"
+            href={TODAY_SHOES_APP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            전체 화면으로 열기
+          </a>
         </div>
-        <iframe
-          className="module-embed__frame"
-          src={TODAY_SHOES_APP_URL}
-          title="today-shoes"
-          loading="lazy"
-        />
-      </section>
-    );
-  }
-  return <TodayShoesMvpModule onGoHome={onGoHome} />;
+      </div>
+      <iframe
+        className="module-embed__frame"
+        src={TODAY_SHOES_APP_URL}
+        title="today-shoes"
+        loading="lazy"
+      />
+    </section>
+  );
 }
 
 function AiSynapseWikiMvpModule({ onGoHome }) {

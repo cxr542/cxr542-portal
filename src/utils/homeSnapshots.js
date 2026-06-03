@@ -2,12 +2,10 @@ import {
   readMarathonLogRacesFromStorage,
   summarizeMonthlyRaces,
 } from './marathon';
-import { readList } from './storage';
 import { isAiSynapseWikiWebDemoEmbed } from './aiSynapseWikiDev';
 import { isGeminiTunerWebDemoEmbed } from './geminiTunerDev';
-import { isTodayShoesWebDemoEmbed } from './todayShoesDev';
 
-const SHOES_KEY = 'cxr542-today-shoes-v1';
+const TODAY_SHOES_LS_KEY = 'today-shoes-shoes-v1';
 const IDEA_LS_KEY = 'idea-bank-ideas';
 const PROMPT_LS_KEY = 'prompt-collection-prompts';
 const RATINGS_LS_KEY = 'how-many-points-ratings';
@@ -54,6 +52,28 @@ function readRatingsCount() {
   }
 }
 
+function readTodayShoesCount() {
+  try {
+    const raw = localStorage.getItem(TODAY_SHOES_LS_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.length : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function readLatestShoeNickname() {
+  try {
+    const raw = localStorage.getItem(TODAY_SHOES_LS_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(parsed) || !parsed.length) return '';
+    const sorted = [...parsed].sort((a, b) => Number(b.createdAt) - Number(a.createdAt));
+    return String(sorted[0]?.nickname || sorted[0]?.model || '').trim();
+  } catch {
+    return '';
+  }
+}
+
 function formatLatestRace(race) {
   if (!race?.name) return '';
   const dist = race.distance === 'full' ? '풀' : race.distance === 'half' ? '하프' : race.distance?.toUpperCase?.() || '';
@@ -62,7 +82,8 @@ function formatLatestRace(race) {
 
 /** 포털 홈 카드에 표시할 모듈별 연결 상태 한 줄 */
 export function getHomeSnapshots(now = new Date()) {
-  const shoes = readList(SHOES_KEY);
+  const shoeCount = readTodayShoesCount();
+  const latestShoeName = readLatestShoeNickname();
   const races = readMarathonLogRacesFromStorage();
   const raceSummary = summarizeMonthlyRaces(races, now);
   const ideas = readIdeaCount();
@@ -70,16 +91,13 @@ export function getHomeSnapshots(now = new Date()) {
   const ratings = readRatingsCount();
   const career = readWhoAreYouSummary();
 
-  const latestShoe = shoes[0];
   const latestRace = [...races].sort((a, b) => String(b.date).localeCompare(String(a.date)))[0];
 
   return {
     'vision-font': '시력 테스트 · 맞춤 글꼴 · 기사 읽기 · JSON 백업',
-    'today-shoes': isTodayShoesWebDemoEmbed()
-      ? '웹 데모 · 신발장 · 사진 등록 · AI 분석'
-      : shoes.length
-        ? `기록 ${shoes.length}건${latestShoe?.model ? ` · 최근 ${latestShoe.model}` : ''}`
-        : '착화 기록을 추가해 보세요',
+    'today-shoes': shoeCount
+      ? `신발 ${shoeCount}켤${latestShoeName ? ` · 최근 ${latestShoeName}` : ''}`
+      : '신발장 · 사진 등록 · AI 분석 · JSON 백업',
     marathon: raceSummary.count
       ? `이번 달 대회 ${raceSummary.count}건 · ${raceSummary.totalKm.toFixed(1)}km${formatLatestRace(latestRace)}`
       : races.length

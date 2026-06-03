@@ -12,7 +12,8 @@ export const RELEASE_NOTES = [
     date: '2026-06-03',
     title: '포털 모듈 확장 · 메뉴 순서 · 왓챠 가져오기',
     items: [
-      { type: 'fix', text: 'vision-font — 운영에서도 개발과 동일한 /vision-font/ 웹 데모 iframe 사용 (MVP 프리셋 제거)' },
+      { type: 'fix', text: 'vision-font — 운영에서도 /vision-font/ 웹 데모 iframe (MVP 제거)' },
+      { type: 'fix', text: 'today-shoes — 운영에서도 /today-shoes/ 웹 데모 iframe (착화 메모 MVP 제거)' },
       { type: 'feat', text: '프롬프트 모음 — 제목·본문 저장, 복사, JSON 백업' },
       { type: 'feat', text: '너는몇점? — 영화·시리즈·책·웹툰 평점, 왓챠 CSV 가져오기 (v2, API 403 시 DOM 수집)' },
       { type: 'feat', text: '나는누구? — 자기소개서·근무·기술·학력·자격, 미리보기·인쇄' },

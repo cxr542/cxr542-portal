@@ -7,8 +7,10 @@
 - **소개:** `/vision-font/about.html` (Expo 앱 설명)
 
 ## 2) today-shoes
-- **개발:** `/today-shoes/` 웹 데모 (신발장 · 3각도 사진 · Gemini/기본 분석 · JSON)
-- **운영:** React MVP — 모델·느낌·태그 메모 (`cxr542-today-shoes-v1`)
+- **경로:** `/today-shoes/` (`public/today-shoes/`) — 개발·운영 동일
+- **UI:** 포털 iframe 또는 `/today-shoes/` 직접 접속
+- **기능:** 신발장 · 3각도 사진 · Gemini/기본 분석 · JSON 백업 (`today-shoes-shoes-v1`)
+- **이전:** 포털 MVP 메모(`cxr542-today-shoes-v1`)는 앱 안 **포털 메모 가져오기**로 이전
 - **Expo:** https://cxr542.github.io/today-shoes/
 
 ## 3) 마라톤 기록장
