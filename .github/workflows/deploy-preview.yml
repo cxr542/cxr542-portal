@@ -6,6 +6,11 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   deploy_preview:
     runs-on: ubuntu-latest
@@ -54,6 +59,7 @@ jobs:
           echo "- URL: ${{ steps.vercel_deploy.outputs.preview_url }}" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Comment preview URL on PR
+        continue-on-error: true
         uses: actions/github-script@v7
         with:
           script: |
