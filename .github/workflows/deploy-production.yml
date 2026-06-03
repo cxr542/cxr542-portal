@@ -48,7 +48,11 @@ jobs:
           echo "deploy_url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
 
       - name: Smoke check root page
-        run: curl -fsS "${{ steps.vercel_deploy.outputs.deploy_url }}" > /dev/null
+        env:
+          PRODUCTION_URL: https://cxr542-portal.vercel.app
+        run: |
+          curl -fsS "$PRODUCTION_URL" > /dev/null
+          curl -fsS "$PRODUCTION_URL/?m=release-notes" > /dev/null
 
       - name: Publish deployment summary
         run: |
