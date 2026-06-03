@@ -5,7 +5,15 @@ import ModuleLinkBar from './components/ModuleLinkBar';
 import NavLabelsModal from './components/NavLabelsModal';
 import NavOrderModal from './components/NavOrderModal';
 import PortalSidebar from './components/PortalSidebar';
-import { MODULE_HINTS, NAV_IDS, PORTAL_NAV_ITEMS, SIDEBAR_COLLAPSED_KEY } from './constants/portalNav';
+import ReleaseNotesPanel from './components/ReleaseNotesPanel';
+import {
+  MODULE_HINTS,
+  PORTAL_NAV_ITEMS,
+  RELEASE_NOTES_MODULE_ID,
+  SIDEBAR_COLLAPSED_KEY,
+  isRoutableModuleId,
+} from './constants/portalNav';
+import { RELEASE_NOTES_LABEL, latestReleaseVersion } from './constants/releaseNotes';
 import { useNavLabels } from './hooks/useNavLabels';
 import { useNavOrder } from './hooks/useNavOrder';
 import { getHomeSnapshots } from './utils/homeSnapshots';
@@ -97,9 +105,9 @@ function moduleHasEmbed(id) {
 function readModuleFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const fromQuery = params.get('m');
-  if (fromQuery && NAV_IDS.includes(fromQuery) && fromQuery !== 'home') return fromQuery;
+  if (fromQuery && isRoutableModuleId(fromQuery) && fromQuery !== 'home') return fromQuery;
   const fromHash = window.location.hash.replace(/^#\/?/, '');
-  if (fromHash && NAV_IDS.includes(fromHash) && fromHash !== 'home') return fromHash;
+  if (fromHash && isRoutableModuleId(fromHash) && fromHash !== 'home') return fromHash;
   return 'home';
 }
 
@@ -787,6 +795,7 @@ function WhoAreYouModule({ onGoHome }) {
 }
 
 function ModuleContent({ active, onOpenModule, onGoHome, labels, navItems }) {
+  if (active === RELEASE_NOTES_MODULE_ID) return <ReleaseNotesPanel onGoHome={onGoHome} />;
   if (active === 'vision-font') return <VisionFontModule onGoHome={onGoHome} />;
   if (active === 'today-shoes') return <TodayShoesModule onGoHome={onGoHome} />;
   if (active === 'marathon') return <MarathonLogModule onGoHome={onGoHome} />;
@@ -827,7 +836,10 @@ function App() {
   }, [activeModule]);
 
   const goHome = () => setActiveModule('home');
-  const activeTitle = labels[activeModule] || findNavItem(activeModule)?.defaultLabel;
+  const activeTitle =
+    activeModule === RELEASE_NOTES_MODULE_ID
+      ? RELEASE_NOTES_LABEL
+      : labels[activeModule] || findNavItem(activeModule)?.defaultLabel;
 
   return (
     <div className={`portal-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}`}>
@@ -846,7 +858,7 @@ function App() {
           <h2>{activeTitle}</h2>
           <div className="content-header__meta">
             <EnvironmentBadge className="portal-env-badge--header" compact />
-            <span className="content-header__version">v0.1.0 MVP</span>
+            <span className="content-header__version">v{latestReleaseVersion()}</span>
           </div>
         </header>
         <ModuleContent

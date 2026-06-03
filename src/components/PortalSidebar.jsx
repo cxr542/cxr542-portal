@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import EnvironmentBadge from './EnvironmentBadge';
+import { RELEASE_NOTES_LABEL, RELEASE_NOTES_MODULE_ID } from '../constants/releaseNotes';
+
 export default function PortalSidebar({
   activeModule,
   onModuleChange,
@@ -64,6 +66,23 @@ export default function PortalSidebar({
       </nav>
 
       <div className="sidebar__bottom">
+        <button
+          type="button"
+          className={`nav-btn nav-btn--utility${activeModule === RELEASE_NOTES_MODULE_ID ? ' active' : ''}`}
+          onClick={() => onModuleChange(RELEASE_NOTES_MODULE_ID)}
+          {...navTooltipProps({
+            id: RELEASE_NOTES_MODULE_ID,
+            icon: '📋',
+            defaultLabel: RELEASE_NOTES_LABEL,
+            tooltip: '포털·모듈 변경 이력',
+          })}
+        >
+          <span className="nav-btn__icon" aria-hidden="true">
+            📋
+          </span>
+          <span className="nav-btn__label">{RELEASE_NOTES_LABEL}</span>
+        </button>
+
         <div className="sidebar__settings-wrap">
           <button
             type="button"

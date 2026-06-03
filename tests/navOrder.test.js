@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { applyNavOrder, DEFAULT_NAV_ORDER, normalizeNavOrder } from '../src/constants/portalNav';
+import {
+  applyNavOrder,
+  DEFAULT_NAV_ORDER,
+  RELEASE_NOTES_MODULE_ID,
+  isRoutableModuleId,
+  normalizeNavOrder,
+} from '../src/constants/portalNav';
 
 describe('nav order', () => {
   it('default order puts who-are-you right after home', () => {
@@ -9,6 +15,11 @@ describe('nav order', () => {
 
   it('normalizeNavOrder keeps home first', () => {
     expect(normalizeNavOrder(['vision-font', 'home', 'marathon'])[0]).toBe('home');
+  });
+
+  it('isRoutableModuleId includes release notes but not in default nav order', () => {
+    expect(isRoutableModuleId(RELEASE_NOTES_MODULE_ID)).toBe(true);
+    expect(DEFAULT_NAV_ORDER).not.toContain(RELEASE_NOTES_MODULE_ID);
   });
 
   it('applyNavOrder follows custom order', () => {

@@ -1,3 +1,5 @@
+import { RELEASE_NOTES_MODULE_ID } from './releaseNotes';
+
 export const NAV_LABELS_STORAGE_KEY = 'cxr542-portal-nav-labels-v1';
 export const NAV_ORDER_STORAGE_KEY = 'cxr542-portal-nav-order-v1';
 export const SIDEBAR_COLLAPSED_KEY = 'cxr542-portal-sidebar-collapsed';
@@ -93,6 +95,15 @@ export const PORTAL_NAV_ITEMS = [
 ];
 
 export const NAV_IDS = PORTAL_NAV_ITEMS.map((item) => item.id);
+
+export { RELEASE_NOTES_MODULE_ID };
+
+/** URL·라우팅에 쓰는 모듈 id (주 메뉴 + 하단 유틸) */
+export const ROUTABLE_MODULE_IDS = [...NAV_IDS, RELEASE_NOTES_MODULE_ID];
+
+export function isRoutableModuleId(id) {
+  return ROUTABLE_MODULE_IDS.includes(id);
+}
 
 /** 사이드바·홈 카드 기본 순서 (홈 다음에 나는누구?) */
 export const DEFAULT_NAV_ORDER = NAV_IDS.slice();
