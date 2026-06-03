@@ -3,7 +3,7 @@ import './App.css';
 import { summarizeMonthlyDistance } from './utils/marathon';
 import { readList, writeList } from './utils/storage';
 
-const IDEA_BANK_APP_URL = 'https://cxr542.github.io/cxr542-ai/projects/idea-bank/';
+const IDEA_BANK_APP_URL = '/idea-bank/';
 
 const STORAGE_KEYS = {
   shoes: 'cxr542-today-shoes-v1',
@@ -40,20 +40,26 @@ function formatDate(iso) {
   return new Date(iso).toLocaleString('ko-KR');
 }
 
-function HomeModule() {
+const MODULE_HINTS = {
+  'vision-font': '폰트 프리셋 미리보기 · CSS 복사',
+  'today-shoes': '신발 착화 기록',
+  marathon: '러닝 거리·페이스 기록',
+  'idea-bank': '아이디어 노트 — 검색·카테고리·JSON 백업 (포털과 같은 도메인에 저장)',
+};
+
+function HomeModule({ onOpenModule }) {
   return (
     <section className="module-panel">
       <h2>cxr542 포털</h2>
       <p>업무 외 모든 개발 서비스(vision-font, today-shoes, 마라톤 기록장, 아이디어 뱅크)를 한 곳에서 관리합니다.</p>
       <ul className="home-cards">
         {MODULES.filter((item) => item.id !== 'home').map((item) => (
-          <li key={item.id}>
-            <strong>{item.label}</strong>
-            <span>
-              {item.id === 'idea-bank'
-                ? 'GitHub Pages 아이디어 노트(검색·카테고리·JSON 백업) — 데이터는 해당 사이트 브라우저 저장소에만 있습니다.'
-                : '모듈로 이동해 기능을 바로 사용하세요.'}
-            </span>
+          <li key={item.id} className={item.id === 'idea-bank' ? 'home-card--featured' : ''}>
+            <button type="button" className="home-card-btn" onClick={() => onOpenModule(item.id)}>
+              <strong>{item.label}</strong>
+              <span>{MODULE_HINTS[item.id]}</span>
+              <em className="home-card-cta">{item.id === 'idea-bank' ? '아이디어 뱅크 열기 →' : '모듈 열기 →'}</em>
+            </button>
           </li>
         ))}
       </ul>
@@ -182,12 +188,11 @@ function IdeaBankModule() {
     <section className="idea-bank-embed">
       <div className="idea-bank-embed__bar">
         <p className="hint" style={{ margin: 0 }}>
-          운영 앱 <strong>idea-bank</strong> · 아이디어·JSON 데이터는{' '}
-          <code style={{ display: 'inline', padding: '0.1rem 0.35rem' }}>cxr542.github.io</code> 브라우저에만 저장됩니다.
-          포털(<code style={{ display: 'inline', padding: '0.1rem 0.35rem' }}>vercel.app</code>)과 자동 동기화되지 않습니다.
+          아이디어·JSON은 <strong>이 포털 도메인</strong>에 저장됩니다.
+          예전 <a href="https://cxr542.github.io/cxr542-ai/projects/idea-bank/" target="_blank" rel="noopener noreferrer">GitHub Pages</a> 데이터는 앱 안 <strong>JSON 가져오기</strong>로 1회 이전하세요.
         </p>
         <a className="btn-primary" href={IDEA_BANK_APP_URL} target="_blank" rel="noopener noreferrer">
-          새 탭에서 열기
+          전체 화면으로 열기
         </a>
       </div>
       <iframe
@@ -200,12 +205,12 @@ function IdeaBankModule() {
   );
 }
 
-function ModuleContent({ active }) {
+function ModuleContent({ active, onOpenModule }) {
   if (active === 'vision-font') return <VisionFontModule />;
   if (active === 'today-shoes') return <TodayShoesModule />;
   if (active === 'marathon') return <MarathonModule />;
   if (active === 'idea-bank') return <IdeaBankModule />;
-  return <HomeModule />;
+  return <HomeModule onOpenModule={onOpenModule} />;
 }
 
 function App() {
@@ -234,7 +239,7 @@ function App() {
           <h2>{MODULES.find((item) => item.id === activeModule)?.label}</h2>
           <span>v0.1.0 MVP</span>
         </header>
-        <ModuleContent active={activeModule} />
+        <ModuleContent active={activeModule} onOpenModule={setActiveModule} />
       </main>
     </div>
   );

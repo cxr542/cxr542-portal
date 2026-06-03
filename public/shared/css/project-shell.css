@@ -1,0 +1,802 @@
+/* Shared cxr542 project app shell (idea-bank, marathon-log, …) */
+
+.project-app {
+  --shell-bg: #050508;
+  --shell-sidebar: #0c0c12;
+  --shell-border: rgba(255, 255, 255, 0.1);
+  --shell-text: #f0f0f5;
+  --shell-muted: #9a9aa8;
+  --shell-green: #10b981;
+  --shell-font: "IBM Plex Sans", system-ui, sans-serif;
+  --shell-font-display: "Sora", var(--shell-font);
+  --shell-sidebar-w: 13.75rem;
+  --shell-sidebar-w-mini: 3.5rem;
+  --shell-banner-h: 2.25rem;
+  --app-accent: #fbbf24;
+  --app-accent-rgb: 251, 191, 36;
+  --shell-drawer-bp: 1024px;
+  --shell-tabs-bp: 768px;
+}
+
+.theme-idea-bank {
+  --app-accent: #fbbf24;
+  --app-accent-rgb: 251, 191, 36;
+}
+
+.theme-marathon {
+  --app-accent: #6ee7b7;
+  --app-accent-rgb: 110, 231, 183;
+}
+
+.project-app * {
+  box-sizing: border-box;
+}
+
+.project-app {
+  margin: 0;
+  font-family: var(--shell-font);
+  font-size: 14px;
+  color: var(--shell-text);
+  background: var(--shell-bg);
+}
+
+.project-app .app-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem 0.65rem;
+  min-height: var(--shell-banner-h);
+  padding: 0.55rem 1rem;
+  text-align: center;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--shell-muted);
+  background: linear-gradient(
+    90deg,
+    rgba(var(--app-accent-rgb), 0.08) 0%,
+    rgba(167, 139, 250, 0.1) 50%,
+    rgba(var(--app-accent-rgb), 0.08) 100%
+  );
+  border-bottom: 1px solid rgba(var(--app-accent-rgb), 0.2);
+}
+
+.project-app .app-banner__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--shell-font-display);
+  font-weight: 600;
+  color: var(--app-accent);
+  letter-spacing: -0.02em;
+}
+
+.project-app .app-banner__icon {
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.project-app .app-banner__title {
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+}
+
+.project-app .app-banner__tagline.project-brand-editable:hover,
+.project-app .app-banner__title.project-brand-editable:hover {
+  outline-color: rgba(var(--app-accent-rgb), 0.55);
+}
+
+.app-banner .project-brand-input {
+  min-width: 6rem;
+  max-width: min(72vw, 36rem);
+  font: inherit;
+  color: inherit;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.app-banner .app-banner__tagline + .project-brand-input,
+.app-banner .app-banner__title + .project-brand-input {
+  font-family: var(--shell-font-display);
+  font-weight: 600;
+  color: var(--app-accent);
+}
+
+.app-banner .app-banner__tagline.project-brand-editable + .project-brand-input,
+.app-banner .project-brand-input.app-banner__tagline-input {
+  font-family: var(--shell-font);
+  font-weight: 500;
+  color: var(--shell-text);
+}
+
+.project-app .app-banner__tagline {
+  color: var(--shell-text);
+  font-weight: 500;
+}
+
+.project-app .app-banner__meta {
+  font-size: 0.75rem;
+  color: var(--shell-muted);
+}
+
+.project-app .app-banner strong {
+  color: var(--app-accent);
+}
+
+.project-app .app-banner a {
+  color: var(--app-accent);
+  margin-left: 0.35rem;
+}
+
+.project-nav-backdrop {
+  display: none;
+}
+
+.project-shell {
+  display: grid;
+  grid-template-columns: var(--shell-sidebar-w) 1fr;
+  min-height: calc(100dvh - var(--shell-banner-h));
+  transition: grid-template-columns 0.22s ease;
+}
+
+.project-shell.is-sidebar-collapsed {
+  grid-template-columns: var(--shell-sidebar-w-mini) 1fr;
+}
+
+html.project-sidebar-collapsed-boot .project-shell {
+  grid-template-columns: var(--shell-sidebar-w-mini) 1fr;
+}
+
+.project-sidebar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem 0.5rem;
+  padding-right: 0.65rem;
+  background: var(--shell-sidebar);
+  border-right: 1px solid rgba(var(--app-accent-rgb), 0.15);
+  overflow: visible;
+}
+
+.project-sidebar__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+  padding: 0 0.25rem;
+}
+
+.project-logo h1 {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  font-family: var(--shell-font-display);
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+
+.project-logo__icon {
+  font-size: 1.15rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.project-logo__sub {
+  margin: 0.3rem 0 0;
+  font-size: 0.75rem;
+  color: var(--shell-muted);
+  line-height: 1.4;
+}
+
+.project-brand-editable-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  max-width: 100%;
+}
+
+.project-brand-editable {
+  cursor: text;
+  border-radius: 4px;
+  outline: 1px dashed transparent;
+  outline-offset: 2px;
+  transition: outline-color 0.15s ease, background 0.15s ease;
+}
+
+.project-brand-edit-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  padding: 0;
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1;
+  color: var(--shell-muted);
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0.45;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.project-brand-editable-wrap:hover .project-brand-edit-btn,
+.project-brand-edit-btn:hover,
+.project-brand-edit-btn:focus-visible {
+  opacity: 1;
+  color: var(--app-accent);
+  background: rgba(var(--app-accent-rgb), 0.12);
+}
+
+.project-brand-editable:hover,
+.project-brand-editable:focus-visible {
+  outline-color: rgba(var(--app-accent-rgb), 0.45);
+  background: rgba(var(--app-accent-rgb), 0.08);
+}
+
+.project-brand-input,
+.inline-title-input {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0.15rem 0.35rem;
+  font: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: var(--shell-text);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(var(--app-accent-rgb), 0.45);
+  border-radius: 6px;
+}
+
+.project-logo .project-brand-input {
+  font-family: var(--shell-font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.project-logo__sub.project-brand-input,
+.project-logo .project-brand-input + .project-brand-input {
+  font-family: var(--shell-font);
+  font-size: 0.75rem;
+}
+
+.inline-title-editable {
+  cursor: text;
+  border-radius: 4px;
+  outline: 1px dashed transparent;
+  outline-offset: 2px;
+}
+
+.inline-title-editable:hover {
+  outline-color: rgba(var(--app-accent-rgb), 0.35);
+}
+
+.project-sidebar-rail {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  width: 1.35rem;
+  padding: 0.5rem 0.15rem;
+  margin: 0;
+  font: inherit;
+  font-size: 0.625rem;
+  line-height: 1.1;
+  color: var(--shell-text);
+  background: var(--shell-sidebar);
+  border: 1px solid rgba(var(--app-accent-rgb), 0.45);
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transform: translate(100%, -50%);
+}
+
+.project-sidebar-rail:hover {
+  background: rgba(var(--app-accent-rgb), 0.15);
+  border-color: var(--app-accent);
+}
+
+.project-sidebar-rail__label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--app-accent);
+}
+
+.project-sidebar-rail__icon {
+  font-size: 1rem;
+  line-height: 1;
+  transition: transform 0.22s ease;
+}
+
+.project-shell.is-sidebar-collapsed .project-sidebar-rail__icon,
+html.project-sidebar-collapsed-boot .project-sidebar-rail__icon {
+  transform: rotate(180deg);
+}
+
+.project-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.project-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.55rem 0.6rem;
+  font: inherit;
+  font-size: 0.875rem;
+  text-align: left;
+  color: var(--shell-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.project-nav-item__icon {
+  flex-shrink: 0;
+  width: 1.35rem;
+  font-size: 1.05rem;
+  line-height: 1;
+  text-align: center;
+}
+
+.project-nav-item__label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-nav-item__badge {
+  flex-shrink: 0;
+  min-width: 1.25rem;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--shell-muted);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+}
+
+.project-nav-item.is-active .project-nav-item__badge {
+  color: var(--shell-text);
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.project-nav-item:hover {
+  color: var(--shell-text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.project-nav-item.is-active {
+  color: var(--shell-text);
+  background: rgba(var(--app-accent-rgb), 0.12);
+  border-color: rgba(var(--app-accent-rgb), 0.35);
+}
+
+a.project-nav-item.project-nav-item--hub {
+  margin-top: 0.35rem;
+  color: var(--shell-green);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+a.project-nav-item.project-nav-item--hub:hover {
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.45);
+}
+
+.project-sidebar-note {
+  margin-top: auto;
+  padding: 0.75rem 0.35rem 0;
+  border-top: 1px solid var(--shell-border);
+  font-size: 0.75rem;
+  color: var(--shell-muted);
+  line-height: 1.5;
+}
+
+.project-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.project-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--shell-border);
+  background: rgba(5, 5, 8, 0.6);
+}
+
+.project-toolbar__title {
+  flex: 1;
+  min-width: 6rem;
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--shell-muted);
+}
+
+.project-nav-toggle {
+  display: none;
+  flex-shrink: 0;
+  min-width: 2.5rem;
+  padding: 0.45rem 0.6rem !important;
+  font-size: 1rem !important;
+  line-height: 1;
+}
+
+.project-toolbar .btn {
+  padding: 0.45rem 0.75rem;
+  font: inherit;
+  font-size: 0.8125rem;
+  color: var(--shell-muted);
+  background: transparent;
+  border: 1px solid var(--shell-border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.project-toolbar .btn:hover {
+  color: var(--shell-text);
+}
+
+.project-toolbar .btn--primary {
+  color: #050508;
+  background: var(--app-accent);
+  border-color: var(--app-accent);
+}
+
+.project-toolbar .btn--hub {
+  flex-shrink: 0;
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.4);
+  text-decoration: none;
+}
+
+.project-toolbar .btn--hub:hover {
+  color: var(--shell-text);
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.project-toolbar input[type="search"],
+.project-toolbar input[type="text"]:not([hidden]) {
+  flex: 1;
+  min-width: 8rem;
+  max-width: 16rem;
+  padding: 0.45rem 0.65rem;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--shell-text);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--shell-border);
+  border-radius: 8px;
+}
+
+.project-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.project-content,
+.project-app .content {
+  flex: 1;
+  padding: 1rem 1.25rem 2rem;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.project-app--mobile-tabs .project-content,
+.project-app--mobile-tabs .content {
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.project-mobile-tabs {
+  display: none;
+}
+
+/* Desktop: icon-only sidebar */
+.project-shell.is-sidebar-collapsed .project-logo__text,
+.project-shell.is-sidebar-collapsed .project-logo__sub,
+.project-shell.is-sidebar-collapsed .project-nav-item__label,
+.project-shell.is-sidebar-collapsed .project-sidebar-note,
+html.project-sidebar-collapsed-boot .project-logo__text,
+html.project-sidebar-collapsed-boot .project-logo__sub,
+html.project-sidebar-collapsed-boot .project-nav-item__label,
+html.project-sidebar-collapsed-boot .project-sidebar-note {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+}
+
+.project-shell.is-sidebar-collapsed .project-sidebar-rail__label,
+html.project-sidebar-collapsed-boot .project-sidebar-rail__label {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  position: absolute;
+}
+
+.project-shell.is-sidebar-collapsed .project-nav-item,
+html.project-sidebar-collapsed-boot .project-nav-item {
+  justify-content: center;
+  padding: 0.55rem 0.35rem;
+}
+
+.project-shell.is-sidebar-collapsed .project-sidebar__head,
+html.project-sidebar-collapsed-boot .project-sidebar__head {
+  flex-direction: column;
+  align-items: center;
+}
+
+.project-shell.is-sidebar-collapsed .project-logo h1,
+html.project-sidebar-collapsed-boot .project-logo h1 {
+  justify-content: center;
+}
+
+/* Tablet/phone: drawer */
+@media (max-width: 1024px) {
+  .project-nav-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .project-sidebar-rail {
+    display: none;
+  }
+
+  .project-shell,
+  .project-shell.is-sidebar-collapsed,
+  html.project-sidebar-collapsed-boot .project-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .project-sidebar {
+    position: fixed;
+    z-index: 120;
+    top: var(--shell-banner-h);
+    left: 0;
+    bottom: 0;
+    width: min(88vw, 17.5rem);
+    max-height: none;
+    margin: 0;
+    padding-top: 1rem;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+    border-right: 1px solid rgba(var(--app-accent-rgb), 0.15);
+    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.45);
+    transform: translateX(-105%);
+    transition: transform 0.22s ease;
+    pointer-events: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body.project-nav-open .project-sidebar {
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+
+  .project-nav-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    top: var(--shell-banner-h);
+    z-index: 110;
+    background: rgba(0, 0, 0, 0.62);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease;
+  }
+
+  body.project-nav-open .project-nav-backdrop:not([hidden]) {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .project-shell.is-sidebar-collapsed .project-logo__text,
+  .project-shell.is-sidebar-collapsed .project-logo__sub,
+  .project-shell.is-sidebar-collapsed .project-nav-item__label,
+  html.project-sidebar-collapsed-boot .project-logo__text,
+  html.project-sidebar-collapsed-boot .project-logo__sub,
+  html.project-sidebar-collapsed-boot .project-nav-item__label {
+    opacity: 1;
+    width: auto;
+    height: auto;
+    position: static;
+    pointer-events: auto;
+  }
+
+  .project-shell.is-sidebar-collapsed .project-nav-item,
+  html.project-sidebar-collapsed-boot .project-nav-item {
+    justify-content: flex-start;
+    padding: 0.55rem 0.6rem;
+  }
+}
+
+/* Mobile tabs (marathon-log 등) */
+@media (max-width: 768px) {
+  .project-app--mobile-tabs .project-mobile-tabs {
+    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 90;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0.35rem 0.5rem calc(0.35rem + env(safe-area-inset-bottom, 0px));
+    background: rgba(12, 12, 18, 0.92);
+    border-top: 1px solid var(--shell-border);
+    backdrop-filter: blur(12px);
+  }
+
+  .project-app--mobile-tabs.project-hide-mobile-tabs .project-mobile-tabs {
+    display: none;
+  }
+
+  .project-mobile-tab {
+    flex: 1;
+    max-width: 12rem;
+    padding: 0.5rem 0.35rem;
+    font: inherit;
+    font-size: 0.75rem;
+    color: var(--shell-muted);
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .project-mobile-tab__icon {
+    display: block;
+    font-size: 1.1rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .project-mobile-tab.is-active {
+    color: var(--app-accent);
+    background: rgba(var(--app-accent-rgb), 0.15);
+  }
+}
+
+/* idea-bank legacy class aliases (점진 이전) */
+.project-app .app-shell {
+  display: grid;
+  grid-template-columns: var(--shell-sidebar-w) 1fr;
+  min-height: calc(100dvh - var(--shell-banner-h));
+  transition: grid-template-columns 0.22s ease;
+}
+
+.project-app .app-shell.is-sidebar-collapsed {
+  grid-template-columns: var(--shell-sidebar-w-mini) 1fr;
+}
+
+.project-app .sidebar,
+.project-app .project-sidebar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem 0.5rem;
+  padding-right: 0.65rem;
+  background: var(--shell-sidebar);
+  border-right: 1px solid rgba(var(--app-accent-rgb), 0.15);
+}
+
+.project-app .nav-item,
+.project-app .project-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.55rem 0.6rem;
+  font: inherit;
+  font-size: 0.875rem;
+  text-align: left;
+  color: var(--shell-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.project-app .nav-item.is-active,
+.project-app .project-nav-item.is-active {
+  color: var(--shell-text);
+  background: rgba(var(--app-accent-rgb), 0.12);
+  border-color: rgba(var(--app-accent-rgb), 0.35);
+}
+
+.project-app .toolbar,
+.project-app .project-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--shell-border);
+  background: rgba(5, 5, 8, 0.6);
+}
+
+.project-app .main,
+.project-app .project-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.project-app .sidebar-rail,
+.project-app .project-sidebar-rail {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  z-index: 20;
+  transform: translate(100%, -50%);
+}
+
+@media (max-width: 1024px) {
+  .project-app .sidebar,
+  .project-app .project-sidebar {
+    position: fixed;
+    z-index: 120;
+    top: var(--shell-banner-h);
+    left: 0;
+    bottom: 0;
+    width: min(88vw, 17.5rem);
+    transform: translateX(-105%);
+    transition: transform 0.22s ease;
+    pointer-events: none;
+  }
+
+  body.project-nav-open .project-app .sidebar,
+  body.project-nav-open .project-app .project-sidebar {
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+
+  .project-app .app-shell,
+  .project-app .app-shell.is-sidebar-collapsed {
+    grid-template-columns: 1fr;
+  }
+
+  .project-app .sidebar-rail,
+  .project-app .project-sidebar-rail {
+    display: none;
+  }
+}

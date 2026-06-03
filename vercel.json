@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/idea-bank", "destination": "/idea-bank/index.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

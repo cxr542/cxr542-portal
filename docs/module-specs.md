@@ -17,10 +17,11 @@
 - 요약: 이번 달 기록 수/총 거리
 
 ## 4) 아이디어 뱅크
-- **연동:** [idea-bank · 아이디어 노트](https://cxr542.github.io/cxr542-ai/projects/idea-bank/) (GitHub Pages) — 포털 내 iframe + 새 탭 링크
-- **저장:** IndexedDB / `idea-bank-ideas` (운영 origin `cxr542.github.io` 전용, 포털과 분리)
-- **기능:** 검색, 카테고리, 고정함, JSON 보내기/가져오기 등 (본앱)
-- **동기화:** 운영 ↔ 로컬은 앱 내 JSON 가져오기/보내기 ([idea-bank README](https://github.com/cxr542/cxr542-ai/tree/main/projects/idea-bank))
+- **경로:** `/idea-bank/` (포털과 동일 origin · `public/idea-bank/`)
+- **UI:** 포털 홈 카드·사이드바 → iframe 또는 `/idea-bank/` 직접 접속
+- **저장:** IndexedDB / `idea-bank-ideas` (포털 도메인 `vercel.app`)
+- **기능:** 검색, 카테고리, 고정함, JSON 보내기/가져오기
+- **이전:** [GitHub Pages idea-bank](https://cxr542.github.io/cxr542-ai/projects/idea-bank/) 데이터 → JSON보내기 후 포털 `/idea-bank/`에서 JSON 가져오기
 
 ## 공통 규칙
 - 모든 모듈 데이터는 브라우저 localStorage 사용
