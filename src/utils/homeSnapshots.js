@@ -113,7 +113,7 @@ export function getHomeSnapshots(now = new Date()) {
     'who-are-you': career
       ? `근무 ${career.employments || 0} · 프로젝트 ${career.projects || 0} · 자소서 ${career.documents || 0}`
       : '자기소개서·경력 구조화 · 미리보기·JSON',
-    'ai-synapse-wiki': '한글 AI Wiki · 주제·허브·검색 · 정적 빌드',
+    'ai-synapse-wiki': '한글 AI Wiki · 주제·허브 · 읽기·편집(운영 API)',
     'gemini-tuner': 'FinOps 데모 · 스파클 · 한도·예산 · Chrome 확장',
   };
 }

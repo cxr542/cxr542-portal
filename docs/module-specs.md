@@ -21,10 +21,12 @@
 - **이전:** [GitHub Pages marathon-log](https://cxr542.github.io/cxr542-ai/projects/marathon-log/) 데이터 → JSON보내기 후 포털 `/marathon-log/`에서 JSON 가져오기
 
 ## 4) AI-Synapse Wiki
-- **경로:** `/ai-synapse-wiki/` (`public/ai-synapse-wiki/`) — 개발·운영 동일(읽기)
-- **UI:** 포털 iframe 또는 `/ai-synapse-wiki/` 직접 접속
-- **개발 전용:** Wiki dev(`5174`) + **편집(Wiki dev)** 모드 · `npm run wiki:check` · 주제 등록
-- **정적 갱신:** `WIKI_ROOT=… npm run wiki:sync` 후 배포
+- **경로:** `/ai-synapse-wiki/` (`public/ai-synapse-wiki/`) — 개발·운영 동일(읽기·편집 UI)
+- **UI:** 포털 iframe · 주제 등록/목록 바로가기 · Wiki `/admin` 화면
+- **편집 API:** `api/admin/*` — Vercel `GITHUB_TOKEN` + `WIKI_ADMIN_PIN` → [AI-Synapse-Wiki](https://github.com/cxr542/AI-Synapse-Wiki)에 커밋
+- **대안:** `WIKI_ADMIN_API_URL` → 외부 Wiki dev 서버 프록시
+- **로컬:** Wiki dev(`5174`) + 포털 `/api/admin` 프록시 · `npm run wiki:check`
+- **읽기 갱신:** 저장 후 `npm run wiki:sync` → 포털 배포 (정적 entries 반영)
 - **가이드:** [docs/ai-synapse-wiki-improve.md](ai-synapse-wiki-improve.md)
 - **미러:** [GitHub Pages Wiki](https://cxr542.github.io/cxr542-ai/projects/ai-synapse-wiki/)
 - **소개:** `/ai-synapse-wiki/about.html`

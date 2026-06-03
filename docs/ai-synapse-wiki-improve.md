@@ -6,11 +6,12 @@
 
 | 레이어 | 역할 | 한계 |
 |--------|------|------|
-| **포털 정적 빌드** | `public/ai-synapse-wiki/` — 읽기·검색·Synapse UI | `/api/admin` 없음 → **주제 등록 불가** |
-| **Wiki Vite dev** | `scripts/vite-admin-api.mjs` — 등록·편집·삭제 | 포트 기본 5173 → 포털과 충돌 → **5174 권장** |
+| **포털 정적 빌드** | `public/ai-synapse-wiki/` — 읽기·검색·Synapse UI · 관리 화면 | `VITE_ADMIN_ENABLED=true` 로 빌드(`wiki:sync`) |
+| **포털 운영 API** | `api/admin/*` — GitHub Contents API | Vercel `GITHUB_TOKEN` + `WIKI_ADMIN_PIN` |
+| **Wiki Vite dev** | `scripts/vite-admin-api.mjs` — 등록·편집·삭제 | 포트 **5174** 권장 |
 | **포털 dev 프록시** | `5173`의 `/api/admin` → `5174` | Wiki dev가 떠 있어야 함 |
 
-운영(Vercel)에서는 GitHub Pages Wiki 링크만 제공하고, 편집은 로컬 또는 Wiki 저장소에서 합니다.
+운영에서도 포털 **AI-Synapse Wiki** 모듈에서 주제 등록·편집 가능(저장소에 커밋). **검색·홈 목록** 반영은 `wiki:sync` 후 배포가 필요합니다.
 
 ---
 
@@ -85,9 +86,22 @@ npm run wiki:sync
 
 ## 5단계 — 배포·운영
 
-1. `npm run wiki:sync` 후 `npm test` · `npm run build`
-2. main 머지 → Vercel production
-3. 운영 사용자: GitHub Pages Wiki 읽기 + 편집은 로컬 dev 또는 PR로 `docs/` 반영
+### Vercel 환경 변수 (편집 API)
+
+| 변수 | 용도 |
+|------|------|
+| `GITHUB_TOKEN` | `cxr542/AI-Synapse-Wiki` 쓰기 (fine-grained: Contents R/W) |
+| `WIKI_ADMIN_PIN` | Wiki 관리 화면 PIN (`x-wiki-admin-pin` 헤더) |
+| `WIKI_GITHUB_REPO` | (선택) 기본 `cxr542/AI-Synapse-Wiki` |
+| `WIKI_ADMIN_API_URL` | (선택) 자체 Wiki dev URL — 설정 시 GitHub 대신 프록시 |
+
+### 배포 순서
+
+1. `npm run wiki:sync` (`VITE_ADMIN_ENABLED=true` 포함 빌드)
+2. `npm test` · `npm run build`
+3. main 머지 → Vercel production
+4. 포털 → Wiki → **연결 다시 확인** → 주제 등록
+5. 주제 저장 후 읽기 목록 갱신: 다시 `wiki:sync` + 배포
 
 ---
 

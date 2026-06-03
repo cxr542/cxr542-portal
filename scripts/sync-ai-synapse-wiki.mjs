@@ -82,7 +82,12 @@ run(npm, ['run', 'build:entries'], { cwd: wikiRoot });
 if (!process.env.WIKI_SYNC_SKIP_BUILD) {
   run(npxCmd(), ['vite', 'build'], {
     cwd: wikiRoot,
-    env: { ...process.env, VITE_BASE: '/ai-synapse-wiki/' },
+    env: {
+      ...process.env,
+      VITE_BASE: '/ai-synapse-wiki/',
+      VITE_ADMIN_ENABLED: process.env.WIKI_ADMIN_ENABLED ?? 'true',
+      VITE_ADMIN_PIN: process.env.WIKI_ADMIN_PIN || process.env.VITE_ADMIN_PIN || '',
+    },
   });
   console.log('Tip: Wiki dev for portal → VITE_BASE=/ai-synapse-wiki/ npm run dev -- --port 5174');
 } else {

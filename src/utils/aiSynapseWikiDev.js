@@ -25,8 +25,8 @@ export const WIKI_DEV_PATH_ADMIN_TOPICS = '/admin/topics';
 export const WIKI_DEV_PATH_REGISTER_NL = '/admin/topics/register/nl';
 export const WIKI_DEV_PATH_REGISTER_NEW = '/admin/topics/register/new';
 
-/** 주제 등록·편집(Wiki dev 5174) — 로컬 개발에서만 */
-export function isWikiDevEditingAvailable() {
+/** 로컬 Wiki dev 서버(5174) iframe — npm run dev 전용 */
+export function isWikiLocalDevServerAvailable() {
   return import.meta.env.DEV;
 }
 

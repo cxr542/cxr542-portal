@@ -15,6 +15,7 @@ export const RELEASE_NOTES = [
       { type: 'fix', text: 'vision-font — 운영에서도 /vision-font/ 웹 데모 iframe (MVP 제거)' },
       { type: 'fix', text: 'today-shoes — 운영에서도 /today-shoes/ 웹 데모 iframe (착화 메모 MVP 제거)' },
       { type: 'fix', text: 'AI-Synapse Wiki — 운영에서 /ai-synapse-wiki/ 정적 Wiki iframe (링크만 MVP 제거)' },
+      { type: 'feat', text: 'AI-Synapse Wiki — 운영 편집 API (GitHub 저장) · Vercel GITHUB_TOKEN + WIKI_ADMIN_PIN' },
       { type: 'fix', text: 'GeminiTuner — 운영에서도 /gemini-tuner/ 웹 데모 iframe (링크 MVP 제거)' },
       { type: 'feat', text: '프롬프트 모음 — 제목·본문 저장, 복사, JSON 백업' },
       { type: 'feat', text: '너는몇점? — 영화·시리즈·책·웹툰 평점, 왓챠 CSV 가져오기 (v2, API 403 시 DOM 수집)' },

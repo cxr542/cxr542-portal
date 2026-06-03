@@ -20,7 +20,7 @@ import { getHomeSnapshots } from './utils/homeSnapshots';
 import {
   fetchWikiAdminConfig,
   AI_SYNAPSE_WIKI_APP_URL,
-  isWikiDevEditingAvailable,
+  isWikiLocalDevServerAvailable,
   resolveWikiFrameUrl,
   WIKI_DEV_PATH_HOME,
   WIKI_DEV_PATH_ADMIN_TOPICS,
@@ -178,34 +178,38 @@ function TodayShoesModule({ onGoHome }) {
 }
 
 function AiSynapseWikiModule({ onGoHome }) {
-  const wikiDevEditing = isWikiDevEditingAvailable();
-  const external = findNavItem('ai-synapse-wiki');
+  const localDevServer = isWikiLocalDevServerAvailable();
   const [wikiMode, setWikiMode] = useState('static');
   const [wikiFrameSrc, setWikiFrameSrc] = useState(() => wikiStaticFrameUrl('/'));
-  const [adminApi, setAdminApi] = useState({ status: wikiDevEditing ? 'checking' : 'offline' });
+  const [adminApi, setAdminApi] = useState({ status: 'checking' });
   const [adminCheckGen, setAdminCheckGen] = useState(0);
 
-  const openWikiPath = (path, preferDev = false) => {
-    let mode = wikiMode;
-    if (preferDev && adminApi.status === 'connected') {
-      mode = 'dev';
-      if (wikiMode !== 'dev') setWikiMode('dev');
-    }
-    setWikiFrameSrc(resolveWikiFrameUrl(mode, path));
+  const adminConnected = adminApi.status === 'connected';
+  const canUseLocalDev = localDevServer && adminConnected;
+
+  const openWikiPath = (path, preferLocalDev = false) => {
+    const useDev = localDevServer && preferLocalDev && adminConnected;
+    if (useDev && wikiMode !== 'dev') setWikiMode('dev');
+    setWikiFrameSrc(resolveWikiFrameUrl(useDev ? 'dev' : 'static', path));
+  };
+
+  const goStaticPath = (path) => {
+    setWikiMode('static');
+    setWikiFrameSrc(wikiStaticFrameUrl(path));
   };
 
   useEffect(() => {
-    if (!wikiDevEditing) return undefined;
     let cancelled = false;
     setAdminApi((prev) => ({ ...prev, status: 'checking' }));
     fetchWikiAdminConfig()
       .then((cfg) => {
-        if (!cancelled) {
-          setAdminApi({
-            status: 'connected',
-            llmConfigured: Boolean(cfg.llmConfigured),
-            protectMode: Boolean(cfg.protectMode),
-          });
+        if (cancelled) return;
+        setAdminApi({
+          status: 'connected',
+          llmConfigured: Boolean(cfg.llmConfigured),
+          protectMode: Boolean(cfg.protectMode),
+        });
+        if (localDevServer) {
           setWikiMode('dev');
           setWikiFrameSrc(wikiDevFrameUrl(WIKI_DEV_PATH_HOME));
         }
@@ -217,195 +221,181 @@ function AiSynapseWikiModule({ onGoHome }) {
             error: err instanceof Error ? err.message : '연결 실패',
           });
           setWikiMode('static');
+          setWikiFrameSrc(wikiStaticFrameUrl('/'));
         }
       });
     return () => {
       cancelled = true;
     };
-  }, [adminCheckGen]);
+  }, [adminCheckGen, localDevServer]);
 
   useEffect(() => {
-    if (adminApi.status !== 'connected' && wikiMode === 'dev') {
+    if (!canUseLocalDev && wikiMode === 'dev') {
       setWikiMode('static');
       setWikiFrameSrc(wikiStaticFrameUrl('/'));
     }
-  }, [adminApi.status, wikiMode]);
-
-  if (!wikiDevEditing) {
-    return (
-      <section className="module-embed">
-        <div className="module-embed__bar module-link-bar">
-          <p className="hint module-link-bar__hint" style={{ margin: 0 }}>
-            <strong>한글 AI 지식 Wiki</strong> — 주제·허브·스토리·검색. 이 포털에 동기화된 정적 빌드를
-            읽습니다. 주제 등록·편집은 로컬 개발(
-            <code>npm run wiki:check</code>) 또는{' '}
-            <a href={AI_SYNAPSE_WIKI_GITHUB_PAGES_URL} target="_blank" rel="noopener noreferrer">
-              GitHub Pages
-            </a>
-            를 사용하세요.
-          </p>
-          <div className="module-link-bar__actions">
-            <button type="button" className="btn-ghost" onClick={onGoHome}>
-              ← 포털 홈
-            </button>
-            <a
-              className="btn-ghost"
-              href={AI_SYNAPSE_WIKI_REPO_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              저장소
-            </a>
-            {external?.externalUrl ? (
-              <a className="btn-ghost" href={external.externalUrl} target="_blank" rel="noopener noreferrer">
-                {external.externalLabel || 'GitHub Pages'}
-              </a>
-            ) : null}
-            <a
-              className="btn-primary"
-              href={AI_SYNAPSE_WIKI_APP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              전체 화면으로 열기
-            </a>
-          </div>
-        </div>
-        <iframe
-          className="module-embed__frame"
-          src={AI_SYNAPSE_WIKI_APP_URL}
-          title="AI-Synapse Wiki"
-          loading="lazy"
-        />
-      </section>
-    );
-  }
+  }, [canUseLocalDev, wikiMode]);
 
   const apiBadge =
-      adminApi.status === 'connected' ? (
-        <span className="wiki-api-badge wiki-api-badge--ok">관리 API 연결됨</span>
-      ) : adminApi.status === 'checking' ? (
-        <span className="wiki-api-badge">API 확인 중…</span>
-      ) : (
-        <span className="wiki-api-badge wiki-api-badge--off">주제 등록 API 없음</span>
-      );
+    adminApi.status === 'connected' ? (
+      <span className="wiki-api-badge wiki-api-badge--ok">편집 API 연결됨</span>
+    ) : adminApi.status === 'checking' ? (
+      <span className="wiki-api-badge">API 확인 중…</span>
+    ) : (
+      <span className="wiki-api-badge wiki-api-badge--off">편집 API 없음</span>
+    );
 
-    const canUseDev = adminApi.status === 'connected';
-
-    return (
-      <section className="module-embed">
-        <div className="module-embed__bar module-link-bar wiki-embed-bar">
-          <div className="wiki-embed-bar__meta">
-            <p className="hint module-link-bar__hint" style={{ margin: 0 }}>
-              개발 전용 · <strong>{wikiMode === 'dev' ? '편집(Wiki dev)' : '읽기(정적)'}</strong> · API{' '}
-              <code>{WIKI_DEV_API_DEFAULT_URL}</code>
+  return (
+    <section className="module-embed">
+      <div className="module-embed__bar module-link-bar wiki-embed-bar">
+        <div className="wiki-embed-bar__meta">
+          <p className="hint module-link-bar__hint" style={{ margin: 0 }}>
+            {localDevServer ? (
+              <>
+                <strong>{wikiMode === 'dev' ? '편집(Wiki dev)' : '읽기(정적)'}</strong> · API{' '}
+                <code>{WIKI_DEV_API_DEFAULT_URL}</code>
+              </>
+            ) : (
+              <>
+                <strong>읽기·편집</strong> — 포털 정적 Wiki + 관리 API
+                {adminConnected ? ' (GitHub 저장)' : ''}. 저장 후 읽기 갱신:{' '}
+                <code>npm run wiki:sync</code> · 배포
+              </>
+            )}
+          </p>
+          {apiBadge}
+          {adminConnected ? (
+            <p className="wiki-embed-bar__detail hint">
+              주제 등록·편집은 아래 Wiki 화면 <strong>/admin</strong> 메뉴 또는 바로가기
+              {adminApi.llmConfigured ? ' · 자연어(Gemini)' : localDevServer ? ' · 자연어=Wiki dev' : ''}
+              {adminApi.protectMode ? ' · 보호 모드' : ''}
             </p>
-            {apiBadge}
-            {canUseDev ? (
-              <p className="wiki-embed-bar__detail hint">
-                주제 등록은 <strong>편집(Wiki dev)</strong> 모드 권장
-                {adminApi.llmConfigured
-                  ? ' · 자연어(Gemini)'
-                  : ' · 자연어=규칙만(API 키 없음 → Wiki .env WIKI_TOPIC_LLM_API_KEY)'}
-                {adminApi.protectMode ? ' · 보호 모드' : ''}
-              </p>
-            ) : null}
+          ) : null}
+          {localDevServer ? (
             <div className="wiki-mode-toggle" role="group" aria-label="Wiki 표시 모드">
               <button
                 type="button"
                 className={`wiki-mode-btn${wikiMode === 'static' ? ' is-active' : ''}`}
-                onClick={() => setWikiMode('static')}
+                onClick={() => {
+                  setWikiMode('static');
+                  setWikiFrameSrc(wikiStaticFrameUrl('/'));
+                }}
               >
                 읽기(정적)
               </button>
               <button
                 type="button"
                 className={`wiki-mode-btn${wikiMode === 'dev' ? ' is-active' : ''}`}
-                disabled={!canUseDev}
-                title={canUseDev ? undefined : 'Wiki dev(5174) 실행 후 사용'}
-                onClick={() => setWikiMode('dev')}
+                disabled={!canUseLocalDev}
+                title={canUseLocalDev ? undefined : 'Wiki dev(5174) 실행 후 사용'}
+                onClick={() => {
+                  setWikiMode('dev');
+                  setWikiFrameSrc(wikiDevFrameUrl(WIKI_DEV_PATH_HOME));
+                }}
               >
                 편집(Wiki dev)
               </button>
             </div>
-          </div>
-          <div className="module-link-bar__actions">
-            <button type="button" className="btn-ghost" onClick={onGoHome}>
-              ← 포털 홈
-            </button>
-            <button type="button" className="btn-ghost" onClick={() => openWikiPath(WIKI_DEV_PATH_HOME)}>
-              Wiki 홈
-            </button>
-            <button
-              type="button"
-              className="btn-ghost"
-              onClick={() => openWikiPath(WIKI_DEV_PATH_REGISTER_NL, true)}
-            >
-              주제 등록(자연어)
-            </button>
-            <button
-              type="button"
-              className="btn-ghost"
-              onClick={() => openWikiPath(WIKI_DEV_PATH_REGISTER_NEW, true)}
-            >
-              주제 등록(수동)
-            </button>
-            <button
-              type="button"
-              className="btn-ghost"
-              onClick={() => openWikiPath(WIKI_DEV_PATH_ADMIN_TOPICS, true)}
-            >
-              주제 목록
-            </button>
-            {adminApi.status !== 'connected' ? (
-              <button type="button" className="btn-ghost" onClick={() => setAdminCheckGen((n) => n + 1)}>
-                연결 다시 확인
-              </button>
-            ) : null}
-            <a className="btn-primary" href={wikiFrameSrc} target="_blank" rel="noopener noreferrer">
-              전체 화면
-            </a>
-          </div>
+          ) : null}
         </div>
-        {adminApi.status === 'offline' ? (
-          <div className="wiki-api-setup" role="status">
-            <p>
-              <strong>주제 등록</strong>은 Wiki dev가 필요합니다. 상세:{' '}
-              <code>docs/ai-synapse-wiki-improve.md</code> · 저장소{' '}
-              <a href={AI_SYNAPSE_WIKI_REPO_URL} target="_blank" rel="noopener noreferrer">
-                AI-Synapse-Wiki
-              </a>
-            </p>
+        <div className="module-link-bar__actions">
+          <button type="button" className="btn-ghost" onClick={onGoHome}>
+            ← 포털 홈
+          </button>
+          <button type="button" className="btn-ghost" onClick={() => goStaticPath('/')}>
+            Wiki 홈
+          </button>
+          <button
+            type="button"
+            className="btn-ghost"
+            disabled={!adminConnected}
+            onClick={() =>
+              localDevServer
+                ? openWikiPath(WIKI_DEV_PATH_REGISTER_NL, true)
+                : goStaticPath('/admin/topics/register/nl')
+            }
+          >
+            주제 등록(자연어)
+          </button>
+          <button
+            type="button"
+            className="btn-ghost"
+            disabled={!adminConnected}
+            onClick={() =>
+              localDevServer
+                ? openWikiPath(WIKI_DEV_PATH_REGISTER_NEW, true)
+                : goStaticPath('/admin/topics/register/new')
+            }
+          >
+            주제 등록(수동)
+          </button>
+          <button
+            type="button"
+            className="btn-ghost"
+            disabled={!adminConnected}
+            onClick={() =>
+              localDevServer
+                ? openWikiPath(WIKI_DEV_PATH_ADMIN_TOPICS, true)
+                : goStaticPath('/admin/topics')
+            }
+          >
+            주제 목록
+          </button>
+          {adminApi.status !== 'connected' ? (
+            <button type="button" className="btn-ghost" onClick={() => setAdminCheckGen((n) => n + 1)}>
+              연결 다시 확인
+            </button>
+          ) : null}
+          <a className="btn-primary" href={wikiFrameSrc} target="_blank" rel="noopener noreferrer">
+            전체 화면
+          </a>
+        </div>
+      </div>
+      {adminApi.status === 'offline' ? (
+        <div className="wiki-api-setup" role="status">
+          <p>
+            <strong>편집 API</strong>가 필요합니다. 운영(Vercel):{' '}
+            <code>GITHUB_TOKEN</code> + <code>WIKI_ADMIN_PIN</code> · 로컬: Wiki dev 5174.{' '}
+            <code>docs/ai-synapse-wiki-improve.md</code>
+          </p>
+          {localDevServer ? (
             <ol>
               <li>
-                Wiki: <code>{WIKI_DEV_SETUP_COMMANDS.wiki}</code> (또는{' '}
-                <code>.\scripts\start-wiki-dev.ps1</code>)
+                Wiki: <code>{WIKI_DEV_SETUP_COMMANDS.wiki}</code>
               </li>
               <li>
-                Wiki <code>.env</code>: <code>VITE_ADMIN_ENABLED=true</code> (관리 화면) · 재시작 필요
+                Wiki <code>.env</code>: <code>VITE_ADMIN_ENABLED=true</code>
               </li>
               <li>
                 확인: <code>{WIKI_DEV_SETUP_COMMANDS.check}</code>
               </li>
               <li>
-                포털: <code>{WIKI_DEV_SETUP_COMMANDS.portal}</code> → 연결 다시 확인 →{' '}
-                <strong>편집(Wiki dev)</strong> · PIN <code>1234</code> (기본)
-              </li>
-              <li>
-                정적 갱신: <code>WIKI_ROOT=… {WIKI_DEV_SETUP_COMMANDS.sync}</code>
+                포털: <code>{WIKI_DEV_SETUP_COMMANDS.portal}</code> → 연결 다시 확인
               </li>
             </ol>
-            {adminApi.error ? <p className="wiki-api-setup__err">마지막 확인: {adminApi.error}</p> : null}
-          </div>
-        ) : null}
-        <iframe
-          className="module-embed__frame"
-          src={wikiFrameSrc}
-          title="AI-Synapse Wiki"
-          loading="lazy"
-        />
-      </section>
-    );
+          ) : (
+            <ol>
+              <li>
+                Vercel 환경 변수: <code>GITHUB_TOKEN</code>(repo 쓰기), <code>WIKI_ADMIN_PIN</code>
+              </li>
+              <li>또는 <code>WIKI_ADMIN_API_URL</code>에 Wiki dev 서버 URL</li>
+              <li>연결 다시 확인 → 주제 등록</li>
+              <li>
+                읽기 반영: <code>{WIKI_DEV_SETUP_COMMANDS.sync}</code> 후 배포
+              </li>
+            </ol>
+          )}
+          {adminApi.error ? <p className="wiki-api-setup__err">마지막 확인: {adminApi.error}</p> : null}
+        </div>
+      ) : null}
+      <iframe
+        className="module-embed__frame"
+        src={wikiFrameSrc}
+        title="AI-Synapse Wiki"
+        loading="lazy"
+      />
+    </section>
+  );
 }
 
 function GeminiTunerModule({ onGoHome }) {
