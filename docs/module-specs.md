@@ -17,10 +17,10 @@
 - 요약: 이번 달 기록 수/총 거리
 
 ## 4) 아이디어 뱅크
-- 입력: 아이디어 이름, 설명
-- 저장: localStorage (`cxr542-idea-bank-v1`)
-- 규칙: 중복 이름 방지
-- 기능: 등록/목록/삭제
+- **연동:** [idea-bank · 아이디어 노트](https://cxr542.github.io/cxr542-ai/projects/idea-bank/) (GitHub Pages) — 포털 내 iframe + 새 탭 링크
+- **저장:** IndexedDB / `idea-bank-ideas` (운영 origin `cxr542.github.io` 전용, 포털과 분리)
+- **기능:** 검색, 카테고리, 고정함, JSON 보내기/가져오기 등 (본앱)
+- **동기화:** 운영 ↔ 로컬은 앱 내 JSON 가져오기/보내기 ([idea-bank README](https://github.com/cxr542/cxr542-ai/tree/main/projects/idea-bank))
 
 ## 공통 규칙
 - 모든 모듈 데이터는 브라우저 localStorage 사용

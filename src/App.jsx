@@ -3,10 +3,11 @@ import './App.css';
 import { summarizeMonthlyDistance } from './utils/marathon';
 import { readList, writeList } from './utils/storage';
 
+const IDEA_BANK_APP_URL = 'https://cxr542.github.io/cxr542-ai/projects/idea-bank/';
+
 const STORAGE_KEYS = {
   shoes: 'cxr542-today-shoes-v1',
   marathon: 'cxr542-marathon-log-v1',
-  ideas: 'cxr542-idea-bank-v1',
 };
 
 const MODULES = [
@@ -48,7 +49,11 @@ function HomeModule() {
         {MODULES.filter((item) => item.id !== 'home').map((item) => (
           <li key={item.id}>
             <strong>{item.label}</strong>
-            <span>모듈로 이동해 기능을 바로 사용하세요.</span>
+            <span>
+              {item.id === 'idea-bank'
+                ? 'GitHub Pages 아이디어 노트(검색·카테고리·JSON 백업) — 데이터는 해당 사이트 브라우저 저장소에만 있습니다.'
+                : '모듈로 이동해 기능을 바로 사용하세요.'}
+            </span>
           </li>
         ))}
       </ul>
@@ -173,57 +178,24 @@ function MarathonModule() {
 }
 
 function IdeaBankModule() {
-  const [ideas, setIdeas] = useState(() => readList(STORAGE_KEYS.ideas));
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [message, setMessage] = useState('');
-
-  const addIdea = (e) => {
-    e.preventDefault();
-    const title = name.trim();
-    if (!title) {
-      setMessage('아이디어 이름을 입력하세요.');
-      return;
-    }
-    if (ideas.some((idea) => idea.name.toLowerCase() === title.toLowerCase())) {
-      setMessage('동일한 이름의 아이디어가 이미 있습니다.');
-      return;
-    }
-    const next = [{ id: `idea-${Date.now()}`, name: title, description: description.trim(), createdAt: new Date().toISOString() }, ...ideas];
-    setIdeas(next);
-    writeList(STORAGE_KEYS.ideas, next);
-    setName('');
-    setDescription('');
-    setMessage('아이디어가 등록되었습니다.');
-  };
-
-  const removeIdea = (id) => {
-    const next = ideas.filter((idea) => idea.id !== id);
-    setIdeas(next);
-    writeList(STORAGE_KEYS.ideas, next);
-  };
-
   return (
-    <section className="module-panel">
-      <h2>아이디어 뱅크</h2>
-      <form className="grid-form" onSubmit={addIdea}>
-        <input className="field" placeholder="서비스 이름" value={name} onChange={(e) => setName(e.target.value)} />
-        <input className="field" placeholder="설명 (선택)" value={description} onChange={(e) => setDescription(e.target.value)} />
-        <button className="btn-primary" type="submit">아이디어 등록</button>
-      </form>
-      {message && <p className="hint">{message}</p>}
-      <ul className="list">
-        {ideas.map((idea) => (
-          <li key={idea.id}>
-            <div>
-              <strong>{idea.name}</strong>
-              <span>{idea.description || '설명 없음'}</span>
-              <small>{formatDate(idea.createdAt)}</small>
-            </div>
-            <button className="btn-ghost" type="button" onClick={() => removeIdea(idea.id)}>삭제</button>
-          </li>
-        ))}
-      </ul>
+    <section className="idea-bank-embed">
+      <div className="idea-bank-embed__bar">
+        <p className="hint" style={{ margin: 0 }}>
+          운영 앱 <strong>idea-bank</strong> · 아이디어·JSON 데이터는{' '}
+          <code style={{ display: 'inline', padding: '0.1rem 0.35rem' }}>cxr542.github.io</code> 브라우저에만 저장됩니다.
+          포털(<code style={{ display: 'inline', padding: '0.1rem 0.35rem' }}>vercel.app</code>)과 자동 동기화되지 않습니다.
+        </p>
+        <a className="btn-primary" href={IDEA_BANK_APP_URL} target="_blank" rel="noopener noreferrer">
+          새 탭에서 열기
+        </a>
+      </div>
+      <iframe
+        className="idea-bank-embed__frame"
+        src={IDEA_BANK_APP_URL}
+        title="idea-bank 아이디어 노트"
+        loading="lazy"
+      />
     </section>
   );
 }
@@ -257,7 +229,7 @@ function App() {
           ))}
         </nav>
       </aside>
-      <main className="content">
+      <main className={`content${activeModule === 'idea-bank' ? ' content--embed' : ''}`}>
         <header className="content-header">
           <h2>{MODULES.find((item) => item.id === activeModule)?.label}</h2>
           <span>v0.1.0 MVP</span>
