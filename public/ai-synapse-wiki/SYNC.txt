@@ -1,0 +1,7 @@
+AI-Synapse-Wiki → portal public/ai-synapse-wiki
+Source: https://github.com/cxr542/AI-Synapse-Wiki
+Commit: 24cf2c2 Support Vite base path for GitHub Pages subfolder deploy (2026-05-25)
+Entries: 21 (build:entries at sync time)
+Assets: index-2J4WWMLL.js, index-B6Fwdz4B.css
+base: /ai-synapse-wiki/
+Build: npx vite build (tsc skipped — upstream TS errors on main)

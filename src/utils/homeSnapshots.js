@@ -3,13 +3,51 @@ import {
   summarizeMonthlyRaces,
 } from './marathon';
 import { readList } from './storage';
+import { isAiSynapseWikiWebDemoEmbed } from './aiSynapseWikiDev';
+import { isGeminiTunerWebDemoEmbed } from './geminiTunerDev';
+import { isTodayShoesWebDemoEmbed } from './todayShoesDev';
+import { isVisionFontGithubEmbed } from './visionFontDev';
 
 const SHOES_KEY = 'cxr542-today-shoes-v1';
 const IDEA_LS_KEY = 'idea-bank-ideas';
+const PROMPT_LS_KEY = 'prompt-collection-prompts';
+const RATINGS_LS_KEY = 'how-many-points-ratings';
+
+function readWhoAreYouSummary() {
+  try {
+    const raw = localStorage.getItem('who-are-you-summary');
+    const s = raw ? JSON.parse(raw) : null;
+    if (!s) return null;
+    const n = (s.employments || 0) + (s.documents || 0);
+    return n ? s : null;
+  } catch {
+    return null;
+  }
+}
 
 function readIdeaCount() {
   try {
     const raw = localStorage.getItem(IDEA_LS_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.length : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function readPromptCount() {
+  try {
+    const raw = localStorage.getItem(PROMPT_LS_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.length : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function readRatingsCount() {
+  try {
+    const raw = localStorage.getItem(RATINGS_LS_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
     return Array.isArray(parsed) ? parsed.length : 0;
   } catch {
@@ -29,15 +67,22 @@ export function getHomeSnapshots(now = new Date()) {
   const races = readMarathonLogRacesFromStorage();
   const raceSummary = summarizeMonthlyRaces(races, now);
   const ideas = readIdeaCount();
+  const prompts = readPromptCount();
+  const ratings = readRatingsCount();
+  const career = readWhoAreYouSummary();
 
   const latestShoe = shoes[0];
   const latestRace = [...races].sort((a, b) => String(b.date).localeCompare(String(a.date)))[0];
 
   return {
-    'vision-font': '프리셋 3종 · 샘플 미리보기 · CSS 복사',
-    'today-shoes': shoes.length
-      ? `기록 ${shoes.length}건${latestShoe?.model ? ` · 최근 ${latestShoe.model}` : ''}`
-      : '착화 기록을 추가해 보세요',
+    'vision-font': isVisionFontGithubEmbed()
+      ? '웹 데모 · 시력 테스트 · 맞춤 설정 · 기사 읽기'
+      : '프리셋 3종 · 샘플 미리보기 · CSS 복사',
+    'today-shoes': isTodayShoesWebDemoEmbed()
+      ? '웹 데모 · 신발장 · 사진 등록 · AI 분석'
+      : shoes.length
+        ? `기록 ${shoes.length}건${latestShoe?.model ? ` · 최근 ${latestShoe.model}` : ''}`
+        : '착화 기록을 추가해 보세요',
     marathon: raceSummary.count
       ? `이번 달 대회 ${raceSummary.count}건 · ${raceSummary.totalKm.toFixed(1)}km${formatLatestRace(latestRace)}`
       : races.length
@@ -46,5 +91,20 @@ export function getHomeSnapshots(now = new Date()) {
     'idea-bank': ideas
       ? `아이디어 ${ideas}개 · 포털 도메인에 저장`
       : '생각을 모아 두세요 · JSON 백업 가능',
+    'prompt-collection': prompts
+      ? `프롬프트 ${prompts}개 · 검색·복사·JSON 백업`
+      : 'Keep 대신 제목·본문으로 정리 · JSON 백업',
+    'how-many-points': ratings
+      ? `평가 ${ratings}건 · 영화·시리즈·책·웹툰`
+      : '왓챠피디아형 평점 · CSV·JSON 가져오기',
+    'who-are-you': career
+      ? `근무 ${career.employments || 0} · 프로젝트 ${career.projects || 0} · 자소서 ${career.documents || 0}`
+      : '자기소개서·경력 구조화 · 미리보기·JSON',
+    'ai-synapse-wiki': isAiSynapseWikiWebDemoEmbed()
+      ? '웹 데모 · 주제·검색 · 등록(관리 API 연동 시)'
+      : 'GitHub Pages Wiki · topics·Synapse',
+    'gemini-tuner': isGeminiTunerWebDemoEmbed()
+      ? '웹 데모 · Gemini FinOps · 스파클'
+      : 'Chrome 확장 · 토큰·예산 FinOps',
   };
 }

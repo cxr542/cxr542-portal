@@ -3,13 +3,49 @@ import './App.css';
 import EnvironmentBadge from './components/EnvironmentBadge';
 import ModuleLinkBar from './components/ModuleLinkBar';
 import NavLabelsModal from './components/NavLabelsModal';
+import NavOrderModal from './components/NavOrderModal';
 import PortalSidebar from './components/PortalSidebar';
 import { MODULE_HINTS, NAV_IDS, PORTAL_NAV_ITEMS, SIDEBAR_COLLAPSED_KEY } from './constants/portalNav';
 import { useNavLabels } from './hooks/useNavLabels';
+import { useNavOrder } from './hooks/useNavOrder';
 import { getHomeSnapshots } from './utils/homeSnapshots';
 import { readList, writeList } from './utils/storage';
+import {
+  fetchWikiAdminConfig,
+  isAiSynapseWikiWebDemoEmbed,
+  resolveWikiFrameUrl,
+  WIKI_DEV_PATH_HOME,
+  WIKI_DEV_PATH_ADMIN_TOPICS,
+  WIKI_DEV_PATH_REGISTER_NL,
+  WIKI_DEV_PATH_REGISTER_NEW,
+  WIKI_DEV_SETUP_COMMANDS,
+  wikiDevFrameUrl,
+  wikiStaticFrameUrl,
+  WIKI_DEV_API_DEFAULT_URL,
+  AI_SYNAPSE_WIKI_GITHUB_PAGES_URL,
+  AI_SYNAPSE_WIKI_REPO_URL,
+} from './utils/aiSynapseWikiDev';
+import {
+  isTodayShoesWebDemoEmbed,
+  TODAY_SHOES_APP_URL,
+  TODAY_SHOES_GITHUB_PAGES_URL,
+} from './utils/todayShoesDev';
+import {
+  GEMINI_TUNER_APP_URL,
+  GEMINI_TUNER_GITHUB_PAGES_URL,
+  GEMINI_TUNER_REPO_URL,
+  isGeminiTunerWebDemoEmbed,
+} from './utils/geminiTunerDev';
+import {
+  isVisionFontGithubEmbed,
+  VISION_FONT_APP_URL,
+  VISION_FONT_GITHUB_PAGES_URL,
+} from './utils/visionFontDev';
 
 const IDEA_BANK_APP_URL = '/idea-bank/index.html';
+const PROMPT_COLLECTION_APP_URL = '/prompt-collection/index.html';
+const HOW_MANY_POINTS_APP_URL = '/how-many-points/index.html';
+const WHO_ARE_YOU_APP_URL = '/who-are-you/index.html';
 const MARATHON_LOG_APP_URL = '/marathon-log/index.html';
 
 const STORAGE_KEYS = {
@@ -51,6 +87,10 @@ function findNavItem(id) {
 }
 
 function moduleHasEmbed(id) {
+  if (id === 'vision-font' && isVisionFontGithubEmbed()) return true;
+  if (id === 'today-shoes' && isTodayShoesWebDemoEmbed()) return true;
+  if (id === 'ai-synapse-wiki' && isAiSynapseWikiWebDemoEmbed()) return true;
+  if (id === 'gemini-tuner' && isGeminiTunerWebDemoEmbed()) return true;
   return Boolean(findNavItem(id)?.embedPath);
 }
 
@@ -63,8 +103,8 @@ function readModuleFromUrl() {
   return 'home';
 }
 
-function HomeModule({ onOpenModule, labels }) {
-  const cards = PORTAL_NAV_ITEMS.filter((item) => item.id !== 'home');
+function HomeModule({ onOpenModule, labels, navItems }) {
+  const cards = navItems.filter((item) => item.id !== 'home');
   const snapshots = useMemo(() => getHomeSnapshots(), []);
 
   return (
@@ -104,7 +144,7 @@ function HomeModule({ onOpenModule, labels }) {
   );
 }
 
-function VisionFontModule({ onGoHome }) {
+function VisionFontMvpModule({ onGoHome }) {
   const [selected, setSelected] = useState(FONT_PRESETS[0]);
   const [sampleText, setSampleText] = useState('오늘도 꾸준히 만들고 개선한다.');
   const [copied, setCopied] = useState('');
@@ -150,7 +190,40 @@ function VisionFontModule({ onGoHome }) {
   );
 }
 
-function TodayShoesModule({ onGoHome }) {
+function VisionFontModule({ onGoHome }) {
+  if (isVisionFontGithubEmbed()) {
+    return (
+      <section className="module-embed">
+        <div className="module-embed__bar module-link-bar">
+          <p className="hint module-link-bar__hint" style={{ margin: 0 }}>
+            개발 환경 전용 · <strong>vision-font 웹 데모</strong>(시력 테스트 · 맞춤 설정 · 기사 읽기). 운영 포털은
+            프리셋 미리보기 MVP를 사용합니다.{' '}
+            <a href={VISION_FONT_GITHUB_PAGES_URL} target="_blank" rel="noopener noreferrer">
+              GitHub Pages 소개
+            </a>
+          </p>
+          <div className="module-link-bar__actions">
+            <button type="button" className="btn-ghost" onClick={onGoHome}>
+              ← 포털 홈
+            </button>
+            <a className="btn-primary" href={VISION_FONT_APP_URL} target="_blank" rel="noopener noreferrer">
+              전체 화면으로 열기
+            </a>
+          </div>
+        </div>
+        <iframe
+          className="module-embed__frame"
+          src={VISION_FONT_APP_URL}
+          title="vision-font"
+          loading="lazy"
+        />
+      </section>
+    );
+  }
+  return <VisionFontMvpModule onGoHome={onGoHome} />;
+}
+
+function TodayShoesMvpModule({ onGoHome }) {
   const external = findNavItem('today-shoes');
   const [items, setItems] = useState(() => readList(STORAGE_KEYS.shoes));
   const [model, setModel] = useState('');
@@ -212,6 +285,353 @@ function TodayShoesModule({ onGoHome }) {
   );
 }
 
+function TodayShoesModule({ onGoHome }) {
+  if (isTodayShoesWebDemoEmbed()) {
+    return (
+      <section className="module-embed">
+        <div className="module-embed__bar module-link-bar">
+          <p className="hint module-link-bar__hint" style={{ margin: 0 }}>
+            개발 환경 전용 · <strong>오늘뭐신지 웹 데모</strong>(신발장 · 사진 등록 · AI 분석). 운영 포털은 착화
+            메모 MVP를 사용합니다.{' '}
+            <a href={TODAY_SHOES_GITHUB_PAGES_URL} target="_blank" rel="noopener noreferrer">
+              Expo GitHub Pages
+            </a>
+          </p>
+          <div className="module-link-bar__actions">
+            <button type="button" className="btn-ghost" onClick={onGoHome}>
+              ← 포털 홈
+            </button>
+            <a className="btn-primary" href={TODAY_SHOES_APP_URL} target="_blank" rel="noopener noreferrer">
+              전체 화면으로 열기
+            </a>
+          </div>
+        </div>
+        <iframe
+          className="module-embed__frame"
+          src={TODAY_SHOES_APP_URL}
+          title="today-shoes"
+          loading="lazy"
+        />
+      </section>
+    );
+  }
+  return <TodayShoesMvpModule onGoHome={onGoHome} />;
+}
+
+function AiSynapseWikiMvpModule({ onGoHome }) {
+  const external = findNavItem('ai-synapse-wiki');
+
+  return (
+    <>
+      <ModuleLinkBar
+        hint={
+          <>
+            포털에서 Wiki 바로가기 · 전체 기능은{' '}
+            <strong>{external?.externalLabel || 'GitHub Pages'}</strong> 또는 저장소 로컬 dev 서버를
+            사용합니다.
+          </>
+        }
+        actions={
+          <>
+            <button type="button" className="btn-ghost" onClick={onGoHome}>
+              ← 포털 홈
+            </button>
+            {external?.externalUrl ? (
+              <a className="btn-primary" href={external.externalUrl} target="_blank" rel="noopener noreferrer">
+                Wiki 열기
+              </a>
+            ) : null}
+          </>
+        }
+      />
+      <section className="module-panel">
+        <h2>AI-Synapse Wiki</h2>
+        <p>
+          한글 AI 지식 Wiki — topics·hubs·stories·Synapse 연결. Antigravity, Gemini, ChatGPT, Harness
+          Engineering 등 주제를 정리합니다.
+        </p>
+        <ul className="list">
+          <li>
+            <a href={AI_SYNAPSE_WIKI_GITHUB_PAGES_URL} target="_blank" rel="noopener noreferrer">
+              GitHub Pages Wiki ↗
+            </a>
+          </li>
+          <li>
+            <a href={AI_SYNAPSE_WIKI_REPO_URL} target="_blank" rel="noopener noreferrer">
+              소스 저장소 ↗
+            </a>
+          </li>
+        </ul>
+      </section>
+    </>
+  );
+}
+
+function AiSynapseWikiModule({ onGoHome }) {
+  const [wikiMode, setWikiMode] = useState('static');
+  const [wikiFrameSrc, setWikiFrameSrc] = useState(() => wikiStaticFrameUrl('/'));
+  const [adminApi, setAdminApi] = useState({ status: 'checking' });
+  const [adminCheckGen, setAdminCheckGen] = useState(0);
+
+  const openWikiPath = (path, preferDev = false) => {
+    let mode = wikiMode;
+    if (preferDev && adminApi.status === 'connected') {
+      mode = 'dev';
+      if (wikiMode !== 'dev') setWikiMode('dev');
+    }
+    setWikiFrameSrc(resolveWikiFrameUrl(mode, path));
+  };
+
+  useEffect(() => {
+    if (!isAiSynapseWikiWebDemoEmbed()) return undefined;
+    let cancelled = false;
+    setAdminApi((prev) => ({ ...prev, status: 'checking' }));
+    fetchWikiAdminConfig()
+      .then((cfg) => {
+        if (!cancelled) {
+          setAdminApi({
+            status: 'connected',
+            llmConfigured: Boolean(cfg.llmConfigured),
+            protectMode: Boolean(cfg.protectMode),
+          });
+          setWikiMode('dev');
+          setWikiFrameSrc(wikiDevFrameUrl(WIKI_DEV_PATH_HOME));
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setAdminApi({
+            status: 'offline',
+            error: err instanceof Error ? err.message : '연결 실패',
+          });
+          setWikiMode('static');
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [adminCheckGen]);
+
+  useEffect(() => {
+    if (adminApi.status !== 'connected' && wikiMode === 'dev') {
+      setWikiMode('static');
+      setWikiFrameSrc(wikiStaticFrameUrl('/'));
+    }
+  }, [adminApi.status, wikiMode]);
+
+  if (isAiSynapseWikiWebDemoEmbed()) {
+    const apiBadge =
+      adminApi.status === 'connected' ? (
+        <span className="wiki-api-badge wiki-api-badge--ok">관리 API 연결됨</span>
+      ) : adminApi.status === 'checking' ? (
+        <span className="wiki-api-badge">API 확인 중…</span>
+      ) : (
+        <span className="wiki-api-badge wiki-api-badge--off">주제 등록 API 없음</span>
+      );
+
+    const canUseDev = adminApi.status === 'connected';
+
+    return (
+      <section className="module-embed">
+        <div className="module-embed__bar module-link-bar wiki-embed-bar">
+          <div className="wiki-embed-bar__meta">
+            <p className="hint module-link-bar__hint" style={{ margin: 0 }}>
+              개발 전용 · <strong>{wikiMode === 'dev' ? '편집(Wiki dev)' : '읽기(정적)'}</strong> · API{' '}
+              <code>{WIKI_DEV_API_DEFAULT_URL}</code>
+            </p>
+            {apiBadge}
+            {canUseDev ? (
+              <p className="wiki-embed-bar__detail hint">
+                주제 등록은 <strong>편집(Wiki dev)</strong> 모드 권장
+                {adminApi.llmConfigured
+                  ? ' · 자연어(Gemini)'
+                  : ' · 자연어=규칙만(API 키 없음 → Wiki .env WIKI_TOPIC_LLM_API_KEY)'}
+                {adminApi.protectMode ? ' · 보호 모드' : ''}
+              </p>
+            ) : null}
+            <div className="wiki-mode-toggle" role="group" aria-label="Wiki 표시 모드">
+              <button
+                type="button"
+                className={`wiki-mode-btn${wikiMode === 'static' ? ' is-active' : ''}`}
+                onClick={() => setWikiMode('static')}
+              >
+                읽기(정적)
+              </button>
+              <button
+                type="button"
+                className={`wiki-mode-btn${wikiMode === 'dev' ? ' is-active' : ''}`}
+                disabled={!canUseDev}
+                title={canUseDev ? undefined : 'Wiki dev(5174) 실행 후 사용'}
+                onClick={() => setWikiMode('dev')}
+              >
+                편집(Wiki dev)
+              </button>
+            </div>
+          </div>
+          <div className="module-link-bar__actions">
+            <button type="button" className="btn-ghost" onClick={onGoHome}>
+              ← 포털 홈
+            </button>
+            <button type="button" className="btn-ghost" onClick={() => openWikiPath(WIKI_DEV_PATH_HOME)}>
+              Wiki 홈
+            </button>
+            <button
+              type="button"
+              className="btn-ghost"
+              onClick={() => openWikiPath(WIKI_DEV_PATH_REGISTER_NL, true)}
+            >
+              주제 등록(자연어)
+            </button>
+            <button
+              type="button"
+              className="btn-ghost"
+              onClick={() => openWikiPath(WIKI_DEV_PATH_REGISTER_NEW, true)}
+            >
+              주제 등록(수동)
+            </button>
+            <button
+              type="button"
+              className="btn-ghost"
+              onClick={() => openWikiPath(WIKI_DEV_PATH_ADMIN_TOPICS, true)}
+            >
+              주제 목록
+            </button>
+            {adminApi.status !== 'connected' ? (
+              <button type="button" className="btn-ghost" onClick={() => setAdminCheckGen((n) => n + 1)}>
+                연결 다시 확인
+              </button>
+            ) : null}
+            <a className="btn-primary" href={wikiFrameSrc} target="_blank" rel="noopener noreferrer">
+              전체 화면
+            </a>
+          </div>
+        </div>
+        {adminApi.status === 'offline' ? (
+          <div className="wiki-api-setup" role="status">
+            <p>
+              <strong>주제 등록</strong>은 Wiki dev가 필요합니다. 상세:{' '}
+              <code>docs/ai-synapse-wiki-improve.md</code> · 저장소{' '}
+              <a href={AI_SYNAPSE_WIKI_REPO_URL} target="_blank" rel="noopener noreferrer">
+                AI-Synapse-Wiki
+              </a>
+            </p>
+            <ol>
+              <li>
+                Wiki: <code>{WIKI_DEV_SETUP_COMMANDS.wiki}</code> (또는{' '}
+                <code>.\scripts\start-wiki-dev.ps1</code>)
+              </li>
+              <li>
+                Wiki <code>.env</code>: <code>VITE_ADMIN_ENABLED=true</code> (관리 화면) · 재시작 필요
+              </li>
+              <li>
+                확인: <code>{WIKI_DEV_SETUP_COMMANDS.check}</code>
+              </li>
+              <li>
+                포털: <code>{WIKI_DEV_SETUP_COMMANDS.portal}</code> → 연결 다시 확인 →{' '}
+                <strong>편집(Wiki dev)</strong> · PIN <code>1234</code> (기본)
+              </li>
+              <li>
+                정적 갱신: <code>WIKI_ROOT=… {WIKI_DEV_SETUP_COMMANDS.sync}</code>
+              </li>
+            </ol>
+            {adminApi.error ? <p className="wiki-api-setup__err">마지막 확인: {adminApi.error}</p> : null}
+          </div>
+        ) : null}
+        <iframe
+          className="module-embed__frame"
+          src={wikiFrameSrc}
+          title="AI-Synapse Wiki"
+          loading="lazy"
+        />
+      </section>
+    );
+  }
+  return <AiSynapseWikiMvpModule onGoHome={onGoHome} />;
+}
+
+function GeminiTunerMvpModule({ onGoHome }) {
+  const external = findNavItem('gemini-tuner');
+
+  return (
+    <>
+      <ModuleLinkBar
+        hint={
+          <>gemini.google.com FinOps Chrome 확장 · 웹 데모는 개발 환경에서만 포털에 표시됩니다.</>
+        }
+        actions={
+          <>
+            <button type="button" className="btn-ghost" onClick={onGoHome}>
+              ← 포털 홈
+            </button>
+            {external?.externalUrl ? (
+              <a className="btn-primary" href={GEMINI_TUNER_REPO_URL} target="_blank" rel="noopener noreferrer">
+                저장소
+              </a>
+            ) : null}
+          </>
+        }
+      />
+      <section className="module-panel">
+        <h2>GeminiTuner</h2>
+        <p>
+          gemini.google.com에서 토큰·예상 비용을 보는 Chrome 확장(FinOps). 데이터는 브라우저에만
+          저장됩니다.
+        </p>
+        <ul className="list">
+          <li>
+            <a href={GEMINI_TUNER_REPO_URL} target="_blank" rel="noopener noreferrer">
+              GitHub — GeminiTuner ↗
+            </a>
+          </li>
+          <li>
+            <a href={GEMINI_TUNER_GITHUB_PAGES_URL} target="_blank" rel="noopener noreferrer">
+              GitHub Pages 소개 ↗
+            </a>
+          </li>
+          <li>
+            <a href="https://gemini.google.com" target="_blank" rel="noopener noreferrer">
+              gemini.google.com ↗
+            </a>
+          </li>
+        </ul>
+      </section>
+    </>
+  );
+}
+
+function GeminiTunerModule({ onGoHome }) {
+  if (isGeminiTunerWebDemoEmbed()) {
+    return (
+      <section className="module-embed">
+        <div className="module-embed__bar module-link-bar">
+          <p className="hint module-link-bar__hint" style={{ margin: 0 }}>
+            개발 환경 전용 · <strong>GeminiTuner 웹 데모</strong> — 사이드 패널 FinOps · 스파클 캐릭터 ·
+            Gemini 한도 위젯. 실제 사용은 Chrome 확장·{' '}
+            <a href={GEMINI_TUNER_REPO_URL} target="_blank" rel="noopener noreferrer">
+              저장소
+            </a>
+          </p>
+          <div className="module-link-bar__actions">
+            <button type="button" className="btn-ghost" onClick={onGoHome}>
+              ← 포털 홈
+            </button>
+            <a className="btn-primary" href={GEMINI_TUNER_APP_URL} target="_blank" rel="noopener noreferrer">
+              전체 화면으로 열기
+            </a>
+          </div>
+        </div>
+        <iframe
+          className="module-embed__frame"
+          src={GEMINI_TUNER_APP_URL}
+          title="GeminiTuner"
+          loading="lazy"
+        />
+      </section>
+    );
+  }
+  return <GeminiTunerMvpModule onGoHome={onGoHome} />;
+}
+
 function MarathonLogModule({ onGoHome }) {
   return (
     <section className="module-embed">
@@ -270,19 +690,122 @@ function IdeaBankModule({ onGoHome }) {
   );
 }
 
-function ModuleContent({ active, onOpenModule, onGoHome, labels }) {
+function PromptCollectionModule({ onGoHome }) {
+  return (
+    <section className="module-embed">
+      <div className="module-embed__bar module-link-bar">
+        <p className="hint module-link-bar__hint" style={{ margin: 0 }}>
+          Google Keep에 두던 프롬프트를 <strong>제목·본문</strong>으로 정리합니다.
+          데이터는 <strong>이 포털 도메인</strong> 브라우저 저장소에만 있으며, JSON 보내기로 백업하세요.
+        </p>
+        <div className="module-link-bar__actions">
+          <button type="button" className="btn-ghost" onClick={onGoHome}>
+            ← 포털 홈
+          </button>
+          <a
+            className="btn-primary"
+            href={PROMPT_COLLECTION_APP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            전체 화면으로 열기
+          </a>
+        </div>
+      </div>
+      <iframe
+        className="module-embed__frame"
+        src={PROMPT_COLLECTION_APP_URL}
+        title="프롬프트 모음"
+        loading="lazy"
+      />
+    </section>
+  );
+}
+
+function HowManyPointsModule({ onGoHome }) {
+  return (
+    <section className="module-embed">
+      <div className="module-embed__bar module-link-bar">
+        <p className="hint module-link-bar__hint" style={{ margin: 0 }}>
+          왓챠피디아처럼 <strong>영화·시리즈·책·웹툰</strong> 평점을 모읍니다.
+          공식 API는 없어 <strong>가져오기</strong>에서 커뮤니티 CSV 스크립트 안내를 따르세요.
+        </p>
+        <div className="module-link-bar__actions">
+          <button type="button" className="btn-ghost" onClick={onGoHome}>
+            ← 포털 홈
+          </button>
+          <a
+            className="btn-primary"
+            href={HOW_MANY_POINTS_APP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            전체 화면으로 열기
+          </a>
+        </div>
+      </div>
+      <iframe
+        className="module-embed__frame"
+        src={HOW_MANY_POINTS_APP_URL}
+        title="너는몇점?"
+        loading="lazy"
+      />
+    </section>
+  );
+}
+
+function WhoAreYouModule({ onGoHome }) {
+  return (
+    <section className="module-embed">
+      <div className="module-embed__bar module-link-bar">
+        <p className="hint module-link-bar__hint" style={{ margin: 0 }}>
+          <strong>자기소개서·근무·기술·학력</strong>을 career.sw.or.kr 항목 구조로 정리합니다.
+          한글 원고는 <strong>가져오기</strong>에서 <code>## 항목</code> 붙여넣기 또는 JSON으로 옮길 수 있습니다.
+        </p>
+        <div className="module-link-bar__actions">
+          <button type="button" className="btn-ghost" onClick={onGoHome}>
+            ← 포털 홈
+          </button>
+          <a
+            className="btn-primary"
+            href={WHO_ARE_YOU_APP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            전체 화면으로 열기
+          </a>
+        </div>
+      </div>
+      <iframe
+        className="module-embed__frame"
+        src={WHO_ARE_YOU_APP_URL}
+        title="나는누구?"
+        loading="lazy"
+      />
+    </section>
+  );
+}
+
+function ModuleContent({ active, onOpenModule, onGoHome, labels, navItems }) {
   if (active === 'vision-font') return <VisionFontModule onGoHome={onGoHome} />;
   if (active === 'today-shoes') return <TodayShoesModule onGoHome={onGoHome} />;
   if (active === 'marathon') return <MarathonLogModule onGoHome={onGoHome} />;
   if (active === 'idea-bank') return <IdeaBankModule onGoHome={onGoHome} />;
-  return <HomeModule onOpenModule={onOpenModule} labels={labels} />;
+  if (active === 'prompt-collection') return <PromptCollectionModule onGoHome={onGoHome} />;
+  if (active === 'how-many-points') return <HowManyPointsModule onGoHome={onGoHome} />;
+  if (active === 'who-are-you') return <WhoAreYouModule onGoHome={onGoHome} />;
+  if (active === 'ai-synapse-wiki') return <AiSynapseWikiModule onGoHome={onGoHome} />;
+  if (active === 'gemini-tuner') return <GeminiTunerModule onGoHome={onGoHome} />;
+  return <HomeModule onOpenModule={onOpenModule} labels={labels} navItems={navItems} />;
 }
 
 function App() {
   const [activeModule, setActiveModule] = useState(readModuleFromUrl);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(readSidebarCollapsed);
   const [navLabelsOpen, setNavLabelsOpen] = useState(false);
+  const [navOrderOpen, setNavOrderOpen] = useState(false);
   const { labels, updateLabels, resetLabels, defaults } = useNavLabels();
+  const { navItems, order, setOrder, resetOrder } = useNavOrder();
 
   useEffect(() => {
     try {
@@ -311,10 +834,12 @@ function App() {
       <PortalSidebar
         activeModule={activeModule}
         onModuleChange={setActiveModule}
+        navItems={navItems}
         labels={labels}
         collapsed={sidebarCollapsed}
         onCollapsedChange={setSidebarCollapsed}
         onOpenNavLabels={() => setNavLabelsOpen(true)}
+        onOpenNavOrder={() => setNavOrderOpen(true)}
       />
       <main className={`content${moduleHasEmbed(activeModule) ? ' content--embed' : ''}`}>
         <header className="content-header">
@@ -329,6 +854,7 @@ function App() {
           onOpenModule={setActiveModule}
           onGoHome={goHome}
           labels={labels}
+          navItems={navItems}
         />
       </main>
       <NavLabelsModal
@@ -338,6 +864,15 @@ function App() {
         defaults={defaults}
         onSave={updateLabels}
         onReset={resetLabels}
+      />
+      <NavOrderModal
+        isOpen={navOrderOpen}
+        onClose={() => setNavOrderOpen(false)}
+        order={order}
+        labels={labels}
+        defaults={defaults}
+        onSave={setOrder}
+        onReset={resetOrder}
       />
     </div>
   );

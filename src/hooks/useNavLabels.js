@@ -6,6 +6,9 @@ function readLabels() {
     const raw = localStorage.getItem(NAV_LABELS_STORAGE_KEY);
     if (!raw) return { ...DEFAULT_NAV_LABELS };
     const parsed = JSON.parse(raw);
+    if (parsed['who-are-you'] === '너는누구?') {
+      parsed['who-are-you'] = '나는누구?';
+    }
     return { ...DEFAULT_NAV_LABELS, ...parsed };
   } catch {
     return { ...DEFAULT_NAV_LABELS };

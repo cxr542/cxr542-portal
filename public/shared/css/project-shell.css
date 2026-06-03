@@ -23,9 +23,42 @@
   --app-accent-rgb: 251, 191, 36;
 }
 
+.theme-prompt-collection {
+  --app-accent: #a78bfa;
+  --app-accent-rgb: 167, 139, 250;
+}
+
+.theme-how-many-points {
+  --app-accent: #ff2d6a;
+  --app-accent-rgb: 255, 45, 106;
+}
+
+.theme-who-are-you {
+  --app-accent: #2b6cb0;
+  --app-accent-rgb: 43, 108, 176;
+}
+
 .theme-marathon {
   --app-accent: #6ee7b7;
   --app-accent-rgb: 110, 231, 183;
+}
+
+.theme-vision-font {
+  --app-accent: #e8935a;
+  --app-accent-rgb: 232, 147, 90;
+  --shell-bg: #12100e;
+}
+
+.theme-today-shoes {
+  --app-accent: #ea580c;
+  --app-accent-rgb: 234, 88, 12;
+  --shell-bg: #0f1012;
+}
+
+.theme-gemini-tuner {
+  --app-accent: #a855f7;
+  --app-accent-rgb: 168, 85, 247;
+  --shell-bg: #050b14;
 }
 
 .project-app * {

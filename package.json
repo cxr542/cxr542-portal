@@ -8,7 +8,9 @@
     "build": "vite build",
     "lint": "eslint .",
     "test": "vitest run",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "wiki:check": "node scripts/check-wiki-api.mjs",
+    "wiki:sync": "node scripts/sync-ai-synapse-wiki.mjs"
   },
   "dependencies": {
     "react": "^19.2.6",

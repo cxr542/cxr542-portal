@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI-Synapse Wiki · 소개</title>
+  <style>
+    :root { --bg: #0f1419; --card: #1a2332; --ink: #e8eef4; --muted: #94a3b8; --accent: #38bdf8; --border: #334155; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; font-family: "Malgun Gothic", "Noto Sans KR", sans-serif; background: var(--bg); color: var(--ink); line-height: 1.65; }
+    .wrap { max-width: 560px; margin: 0 auto; padding: 2.5rem 1.25rem 3rem; }
+    .back a { color: var(--muted); text-decoration: none; font-size: 0.85rem; }
+    h1 { font-size: 1.75rem; margin: 0 0 0.5rem; }
+    .lead { color: var(--muted); }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.2rem; margin-top: 1.25rem; }
+    a { color: var(--accent); }
+    .btn { display: inline-block; margin-top: 0.75rem; padding: 0.55rem 1rem; border-radius: 8px; background: var(--accent); color: #0f1419; font-weight: 600; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="back"><a href="/">← cxr542 포털</a> · <a href="/ai-synapse-wiki/">Wiki</a></p>
+    <h1>AI-Synapse Wiki</h1>
+    <p class="lead">한글 AI 지식 Wiki — topics·hubs·stories·Synapse 연결과 관리자 관측 대시보드.</p>
+    <div class="card">
+      <p>포털 웹 데모는 <a href="https://github.com/cxr542/AI-Synapse-Wiki">AI-Synapse-Wiki</a> 최신 빌드를 <code>/ai-synapse-wiki/</code>에 호스팅합니다 (<code>SYNC.txt</code> 참고). <strong>주제 등록</strong>은 읽기 전용 정적 빌드만으로는 되지 않으며, <a href="https://github.com/cxr542/AI-Synapse-Wiki">AI-Synapse-Wiki</a> 저장소 dev 서버가 필요합니다.</p>
+      <ol style="margin: 0.75rem 0 0; padding-left: 1.25rem; color: var(--muted); font-size: 0.92rem;">
+        <li>Wiki: <code>npm install && npm run dev -- --port 5174</code></li>
+        <li>포털: <code>npm run dev</code> (5173) — <code>/api/admin</code>을 5174로 프록시</li>
+        <li>포털 dev: API 연결 후 <strong>편집(Wiki dev)</strong> 모드에서 등록 (권장)</li>
+        <li>자연어·수동·목록: 포털 AI-Synapse Wiki 모듈 상단 버튼</li>
+        <li>상세: 저장소 <code>docs/ai-synapse-wiki-improve.md</code> (포털 클론 기준)</li>
+      </ol>
+      <a class="btn" href="/ai-synapse-wiki/">Wiki 열기</a>
+    </div>
+  </div>
+</body>
+</html>

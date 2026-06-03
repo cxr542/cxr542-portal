@@ -1,0 +1,528 @@
+/* gemini-tuner — GeminiTuner FinOps 웹 데모 */
+
+body.project-app.theme-gemini-tuner {
+  margin: 0;
+  min-height: 100dvh;
+  font-size: 15px;
+  color: #f8fafc;
+  font-family: "IBM Plex Sans", "Inter", system-ui, sans-serif;
+}
+
+.theme-gemini-tuner.project-app {
+  background:
+    radial-gradient(ellipse 70% 45% at 15% -5%, rgba(56, 189, 248, 0.12), transparent),
+    radial-gradient(ellipse 60% 40% at 90% 100%, rgba(168, 85, 247, 0.14), transparent),
+    var(--shell-bg, #050b14);
+}
+
+.gt-panel {
+  display: none;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 52rem;
+}
+
+.gt-panel.is-active {
+  display: flex;
+}
+
+.gt-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.1rem 1.2rem;
+}
+
+.gt-card h2 {
+  margin: 0 0 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+/* GeminiTuner 스파클 캐릭터 (확장 gt-char-wrap) */
+.gt-hero {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.gt-hero--large .gt-char-wrap {
+  width: 72px;
+  height: 72px;
+}
+
+.gt-char-wrap {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.gt-char-wrap--sm {
+  width: 44px;
+  height: 44px;
+}
+
+.gt-char-wrap svg,
+.gt-char-wrap .gt-char-svg {
+  width: 100%;
+  height: 100%;
+  animation: gt-char-float 3s ease-in-out infinite;
+}
+
+.gt-char-wrap.gt-mood-active svg {
+  animation: gt-char-float 1.2s ease-in-out infinite;
+}
+
+@keyframes gt-char-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.gt-char-happy,
+.gt-char-wrap .gt-char-happy {
+  display: block;
+}
+
+.gt-char-warn,
+.gt-char-wrap .gt-char-warn {
+  display: none;
+}
+
+.gt-char-wrap.gt-mood-warn .gt-char-happy {
+  display: none;
+}
+
+.gt-char-wrap.gt-mood-warn .gt-char-warn {
+  display: block;
+}
+
+.gt-char-wrap--sm.gt-mood-happy .gt-char-warn {
+  display: none;
+}
+
+.gt-char-wrap--sm.gt-mood-happy .gt-char-happy {
+  display: block;
+}
+
+.gt-hero-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.gt-hero-text strong {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.gt-hero-text span {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+/* 한도 위젯 (tuner_ui_demo) */
+.gt-quota-widget.is-warn {
+  border-color: rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.12);
+}
+
+.gt-quota-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 520px) {
+  .gt-quota-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gt-quota-col.is-low .gt-quota-val {
+  color: #f87171;
+}
+
+.gt-quota-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+}
+
+.gt-quota-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  background: #fff;
+  color: #0b1320;
+  padding: 0.1rem 0.45rem;
+  border-radius: 8px;
+}
+
+.gt-quota-val {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0.15rem 0 0.35rem;
+}
+
+.gt-quota-val.is-yellow {
+  color: #fbbf24;
+}
+
+.gt-quota-val.is-purple {
+  color: #c084fc;
+}
+
+.gt-quota-val.is-warn {
+  color: #f87171;
+}
+
+.gt-progress__bar.is-short {
+  background: #fbbf24;
+}
+
+.gt-progress__bar.is-long {
+  background: linear-gradient(90deg, #a855f7, #38bdf8);
+}
+
+.gt-quota-reset {
+  display: block;
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: 0.35rem;
+}
+
+.gt-quota-sliders {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.gt-quota-slider {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.gt-quota-slider__row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.gt-quota-slider input[type="range"] {
+  width: 100%;
+  accent-color: #a855f7;
+}
+
+.gt-hero--compact {
+  margin: 0.65rem 0;
+  padding: 0.55rem 0.65rem;
+}
+
+/* Chrome 확장 사이드 패널 미리보기 */
+.gt-sidepanel {
+  max-width: 17rem;
+  margin-top: 0.5rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 18px;
+  background: rgba(11, 19, 32, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.45),
+    0 0 32px rgba(168, 85, 247, 0.08);
+}
+
+.gt-sidepanel.is-warn {
+  border-color: rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 24px rgba(239, 68, 68, 0.12);
+}
+
+.gt-sidepanel__head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.9rem;
+}
+
+.gt-sidepanel__logo {
+  font-size: 1rem;
+}
+
+.gt-panel-badge {
+  margin-left: auto;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(168, 85, 247, 0.18);
+  color: #c084fc;
+}
+
+.gt-panel-badge--warn {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.gt-sidepanel__label {
+  margin: 0.5rem 0 0.15rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #475569;
+}
+
+.gt-sidepanel__big {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.gt-sidepanel__sub {
+  margin: 0.15rem 0 0.5rem;
+  font-size: 0.68rem;
+  color: #64748b;
+}
+
+.gt-sidepanel__cost {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.5rem;
+  font-weight: 700;
+}
+
+.gt-sidepanel__krw {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.gt-sidepanel__limit {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.gt-panel-bar {
+  height: 100%;
+  border-radius: 999px;
+  background: #a855f7;
+  box-shadow: 0 0 6px rgba(168, 85, 247, 0.45);
+  transition: width 0.4s ease, background 0.3s ease;
+}
+
+.gt-panel-bar.is-yellow {
+  background: #fbbf24;
+}
+
+.gt-panel-bar.is-red {
+  background: #ef4444;
+}
+
+.gt-sidepanel__pct {
+  margin: 0.25rem 0 0.5rem;
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.gt-turn-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.gt-turn-grid > div {
+  padding: 0.4rem 0.35rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  text-align: center;
+}
+
+.gt-turn-grid__lbl {
+  display: block;
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #475569;
+  margin-bottom: 0.15rem;
+}
+
+.gt-turn-grid strong {
+  font-size: 0.78rem;
+  color: #c084fc;
+}
+
+.gt-sidepanel__footer {
+  margin: 0;
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.65rem;
+  color: #475569;
+}
+
+.gt-finops-label {
+  font-size: 0.75rem;
+  color: #8c9ba5;
+  margin-top: 0.75rem;
+  display: block;
+}
+
+.gt-finops-pct {
+  font-size: 1.1rem;
+}
+
+/* FinOps widget */
+.gt-widget {
+  border-radius: 20px;
+  padding: 1.15rem 1.2rem;
+  background: #0f141c;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+.gt-widget.is-warn {
+  border-color: rgba(239, 68, 68, 0.45);
+  box-shadow: 0 0 24px rgba(239, 68, 68, 0.15);
+}
+
+.gt-widget__title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: 0 0 0.85rem;
+  background: linear-gradient(135deg, #38bdf8, #c084fc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gt-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 520px) {
+  .gt-stat-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gt-stat label {
+  font-size: 0.75rem;
+  color: #8c9ba5;
+}
+
+.gt-stat strong {
+  display: block;
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.gt-progress {
+  height: 6px;
+  margin: 0.5rem 0 0.25rem;
+  border-radius: 999px;
+  background: #1a2230;
+  overflow: hidden;
+}
+
+.gt-progress__bar {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #a855f7, #ec4899);
+  transition: width 0.35s ease;
+}
+
+.gt-progress__bar.is-warn {
+  background: #ef4444;
+}
+
+.gt-sessions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.gt-sessions li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.35rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.22);
+  font-size: 0.85rem;
+}
+
+.gt-form {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.gt-form label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.gt-form input {
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.28);
+  color: inherit;
+  font: inherit;
+}
+
+.gt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.gt-note {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.gt-note a {
+  color: #c084fc;
+}
+
+.gt-links-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.gt-links-list a {
+  color: #c084fc;
+}

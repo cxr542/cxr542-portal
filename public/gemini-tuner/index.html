@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="GeminiTuner — gemini.google.com FinOps Chrome 확장 웹 데모" />
+    <title>GeminiTuner · 웹 데모</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/shared/css/project-shell.css?v=portal2" />
+    <link rel="stylesheet" href="/gemini-tuner/css/app.css?v=portal4" />
+  </head>
+  <body class="project-app theme-gemini-tuner">
+    <p class="app-banner">
+      <span class="app-banner__brand">
+        <span class="app-banner__icon" aria-hidden="true">✨</span>
+        <span class="app-banner__title" id="app-banner-title">GeminiTuner</span>
+      </span>
+      <span class="app-banner__tagline" id="app-banner-tagline">gemini.google.com FinOps · 스파클 캐릭터 · 한도 위젯</span>
+      <span class="app-banner__meta">🔒 데모 · localStorage · JSON 백업</span>
+    </p>
+    <div class="project-nav-backdrop" id="project-nav-backdrop" hidden aria-hidden="true"></div>
+    <div class="app-shell project-shell" id="app-shell">
+      <aside class="sidebar project-sidebar" id="sidebar" aria-label="GeminiTuner 메뉴">
+        <div class="sidebar__head project-sidebar__head">
+          <div class="logo-block project-logo">
+            <h1>
+              <span class="logo-block__icon project-logo__icon" aria-hidden="true">✨</span>
+              <span class="logo-block__text project-logo__text" id="app-brand-title">GeminiTuner</span>
+            </h1>
+            <p class="logo-block__sub project-logo__sub" id="app-brand-sub">FinOps · Gemini</p>
+          </div>
+        </div>
+        <nav class="sidebar-nav project-sidebar-nav">
+          <button type="button" class="nav-item project-nav-item is-active" data-view="dashboard">
+            <span class="nav-item__icon project-nav-item__icon" aria-hidden="true">📊</span>
+            <span class="nav-item__label project-nav-item__label">대시보드</span>
+          </button>
+          <button type="button" class="nav-item project-nav-item" data-view="character">
+            <span class="nav-item__icon project-nav-item__icon" aria-hidden="true">✨</span>
+            <span class="nav-item__label project-nav-item__label">캐릭터</span>
+          </button>
+          <button type="button" class="nav-item project-nav-item" data-view="sessions">
+            <span class="nav-item__icon project-nav-item__icon" aria-hidden="true">💬</span>
+            <span class="nav-item__label project-nav-item__label">세션</span>
+          </button>
+          <button type="button" class="nav-item project-nav-item" data-view="settings">
+            <span class="nav-item__icon project-nav-item__icon" aria-hidden="true">⚙️</span>
+            <span class="nav-item__label project-nav-item__label">설정</span>
+          </button>
+          <button type="button" class="nav-item project-nav-item" data-view="guide">
+            <span class="nav-item__icon project-nav-item__icon" aria-hidden="true">📖</span>
+            <span class="nav-item__label project-nav-item__label">가이드</span>
+          </button>
+          <button type="button" class="nav-item project-nav-item" data-view="links">
+            <span class="nav-item__icon project-nav-item__icon" aria-hidden="true">🔗</span>
+            <span class="nav-item__label project-nav-item__label">링크</span>
+          </button>
+        </nav>
+        <a class="nav-item nav-item--hub project-nav-item project-nav-item--hub" href="/">← 포털 홈</a>
+        <a class="nav-item project-nav-item" href="/gemini-tuner/about.html">ℹ️ 소개</a>
+        <p class="sidebar-note project-sidebar-note">
+          Chrome 확장이 gemini.google.com에 주입하는 FinOps 패널·스파클 캐릭터·Gemini 한도 위젯을 미리봅니다.
+        </p>
+        <button type="button" class="sidebar-rail project-sidebar-rail" id="sidebar-toggle" aria-expanded="true" aria-controls="sidebar">
+          <span class="sidebar-rail__label project-sidebar-rail__label">접기</span>
+          <span class="sidebar-rail__icon project-sidebar-rail__icon" aria-hidden="true">‹</span>
+        </button>
+      </aside>
+      <div class="main project-main">
+        <div class="toolbar project-toolbar">
+          <button type="button" class="btn project-nav-toggle" id="sidebar-toggle-toolbar" aria-expanded="false" aria-controls="sidebar">☰</button>
+          <a class="btn btn--hub" href="/">← 포털</a>
+          <button type="button" class="btn" id="btn-export">JSON보내기</button>
+          <label class="btn">
+            JSON 가져오기
+            <input type="file" id="import-file" accept="application/json,.json" hidden />
+          </label>
+          <button type="button" class="btn btn--primary" id="btn-simulate-chat">데모 채팅 +</button>
+        </div>
+        <div class="content project-content">
+          <section class="gt-panel is-active" data-panel="dashboard">
+            <div class="gt-card">
+              <h2>gemini.google.com 사이드 패널</h2>
+              <p class="gt-note">확장이 주입하는 FinOps UI — 드래그 이동·F5 후에도 누적 토큰 유지.</p>
+              <div class="gt-sidepanel" id="gt-sidepanel">
+                <div class="gt-sidepanel__head">
+                  <span class="gt-sidepanel__logo" aria-hidden="true">✨</span>
+                  <strong>GeminiTuner</strong>
+                  <span class="gt-panel-badge" id="gt-panel-badge">FinOps</span>
+                </div>
+                <div class="gt-hero gt-hero--compact">
+                  <div id="gt-char-wrap" class="gt-char-wrap"></div>
+                  <div class="gt-hero-text">
+                    <strong id="gt-char-msg">안녕하세요! 질문을 보내 보세요</strong>
+                    <span id="gt-char-hint">이번 달 예상 비용 0%</span>
+                  </div>
+                </div>
+                <p class="gt-sidepanel__label">누적 토큰 (저장됨)</p>
+                <p class="gt-sidepanel__big" id="gt-panel-tokens">0</p>
+                <p class="gt-sidepanel__sub">F5·탭 닫아도 유지 · 글자÷4 또는 usageMetadata</p>
+                <div class="gt-sidepanel__cost">
+                  <span id="gt-panel-cost">$0.0000</span>
+                  <span id="gt-panel-cost-krw" class="gt-sidepanel__krw">≈ ₩0</span>
+                  <span id="gt-panel-limit" class="gt-sidepanel__limit">/ $20.00</span>
+                </div>
+                <div class="gt-progress"><div class="gt-panel-bar" id="gt-panel-bar" style="width:0%"></div></div>
+                <p class="gt-sidepanel__pct" id="gt-panel-pct">월 예산의 0.0%</p>
+                <p class="gt-sidepanel__label">방금 대화 1회</p>
+                <div class="gt-turn-grid">
+                  <div><span class="gt-turn-grid__lbl">질문</span><strong id="gt-turn-in">—</strong></div>
+                  <div><span class="gt-turn-grid__lbl">답변</span><strong id="gt-turn-out">—</strong></div>
+                  <div><span class="gt-turn-grid__lbl">합계</span><strong id="gt-turn-total">—</strong></div>
+                </div>
+                <p class="gt-sidepanel__footer" id="gt-meter-status">Meter: DOM 추정 (글자÷4)</p>
+              </div>
+            </div>
+            <div class="gt-card">
+              <h2>Gemini 한도 위젯</h2>
+              <p class="gt-note">UI 프로토타입의 5h·1w 잔여 한도 — 스파클 캐릭터가 한도에 반응합니다.</p>
+              <div class="gt-widget gt-quota-widget" id="gt-quota-widget">
+                <div class="gt-quota-grid" id="gt-quota-grid"></div>
+                <div class="gt-quota-sliders">
+                  <label class="gt-quota-slider">
+                    <span class="gt-quota-slider__row">단기 (5h) <strong id="quota-short-val">55%</strong></span>
+                    <input type="range" id="quota-short" min="0" max="100" value="55" />
+                  </label>
+                  <label class="gt-quota-slider">
+                    <span class="gt-quota-slider__row">장기 (1w) <strong id="quota-long-val">86%</strong></span>
+                    <input type="range" id="quota-long" min="0" max="100" value="86" />
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="gt-card">
+              <h2>월 예산 FinOps</h2>
+              <div class="gt-widget" id="gt-finops-widget">
+                <p class="gt-widget__title">GeminiTuner</p>
+                <div class="gt-stat-grid">
+                  <div class="gt-stat">
+                    <label>누적 토큰</label>
+                    <strong id="gt-total-tokens">0</strong>
+                  </div>
+                  <div class="gt-stat">
+                    <label>예상 비용</label>
+                    <strong id="gt-cost-usd">$0</strong>
+                    <small id="gt-cost-krw" style="color:#94a3b8">≈ ₩0</small>
+                  </div>
+                </div>
+                <label class="gt-finops-label">월 예산 대비</label>
+                <div class="gt-progress"><div class="gt-progress__bar" id="gt-budget-bar" style="width:0%"></div></div>
+                <strong id="gt-budget-pct" class="gt-finops-pct">0%</strong>
+              </div>
+            </div>
+          </section>
+
+          <section class="gt-panel" data-panel="sessions">
+            <div class="gt-card">
+              <h2>세션 기록</h2>
+              <p class="gt-note">gemini.google.com 대화마다 토큰·비용을 누적합니다 (확장 localStorage).</p>
+              <ul class="gt-sessions" id="gt-sessions-list"></ul>
+            </div>
+          </section>
+
+          <section class="gt-panel" data-panel="settings">
+            <div class="gt-card">
+              <h2>예산 · 알림</h2>
+              <div class="gt-form">
+                <label>월 예산 (USD)<input type="number" id="field-budget" min="1" step="1" /></label>
+                <label>환율 (USD→KRW)<input type="number" id="field-krw" min="1" step="10" /></label>
+                <label>경고 임계 (%)<input type="number" id="field-warn" min="50" max="100" step="5" /></label>
+              </div>
+              <div class="gt-actions">
+                <button type="button" class="btn btn--primary" id="btn-save-settings">저장</button>
+                <button type="button" class="btn" id="btn-reset-demo">데모 초기화</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="gt-panel" data-panel="character">
+            <div class="gt-card">
+              <h2>스파클 캐릭터</h2>
+              <p class="gt-note">GeminiTuner만의 마스코트 — 제미나이 반짝임 감성, 예산·한도에 따라 표정이 바뀝니다.</p>
+              <div class="gt-hero gt-hero--large">
+                <div id="gt-char-preview" class="gt-char-wrap"></div>
+                <div class="gt-hero-text">
+                  <strong id="gt-char-preview-msg">—</strong>
+                  <span id="gt-char-preview-hint">—</span>
+                </div>
+              </div>
+              <ul class="gt-links-list" style="margin-top:1rem">
+                <li><strong>행복</strong> — 시안·보라·핑크 스파클 + 미소</li>
+                <li><strong>경고</strong> — 주황 스파클 (월 예산·5h/1w 한도)</li>
+                <li><strong>데모 채팅 +</strong> 로 방금 대화·캐릭터 반응을 확인하세요.</li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="gt-panel" data-panel="guide">
+            <div class="gt-card">
+              <h2>가이드</h2>
+              <ul class="gt-links-list">
+                <li><strong>Chrome 확장</strong> — gemini.google.com에 FinOps 사이드 패널 주입.</li>
+                <li><strong>토큰·비용</strong> — usageMetadata(네트워크) 또는 DOM 추정(글자÷4).</li>
+                <li><strong>스파클 캐릭터</strong> — 예산·한도에 맞춘 안내 멘트와 표정.</li>
+                <li><strong>한도 위젯</strong> — 5h/1w Gemini 잔여량 UI (프로토타입).</li>
+                <li>웹 데모는 확장 없이 UI·시뮬레이션만 제공합니다.</li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="gt-panel" data-panel="links">
+            <div class="gt-card">
+              <h2>링크</h2>
+              <ul class="gt-links-list">
+                <li><a href="https://github.com/cxr542/GeminiTuner" target="_blank" rel="noopener noreferrer">GitHub — GeminiTuner</a></li>
+                <li><a href="https://gemini.google.com" target="_blank" rel="noopener noreferrer">gemini.google.com</a></li>
+                <li><a href="https://aistudio.google.com" target="_blank" rel="noopener noreferrer">Google AI Studio</a></li>
+                <li><a href="https://cxr542.github.io/cxr542-ai/projects/gemini-tuner/">GitHub Pages 소개</a></li>
+              </ul>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <nav class="project-mobile-tabs" aria-label="앱 메뉴">
+      <button type="button" class="project-mobile-tab is-active" data-view="dashboard"><span class="project-mobile-tab__icon" aria-hidden="true">📊</span>대시</button>
+      <button type="button" class="project-mobile-tab" data-view="character"><span class="project-mobile-tab__icon" aria-hidden="true">✨</span>캐릭</button>
+      <button type="button" class="project-mobile-tab" data-view="sessions"><span class="project-mobile-tab__icon" aria-hidden="true">💬</span>세션</button>
+      <button type="button" class="project-mobile-tab" data-view="settings"><span class="project-mobile-tab__icon" aria-hidden="true">⚙️</span>설정</button>
+      <button type="button" class="project-mobile-tab" data-view="guide"><span class="project-mobile-tab__icon" aria-hidden="true">📖</span>가이드</button>
+      <button type="button" class="project-mobile-tab" data-view="links"><span class="project-mobile-tab__icon" aria-hidden="true">🔗</span>링크</button>
+    </nav>
+
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem("gemini-tuner-sidebar-collapsed") === "1") {
+            document.documentElement.classList.add("project-sidebar-collapsed-boot");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <script src="/shared/js/project-shell.js?v=portal2"></script>
+    <script src="/gemini-tuner/js/store.js?v=portal4"></script>
+    <script src="/gemini-tuner/js/characters.js?v=portal4"></script>
+    <script src="/gemini-tuner/js/app.js?v=portal4"></script>
+  </body>
+</html>

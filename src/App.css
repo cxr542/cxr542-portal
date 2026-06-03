@@ -409,6 +409,88 @@
   font-size: 0.9rem;
 }
 
+.portal-modal--wide {
+  max-width: 26rem;
+}
+
+.nav-order-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nav-order-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.55rem;
+  margin-bottom: 0.35rem;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.nav-order-row--fixed {
+  background: #eff6ff;
+  border-color: rgba(37, 99, 235, 0.2);
+  margin-bottom: 0.65rem;
+}
+
+.nav-order-row__rank {
+  width: 1.25rem;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: #64748b;
+  text-align: center;
+}
+
+.nav-order-row__icon {
+  flex-shrink: 0;
+  width: 1.35rem;
+  text-align: center;
+}
+
+.nav-order-row__label {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.nav-order-row__pin {
+  font-size: 0.6875rem;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.nav-order-row__actions {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.nav-order-btn {
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  font-size: 0.875rem;
+  line-height: 1;
+  color: #334155;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.15);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.nav-order-btn:hover:not(:disabled) {
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+.nav-order-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 .portal-modal__actions {
   display: flex;
   justify-content: flex-end;
@@ -461,6 +543,101 @@
   border: 1px solid #dbe3f1;
   border-radius: 12px;
   background: #050508;
+}
+
+.wiki-embed-bar {
+  align-items: flex-start;
+}
+
+.wiki-embed-bar__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 12rem;
+  flex: 1;
+}
+
+.wiki-embed-bar__detail {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.wiki-api-badge {
+  display: inline-block;
+  width: fit-content;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.wiki-api-badge--ok {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.wiki-api-badge--off {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.wiki-api-setup {
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid #fecaca;
+  background: #fff7ed;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: #334155;
+}
+
+.wiki-api-setup p {
+  margin: 0 0 0.5rem;
+}
+
+.wiki-api-setup ol {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.wiki-api-setup code {
+  font-size: 0.8rem;
+}
+
+.wiki-api-setup__err {
+  margin: 0.5rem 0 0 !important;
+  font-size: 0.78rem;
+  color: #b91c1c;
+}
+
+.wiki-mode-toggle {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+}
+
+.wiki-mode-btn {
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+}
+
+.wiki-mode-btn.is-active {
+  border-color: #0ea5e9;
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.wiki-mode-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .content-header {
@@ -547,6 +724,24 @@
   color: #15803d;
 }
 
+.home-card--gemini-tuner {
+  border-color: #c084fc;
+  background: #faf5ff;
+}
+
+.home-card--gemini-tuner .home-card-cta {
+  color: #7e22ce;
+}
+
+.home-card--ai-synapse-wiki {
+  border-color: #38bdf8;
+  background: #f0f9ff;
+}
+
+.home-card--ai-synapse-wiki .home-card-cta {
+  color: #0369a1;
+}
+
 .home-card--idea-bank {
   border-color: #fbbf24;
   background: #fffbeb;
@@ -554,6 +749,33 @@
 
 .home-card--idea-bank .home-card-cta {
   color: #b45309;
+}
+
+.home-card--prompt-collection {
+  border-color: #a78bfa;
+  background: #f5f3ff;
+}
+
+.home-card--prompt-collection .home-card-cta {
+  color: #6d28d9;
+}
+
+.home-card--how-many-points {
+  border-color: #ff2d6a;
+  background: #fff1f5;
+}
+
+.home-card--how-many-points .home-card-cta {
+  color: #be123c;
+}
+
+.home-card--who-are-you {
+  border-color: #2b6cb0;
+  background: #eff6ff;
+}
+
+.home-card--who-are-you .home-card-cta {
+  color: #1e40af;
 }
 
 .home-card-snapshot {

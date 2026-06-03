@@ -1,0 +1,223 @@
+/* prompt-collection — 콘텐츠 (셸: ../shared/css/project-shell.css) */
+
+body.project-app.theme-prompt-collection {
+  margin: 0;
+  min-height: 100dvh;
+  background: #050508;
+  color: #f0f0f5;
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  font-size: 14px;
+}
+
+:root {
+  --bg: #050508;
+  --border: rgba(255, 255, 255, 0.1);
+  --text: #f0f0f5;
+  --muted: #9a9aa8;
+  --green: #10b981;
+  --accent: #a78bfa;
+  --accent-rgb: 167, 139, 250;
+  --font-display: "Sora", "IBM Plex Sans", system-ui, sans-serif;
+}
+
+.project-app .nav-item__icon {
+  flex-shrink: 0;
+  width: 1.35rem;
+  font-size: 1.05rem;
+  line-height: 1;
+  text-align: center;
+}
+
+.project-app .nav-item__label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-app .nav-item__badge {
+  flex-shrink: 0;
+  min-width: 1.25rem;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+}
+
+.project-app a.nav-item--hub {
+  color: var(--green);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+.project-app .toolbar input {
+  flex: 1;
+  min-width: 8rem;
+  max-width: 18rem;
+}
+
+.project-app .toolbar .btn--primary {
+  color: #050508;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.list-meta {
+  font-size: 0.8125rem;
+  color: var(--muted);
+  margin: 0 0 0.75rem;
+  line-height: 1.55;
+}
+
+.list-meta--context {
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+  background: rgba(var(--accent-rgb), 0.08);
+  border: 1px solid rgba(var(--accent-rgb), 0.22);
+}
+
+.list-meta--context strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.list-meta__dim {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.prompt-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  margin-bottom: 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.28);
+  cursor: pointer;
+}
+
+.prompt-card:hover {
+  border-color: rgba(var(--accent-rgb), 0.4);
+}
+
+.prompt-card__body {
+  flex: 1;
+  min-width: 12rem;
+}
+
+.prompt-card__title {
+  font-weight: 600;
+  margin: 0 0 0.35rem;
+}
+
+.prompt-card__preview {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--muted);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  font-family: ui-monospace, "IBM Plex Mono", monospace;
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.pill {
+  padding: 0.15rem 0.5rem;
+  font-size: 0.6875rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+
+.pill--pin {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.btn-copy-inline {
+  padding: 0.2rem 0.55rem;
+  font: inherit;
+  font-size: 0.6875rem;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-copy-inline:hover {
+  color: var(--text);
+  border-color: rgba(var(--accent-rgb), 0.5);
+}
+
+.sketch-form {
+  max-width: 42rem;
+}
+
+.sketch-form h2 {
+  margin: 0 0 1rem;
+  font-family: var(--font-display);
+}
+
+.field-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.field-input {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  margin-bottom: 1rem;
+  font: inherit;
+  font-size: 0.9375rem;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.sketch-body {
+  width: 100%;
+  min-height: 14rem;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  font: ui-monospace, "IBM Plex Mono", monospace;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.empty {
+  color: var(--muted);
+  padding: 2rem 0;
+  line-height: 1.7;
+}
+
+.empty strong {
+  color: var(--accent);
+  font-weight: 600;
+}

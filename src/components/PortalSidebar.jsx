@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import EnvironmentBadge from './EnvironmentBadge';
-import { PORTAL_NAV_ITEMS } from '../constants/portalNav';
-
 export default function PortalSidebar({
   activeModule,
   onModuleChange,
+  navItems,
   labels,
   onOpenNavLabels,
+  onOpenNavOrder,
   collapsed,
   onCollapsedChange,
 }) {
@@ -44,7 +44,7 @@ export default function PortalSidebar({
       </div>
 
       <nav className="sidebar__nav" aria-label="주 메뉴">
-        {PORTAL_NAV_ITEMS.map((item) => {
+        {navItems.map((item) => {
           const label = labels[item.id] || item.defaultLabel;
           return (
             <button
@@ -101,6 +101,17 @@ export default function PortalSidebar({
                 }}
               >
                 ✏️ 메뉴 이름 변경
+              </button>
+              <button
+                type="button"
+                className="sidebar__settings-item"
+                role="menuitem"
+                onClick={() => {
+                  setSettingsOpen(false);
+                  onOpenNavOrder();
+                }}
+              >
+                ↕️ 메뉴 순서 변경
               </button>
             </div>
           )}

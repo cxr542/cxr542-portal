@@ -1,6 +1,9 @@
 {
   "rewrites": [
     { "source": "/idea-bank", "destination": "/idea-bank/index.html" },
+    { "source": "/prompt-collection", "destination": "/prompt-collection/index.html" },
+    { "source": "/how-many-points", "destination": "/how-many-points/index.html" },
+    { "source": "/who-are-you", "destination": "/who-are-you/index.html" },
     { "source": "/marathon-log", "destination": "/marathon-log/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]

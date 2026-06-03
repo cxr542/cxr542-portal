@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="오늘뭐신지 — 러닝화 사진 신발장 웹 데모" />
+    <title>오늘뭐신지 · 웹 데모</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+KR:wght@400;600;700&family=Sora:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/shared/css/project-shell.css?v=portal2" />
+    <link rel="stylesheet" href="/today-shoes/css/app.css?v=portal2" />
+  </head>
+  <body class="project-app theme-today-shoes">
+    <p class="app-banner">
+      <span class="app-banner__brand">
+        <span class="app-banner__icon" aria-hidden="true">👟</span>
+        <span class="app-banner__title" id="app-banner-title">오늘뭐신지</span>
+      </span>
+      <span class="app-banner__tagline" id="app-banner-tagline">러닝화 사진 신발장 · 웹 데모</span>
+      <span class="app-banner__meta">🔒 이 포털 도메인에 저장 · JSON 백업</span>
+    </p>
+    <div class="project-nav-backdrop" id="project-nav-backdrop" hidden aria-hidden="true"></div>
+    <div class="app-shell project-shell" id="app-shell">
+      <aside class="sidebar project-sidebar" id="sidebar" aria-label="오늘뭐신지 메뉴">
+        <div class="sidebar__head project-sidebar__head">
+          <div class="logo-block project-logo">
+            <h1>
+              <span class="logo-block__icon project-logo__icon" aria-hidden="true">👟</span>
+              <span class="logo-block__text project-logo__text" id="app-brand-title">오늘뭐신지</span>
+            </h1>
+            <p class="logo-block__sub project-logo__sub" id="app-brand-sub">러닝화 신발장</p>
+          </div>
+        </div>
+        <nav class="sidebar-nav project-sidebar-nav">
+          <button type="button" class="nav-item project-nav-item is-active" data-view="home">
+            <span class="nav-item__icon project-nav-item__icon" aria-hidden="true">🏠</span>
+            <span class="nav-item__label project-nav-item__label">홈</span>
+          </button>
+          <button type="button" class="nav-item project-nav-item" data-view="closet">
+            <span class="nav-item__icon project-nav-item__icon" aria-hidden="true">👟</span>
+            <span class="nav-item__label project-nav-item__label">신발장</span>
+          </button>
+          <button type="button" class="nav-item project-nav-item" data-view="add">
+            <span class="nav-item__icon project-nav-item__icon" aria-hidden="true">➕</span>
+            <span class="nav-item__label project-nav-item__label">등록</span>
+          </button>
+          <button type="button" class="nav-item project-nav-item" data-view="guide">
+            <span class="nav-item__icon project-nav-item__icon" aria-hidden="true">📖</span>
+            <span class="nav-item__label project-nav-item__label">가이드</span>
+          </button>
+          <button type="button" class="nav-item project-nav-item" data-view="links">
+            <span class="nav-item__icon project-nav-item__icon" aria-hidden="true">🔗</span>
+            <span class="nav-item__label project-nav-item__label">링크</span>
+          </button>
+        </nav>
+        <a class="nav-item nav-item--hub project-nav-item project-nav-item--hub" href="/">← 포털 홈</a>
+        <a class="nav-item project-nav-item" href="/today-shoes/about.html">ℹ️ 소개</a>
+        <p class="sidebar-note project-sidebar-note">
+          정면·측면 사진 선택 → AI 분석 → 신발장 저장. API 키는 등록 탭·링크 탭에서 설정 (Google AI Studio).
+        </p>
+        <button type="button" class="sidebar-rail project-sidebar-rail" id="sidebar-toggle" aria-expanded="true" aria-controls="sidebar">
+          <span class="sidebar-rail__label project-sidebar-rail__label">접기</span>
+          <span class="sidebar-rail__icon project-sidebar-rail__icon" aria-hidden="true">‹</span>
+        </button>
+      </aside>
+      <div class="main project-main">
+        <div class="toolbar project-toolbar">
+          <button type="button" class="btn project-nav-toggle" id="sidebar-toggle-toolbar" aria-expanded="false" aria-controls="sidebar">☰</button>
+          <a class="btn btn--hub" href="/">← 포털</a>
+          <button type="button" class="btn" id="btn-export">JSON보내기</button>
+          <label class="btn">
+            JSON 가져오기
+            <input type="file" id="import-file" accept="application/json,.json" hidden />
+          </label>
+          <button type="button" class="btn" id="btn-import-legacy">MVP 메모 가져오기</button>
+          <button type="button" class="btn btn--primary" id="btn-toolbar-add">등록</button>
+        </div>
+        <div class="content project-content">
+          <section class="ts-panel is-active" data-panel="home">
+            <div class="ts-card">
+              <h2>홈</h2>
+              <div class="ts-dash">
+                <div class="ts-dash-card">👟 신발장<strong id="ts-count-shoes">0</strong>켤레</div>
+                <div class="ts-dash-card">✨ AI 분석<strong id="ts-count-ai">0</strong></div>
+              </div>
+            </div>
+            <div class="ts-card">
+              <h2>최근 등록</h2>
+              <div class="ts-grid" id="ts-recent-grid"></div>
+            </div>
+          </section>
+
+          <section class="ts-panel" data-panel="closet">
+            <div class="ts-card">
+              <h2>신발장</h2>
+              <p>카드를 누르면 상세·삭제할 수 있습니다.</p>
+              <div class="ts-grid" id="ts-closet-grid"></div>
+            </div>
+          </section>
+
+          <section class="ts-panel" data-panel="detail">
+            <div class="ts-card" id="ts-detail-wrap"></div>
+          </section>
+
+          <section class="ts-panel" data-panel="add">
+            <div class="ts-card">
+              <h2>사진 등록</h2>
+              <p>정면(필수)·왼쪽·오른쪽 순으로 선택한 뒤 AI 분석을 실행하세요.</p>
+              <div class="ts-upload-row">
+                <div class="ts-upload-slot" data-angle="front">
+                  <label><span>정면 *</span><input type="file" id="file-front" accept="image/*" /><div class="ts-upload-preview"></div></label>
+                </div>
+                <div class="ts-upload-slot" data-angle="left">
+                  <label><span>왼쪽</span><input type="file" id="file-left" accept="image/*" /><div class="ts-upload-preview"></div></label>
+                </div>
+                <div class="ts-upload-slot" data-angle="right">
+                  <label><span>오른쪽</span><input type="file" id="file-right" accept="image/*" /><div class="ts-upload-preview"></div></label>
+                </div>
+              </div>
+              <div class="ts-actions" style="margin-top:0.75rem">
+                <button type="button" class="btn btn--primary" id="btn-analyze">AI 분석 (정면)</button>
+              </div>
+            </div>
+            <div class="ts-card">
+              <h2>분석 결과 · 저장</h2>
+              <div class="ts-form">
+                <label>표시 이름<input type="text" id="field-display-name" placeholder="나이키 페가수스 40" /></label>
+                <label>브랜드<input type="text" id="field-brand" /></label>
+                <label>모델<input type="text" id="field-model" /></label>
+                <label>특징<textarea id="field-traits" rows="2"></textarea></label>
+                <label>추천 용도<textarea id="field-best-for" rows="2"></textarea></label>
+                <label>참고<textarea id="field-caution" rows="2"></textarea></label>
+                <label>Gemini API 키 (선택)<input type="password" id="field-api-key" placeholder="AIza…" autocomplete="off" /></label>
+              </div>
+              <div class="ts-actions">
+                <button type="button" class="btn" id="btn-save-api-key">API 키 저장</button>
+                <button type="button" class="btn btn--primary" id="btn-save-shoe">신발장에 저장</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="ts-panel" data-panel="guide">
+            <div class="ts-card">
+              <h2>가이드</h2>
+              <ul>
+                <li>정면 사진이 가장 중요합니다. 밝은 곳에서 신발 전체가 보이게 촬영하세요.</li>
+                <li>API 키 없이도 기본 분석 문구로 저장할 수 있습니다.</li>
+                <li>키가 있으면 Gemini 2.0 Flash로 브랜드·특징·용도를 추정합니다.</li>
+                <li>외부 GitHub Pages Expo 앱과 저장소는 공유되지 않습니다 (origin별 localStorage).</li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="ts-panel" data-panel="links">
+            <div class="ts-card">
+              <h2>링크 · API</h2>
+              <ul class="ts-links-list">
+                <li><a href="https://cxr542.github.io/today-shoes/" target="_blank" rel="noopener noreferrer">GitHub Pages — Expo 웹 앱</a></li>
+                <li><a href="https://github.com/cxr542/today-shoes" target="_blank" rel="noopener noreferrer">GitHub 저장소</a></li>
+                <li><a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio API 키</a></li>
+                <li><a href="/today-shoes/about.html">소개 페이지</a></li>
+              </ul>
+              <label style="display:block;margin-top:1rem;font-size:0.85rem;color:var(--shell-muted)">
+                Gemini API 키
+                <input type="password" id="field-api-key-links" style="width:100%;margin-top:0.35rem" placeholder="AIza…" autocomplete="off" />
+              </label>
+              <button type="button" class="btn" id="btn-save-api-key-links" style="margin-top:0.5rem">API 키 저장</button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <nav class="project-mobile-tabs" aria-label="앱 메뉴">
+      <button type="button" class="project-mobile-tab is-active" data-view="home"><span class="project-mobile-tab__icon" aria-hidden="true">🏠</span>홈</button>
+      <button type="button" class="project-mobile-tab" data-view="closet"><span class="project-mobile-tab__icon" aria-hidden="true">👟</span>신발장</button>
+      <button type="button" class="project-mobile-tab" data-view="add"><span class="project-mobile-tab__icon" aria-hidden="true">➕</span>등록</button>
+      <button type="button" class="project-mobile-tab" data-view="guide"><span class="project-mobile-tab__icon" aria-hidden="true">📖</span>가이드</button>
+      <button type="button" class="project-mobile-tab" data-view="links"><span class="project-mobile-tab__icon" aria-hidden="true">🔗</span>링크</button>
+    </nav>
+
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem("today-shoes-sidebar-collapsed") === "1") {
+            document.documentElement.classList.add("project-sidebar-collapsed-boot");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <script src="/shared/js/project-shell.js?v=portal2"></script>
+    <script src="/today-shoes/js/store.js?v=portal2"></script>
+    <script src="/today-shoes/js/analysis.js?v=portal2"></script>
+    <script src="/today-shoes/js/app.js?v=portal2"></script>
+  </body>
+</html>
