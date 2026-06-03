@@ -1,8 +1,9 @@
 # cxr542 모듈 스펙 (MVP)
 
 ## 1) vision-font
-- **개발:** `/vision-font/` 웹 데모 (5단계 시력 테스트 → 맞춤 글꼴 → 샘플 기사·URL 미리보기, localStorage·JSON)
-- **운영:** React MVP — 폰트 프리셋 3종, 샘플 미리보기, CSS 복사
+- **경로:** `/vision-font/` (`public/vision-font/`) — 개발·운영 동일
+- **UI:** 포털 iframe 또는 `/vision-font/` 직접 접속
+- **기능:** 5단계 시력 테스트 → 맞춤 글꼴 → 기사·URL 읽기, localStorage·JSON 백업
 - **소개:** `/vision-font/about.html` (Expo 앱 설명)
 
 ## 2) today-shoes

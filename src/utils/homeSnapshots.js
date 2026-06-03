@@ -6,7 +6,6 @@ import { readList } from './storage';
 import { isAiSynapseWikiWebDemoEmbed } from './aiSynapseWikiDev';
 import { isGeminiTunerWebDemoEmbed } from './geminiTunerDev';
 import { isTodayShoesWebDemoEmbed } from './todayShoesDev';
-import { isVisionFontGithubEmbed } from './visionFontDev';
 
 const SHOES_KEY = 'cxr542-today-shoes-v1';
 const IDEA_LS_KEY = 'idea-bank-ideas';
@@ -75,9 +74,7 @@ export function getHomeSnapshots(now = new Date()) {
   const latestRace = [...races].sort((a, b) => String(b.date).localeCompare(String(a.date)))[0];
 
   return {
-    'vision-font': isVisionFontGithubEmbed()
-      ? '웹 데모 · 시력 테스트 · 맞춤 설정 · 기사 읽기'
-      : '프리셋 3종 · 샘플 미리보기 · CSS 복사',
+    'vision-font': '시력 테스트 · 맞춤 글꼴 · 기사 읽기 · JSON 백업',
     'today-shoes': isTodayShoesWebDemoEmbed()
       ? '웹 데모 · 신발장 · 사진 등록 · AI 분석'
       : shoes.length

@@ -5,6 +5,10 @@
     { "source": "/how-many-points", "destination": "/how-many-points/index.html" },
     { "source": "/who-are-you", "destination": "/who-are-you/index.html" },
     { "source": "/marathon-log", "destination": "/marathon-log/index.html" },
+    { "source": "/vision-font", "destination": "/vision-font/index.html" },
+    { "source": "/today-shoes", "destination": "/today-shoes/index.html" },
+    { "source": "/ai-synapse-wiki", "destination": "/ai-synapse-wiki/index.html" },
+    { "source": "/gemini-tuner", "destination": "/gemini-tuner/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

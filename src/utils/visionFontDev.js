@@ -1,9 +1,5 @@
-/** vision-font 웹 데모 (/vision-font/) — 개발 서버에서만 포털 iframe 임베드 */
+/** vision-font 웹 데모 — 포털과 동일 origin (`public/vision-font/`) */
 export const VISION_FONT_APP_URL = '/vision-font/index.html';
 
 export const VISION_FONT_GITHUB_PAGES_URL =
   'https://cxr542.github.io/cxr542-ai/projects/vision-font/';
-
-export function isVisionFontGithubEmbed() {
-  return import.meta.env.DEV;
-}

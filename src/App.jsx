@@ -44,11 +44,7 @@ import {
   GEMINI_TUNER_REPO_URL,
   isGeminiTunerWebDemoEmbed,
 } from './utils/geminiTunerDev';
-import {
-  isVisionFontGithubEmbed,
-  VISION_FONT_APP_URL,
-  VISION_FONT_GITHUB_PAGES_URL,
-} from './utils/visionFontDev';
+import { VISION_FONT_APP_URL } from './utils/visionFontDev';
 
 const IDEA_BANK_APP_URL = '/idea-bank/index.html';
 const PROMPT_COLLECTION_APP_URL = '/prompt-collection/index.html';
@@ -59,24 +55,6 @@ const MARATHON_LOG_APP_URL = '/marathon-log/index.html';
 const STORAGE_KEYS = {
   shoes: 'cxr542-today-shoes-v1',
 };
-
-const FONT_PRESETS = [
-  {
-    id: 'focus',
-    name: '집중 모드',
-    css: "font-family: 'Pretendard', sans-serif; letter-spacing: 0.01em; font-weight: 600;",
-  },
-  {
-    id: 'reading',
-    name: '가독성 모드',
-    css: "font-family: 'Noto Serif KR', serif; line-height: 1.7; font-weight: 500;",
-  },
-  {
-    id: 'poster',
-    name: '포스터 모드',
-    css: "font-family: 'SUIT', sans-serif; letter-spacing: 0.04em; font-weight: 800;",
-  },
-];
 
 function readSidebarCollapsed() {
   try {
@@ -95,7 +73,6 @@ function findNavItem(id) {
 }
 
 function moduleHasEmbed(id) {
-  if (id === 'vision-font' && isVisionFontGithubEmbed()) return true;
   if (id === 'today-shoes' && isTodayShoesWebDemoEmbed()) return true;
   if (id === 'ai-synapse-wiki' && isAiSynapseWikiWebDemoEmbed()) return true;
   if (id === 'gemini-tuner' && isGeminiTunerWebDemoEmbed()) return true;
@@ -152,83 +129,36 @@ function HomeModule({ onOpenModule, labels, navItems }) {
   );
 }
 
-function VisionFontMvpModule({ onGoHome }) {
-  const [selected, setSelected] = useState(FONT_PRESETS[0]);
-  const [sampleText, setSampleText] = useState('오늘도 꾸준히 만들고 개선한다.');
-  const [copied, setCopied] = useState('');
-
-  const copyCss = async () => {
-    await navigator.clipboard.writeText(selected.css);
-    setCopied('CSS가 복사되었습니다.');
-  };
-
+function VisionFontModule({ onGoHome }) {
   return (
-    <>
-      <ModuleLinkBar
-        hint={
-          <>
-            포털 홈 카드와 연결된 <strong>vision-font</strong> — 프리셋 미리보기 후 CSS를 복사합니다.
-          </>
-        }
-        actions={
+    <section className="module-embed">
+      <div className="module-embed__bar module-link-bar">
+        <p className="hint module-link-bar__hint" style={{ margin: 0 }}>
+          <strong>시력 테스트</strong>로 맞춘 글꼴·크기로 기사를 읽습니다. 설정은{' '}
+          <strong>이 포털 도메인</strong>에 저장되며 JSON으로 백업할 수 있습니다.
+        </p>
+        <div className="module-link-bar__actions">
           <button type="button" className="btn-ghost" onClick={onGoHome}>
             ← 포털 홈
           </button>
-        }
-      />
-      <section className="module-panel">
-      <h2>vision-font</h2>
-      <p>폰트 프리셋을 빠르게 적용하고 CSS 코드를 복사할 수 있습니다.</p>
-      <div className="stack-row">
-        {FONT_PRESETS.map((preset) => (
-          <button key={preset.id} className={`chip ${selected.id === preset.id ? 'active' : ''}`} onClick={() => setSelected(preset)}>
-            {preset.name}
-          </button>
-        ))}
-      </div>
-      <textarea className="field" rows={3} value={sampleText} onChange={(e) => setSampleText(e.target.value)} />
-      <div className="preview-box" style={{ fontFamily: selected.id === 'reading' ? "'Noto Serif KR', serif" : "'Pretendard', sans-serif", fontWeight: selected.id === 'poster' ? 800 : 600, letterSpacing: selected.id === 'poster' ? '0.04em' : '0.01em', lineHeight: selected.id === 'reading' ? 1.7 : 1.5 }}>
-        {sampleText}
-      </div>
-      <code>{selected.css}</code>
-      <button className="btn-primary" onClick={copyCss}>CSS 복사</button>
-      {copied && <small className="hint">{copied}</small>}
-    </section>
-    </>
-  );
-}
-
-function VisionFontModule({ onGoHome }) {
-  if (isVisionFontGithubEmbed()) {
-    return (
-      <section className="module-embed">
-        <div className="module-embed__bar module-link-bar">
-          <p className="hint module-link-bar__hint" style={{ margin: 0 }}>
-            개발 환경 전용 · <strong>vision-font 웹 데모</strong>(시력 테스트 · 맞춤 설정 · 기사 읽기). 운영 포털은
-            프리셋 미리보기 MVP를 사용합니다.{' '}
-            <a href={VISION_FONT_GITHUB_PAGES_URL} target="_blank" rel="noopener noreferrer">
-              GitHub Pages 소개
-            </a>
-          </p>
-          <div className="module-link-bar__actions">
-            <button type="button" className="btn-ghost" onClick={onGoHome}>
-              ← 포털 홈
-            </button>
-            <a className="btn-primary" href={VISION_FONT_APP_URL} target="_blank" rel="noopener noreferrer">
-              전체 화면으로 열기
-            </a>
-          </div>
+          <a
+            className="btn-primary"
+            href={VISION_FONT_APP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            전체 화면으로 열기
+          </a>
         </div>
-        <iframe
-          className="module-embed__frame"
-          src={VISION_FONT_APP_URL}
-          title="vision-font"
-          loading="lazy"
-        />
-      </section>
-    );
-  }
-  return <VisionFontMvpModule onGoHome={onGoHome} />;
+      </div>
+      <iframe
+        className="module-embed__frame"
+        src={VISION_FONT_APP_URL}
+        title="vision-font"
+        loading="lazy"
+      />
+    </section>
+  );
 }
 
 function TodayShoesMvpModule({ onGoHome }) {
