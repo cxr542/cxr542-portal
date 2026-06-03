@@ -2,7 +2,6 @@ import {
   readMarathonLogRacesFromStorage,
   summarizeMonthlyRaces,
 } from './marathon';
-import { isAiSynapseWikiWebDemoEmbed } from './aiSynapseWikiDev';
 import { isGeminiTunerWebDemoEmbed } from './geminiTunerDev';
 
 const TODAY_SHOES_LS_KEY = 'today-shoes-shoes-v1';
@@ -115,9 +114,7 @@ export function getHomeSnapshots(now = new Date()) {
     'who-are-you': career
       ? `근무 ${career.employments || 0} · 프로젝트 ${career.projects || 0} · 자소서 ${career.documents || 0}`
       : '자기소개서·경력 구조화 · 미리보기·JSON',
-    'ai-synapse-wiki': isAiSynapseWikiWebDemoEmbed()
-      ? '웹 데모 · 주제·검색 · 등록(관리 API 연동 시)'
-      : 'GitHub Pages Wiki · topics·Synapse',
+    'ai-synapse-wiki': '한글 AI Wiki · 주제·허브·검색 · 정적 빌드',
     'gemini-tuner': isGeminiTunerWebDemoEmbed()
       ? '웹 데모 · Gemini FinOps · 스파클'
       : 'Chrome 확장 · 토큰·예산 FinOps',

@@ -19,7 +19,8 @@ import { useNavOrder } from './hooks/useNavOrder';
 import { getHomeSnapshots } from './utils/homeSnapshots';
 import {
   fetchWikiAdminConfig,
-  isAiSynapseWikiWebDemoEmbed,
+  AI_SYNAPSE_WIKI_APP_URL,
+  isWikiDevEditingAvailable,
   resolveWikiFrameUrl,
   WIKI_DEV_PATH_HOME,
   WIKI_DEV_PATH_ADMIN_TOPICS,
@@ -60,7 +61,6 @@ function findNavItem(id) {
 }
 
 function moduleHasEmbed(id) {
-  if (id === 'ai-synapse-wiki' && isAiSynapseWikiWebDemoEmbed()) return true;
   if (id === 'gemini-tuner' && isGeminiTunerWebDemoEmbed()) return true;
   return Boolean(findNavItem(id)?.embedPath);
 }
@@ -179,59 +179,12 @@ function TodayShoesModule({ onGoHome }) {
   );
 }
 
-function AiSynapseWikiMvpModule({ onGoHome }) {
-  const external = findNavItem('ai-synapse-wiki');
-
-  return (
-    <>
-      <ModuleLinkBar
-        hint={
-          <>
-            포털에서 Wiki 바로가기 · 전체 기능은{' '}
-            <strong>{external?.externalLabel || 'GitHub Pages'}</strong> 또는 저장소 로컬 dev 서버를
-            사용합니다.
-          </>
-        }
-        actions={
-          <>
-            <button type="button" className="btn-ghost" onClick={onGoHome}>
-              ← 포털 홈
-            </button>
-            {external?.externalUrl ? (
-              <a className="btn-primary" href={external.externalUrl} target="_blank" rel="noopener noreferrer">
-                Wiki 열기
-              </a>
-            ) : null}
-          </>
-        }
-      />
-      <section className="module-panel">
-        <h2>AI-Synapse Wiki</h2>
-        <p>
-          한글 AI 지식 Wiki — topics·hubs·stories·Synapse 연결. Antigravity, Gemini, ChatGPT, Harness
-          Engineering 등 주제를 정리합니다.
-        </p>
-        <ul className="list">
-          <li>
-            <a href={AI_SYNAPSE_WIKI_GITHUB_PAGES_URL} target="_blank" rel="noopener noreferrer">
-              GitHub Pages Wiki ↗
-            </a>
-          </li>
-          <li>
-            <a href={AI_SYNAPSE_WIKI_REPO_URL} target="_blank" rel="noopener noreferrer">
-              소스 저장소 ↗
-            </a>
-          </li>
-        </ul>
-      </section>
-    </>
-  );
-}
-
 function AiSynapseWikiModule({ onGoHome }) {
+  const wikiDevEditing = isWikiDevEditingAvailable();
+  const external = findNavItem('ai-synapse-wiki');
   const [wikiMode, setWikiMode] = useState('static');
   const [wikiFrameSrc, setWikiFrameSrc] = useState(() => wikiStaticFrameUrl('/'));
-  const [adminApi, setAdminApi] = useState({ status: 'checking' });
+  const [adminApi, setAdminApi] = useState({ status: wikiDevEditing ? 'checking' : 'offline' });
   const [adminCheckGen, setAdminCheckGen] = useState(0);
 
   const openWikiPath = (path, preferDev = false) => {
@@ -244,7 +197,7 @@ function AiSynapseWikiModule({ onGoHome }) {
   };
 
   useEffect(() => {
-    if (!isAiSynapseWikiWebDemoEmbed()) return undefined;
+    if (!wikiDevEditing) return undefined;
     let cancelled = false;
     setAdminApi((prev) => ({ ...prev, status: 'checking' }));
     fetchWikiAdminConfig()
@@ -280,8 +233,57 @@ function AiSynapseWikiModule({ onGoHome }) {
     }
   }, [adminApi.status, wikiMode]);
 
-  if (isAiSynapseWikiWebDemoEmbed()) {
-    const apiBadge =
+  if (!wikiDevEditing) {
+    return (
+      <section className="module-embed">
+        <div className="module-embed__bar module-link-bar">
+          <p className="hint module-link-bar__hint" style={{ margin: 0 }}>
+            <strong>한글 AI 지식 Wiki</strong> — 주제·허브·스토리·검색. 이 포털에 동기화된 정적 빌드를
+            읽습니다. 주제 등록·편집은 로컬 개발(
+            <code>npm run wiki:check</code>) 또는{' '}
+            <a href={AI_SYNAPSE_WIKI_GITHUB_PAGES_URL} target="_blank" rel="noopener noreferrer">
+              GitHub Pages
+            </a>
+            를 사용하세요.
+          </p>
+          <div className="module-link-bar__actions">
+            <button type="button" className="btn-ghost" onClick={onGoHome}>
+              ← 포털 홈
+            </button>
+            <a
+              className="btn-ghost"
+              href={AI_SYNAPSE_WIKI_REPO_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              저장소
+            </a>
+            {external?.externalUrl ? (
+              <a className="btn-ghost" href={external.externalUrl} target="_blank" rel="noopener noreferrer">
+                {external.externalLabel || 'GitHub Pages'}
+              </a>
+            ) : null}
+            <a
+              className="btn-primary"
+              href={AI_SYNAPSE_WIKI_APP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              전체 화면으로 열기
+            </a>
+          </div>
+        </div>
+        <iframe
+          className="module-embed__frame"
+          src={AI_SYNAPSE_WIKI_APP_URL}
+          title="AI-Synapse Wiki"
+          loading="lazy"
+        />
+      </section>
+    );
+  }
+
+  const apiBadge =
       adminApi.status === 'connected' ? (
         <span className="wiki-api-badge wiki-api-badge--ok">관리 API 연결됨</span>
       ) : adminApi.status === 'checking' ? (
@@ -406,8 +408,6 @@ function AiSynapseWikiModule({ onGoHome }) {
         />
       </section>
     );
-  }
-  return <AiSynapseWikiMvpModule onGoHome={onGoHome} />;
 }
 
 function GeminiTunerMvpModule({ onGoHome }) {

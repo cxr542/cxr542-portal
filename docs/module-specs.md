@@ -21,11 +21,12 @@
 - **이전:** [GitHub Pages marathon-log](https://cxr542.github.io/cxr542-ai/projects/marathon-log/) 데이터 → JSON보내기 후 포털 `/marathon-log/`에서 JSON 가져오기
 
 ## 4) AI-Synapse Wiki
-- **개발:** `/ai-synapse-wiki/` — 정적 빌드(읽기) + **편집(Wiki dev)** iframe (`5174`)
-- **주제 등록:** `npm run wiki:check` → 포털 **편집(Wiki dev)** 모드 (자연어/수동/목록)
-- **정적 갱신:** `WIKI_ROOT=… npm run wiki:sync`
+- **경로:** `/ai-synapse-wiki/` (`public/ai-synapse-wiki/`) — 개발·운영 동일(읽기)
+- **UI:** 포털 iframe 또는 `/ai-synapse-wiki/` 직접 접속
+- **개발 전용:** Wiki dev(`5174`) + **편집(Wiki dev)** 모드 · `npm run wiki:check` · 주제 등록
+- **정적 갱신:** `WIKI_ROOT=… npm run wiki:sync` 후 배포
 - **가이드:** [docs/ai-synapse-wiki-improve.md](ai-synapse-wiki-improve.md)
-- **운영:** React MVP — GitHub Pages·저장소 링크
+- **미러:** [GitHub Pages Wiki](https://cxr542.github.io/cxr542-ai/projects/ai-synapse-wiki/)
 - **소개:** `/ai-synapse-wiki/about.html`
 
 ## 5) GeminiTuner

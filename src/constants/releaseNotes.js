@@ -14,6 +14,7 @@ export const RELEASE_NOTES = [
     items: [
       { type: 'fix', text: 'vision-font — 운영에서도 /vision-font/ 웹 데모 iframe (MVP 제거)' },
       { type: 'fix', text: 'today-shoes — 운영에서도 /today-shoes/ 웹 데모 iframe (착화 메모 MVP 제거)' },
+      { type: 'fix', text: 'AI-Synapse Wiki — 운영에서 /ai-synapse-wiki/ 정적 Wiki iframe (링크만 MVP 제거)' },
       { type: 'feat', text: '프롬프트 모음 — 제목·본문 저장, 복사, JSON 백업' },
       { type: 'feat', text: '너는몇점? — 영화·시리즈·책·웹툰 평점, 왓챠 CSV 가져오기 (v2, API 403 시 DOM 수집)' },
       { type: 'feat', text: '나는누구? — 자기소개서·근무·기술·학력·자격, 미리보기·인쇄' },
