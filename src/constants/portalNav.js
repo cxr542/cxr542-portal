@@ -26,11 +26,11 @@ export const PORTAL_NAV_ITEMS = [
     id: 'marathon',
     icon: '🏃',
     defaultLabel: '마라톤 기록장',
-    tooltip: '러닝 거리·페이스·월간 합계',
+    tooltip: '대회 기록·PB·통계·JSON 백업',
     homeCta: '마라톤 기록장 열기 →',
-    embedPath: null,
+    embedPath: '/marathon-log/index.html',
     externalUrl: 'https://cxr542.github.io/cxr542-ai/projects/marathon-log/',
-    externalLabel: 'GitHub Pages 기록장',
+    externalLabel: 'GitHub Pages (이전 데이터)',
   },
   {
     id: 'idea-bank',
@@ -38,7 +38,7 @@ export const PORTAL_NAV_ITEMS = [
     defaultLabel: '아이디어 뱅크',
     tooltip: '아이디어 노트·검색·JSON 백업',
     homeCta: '아이디어 뱅크 열기 →',
-    embedPath: '/idea-bank/',
+    embedPath: '/idea-bank/index.html',
     externalUrl: null,
   },
 ];

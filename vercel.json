@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/idea-bank", "destination": "/idea-bank/index.html" },
+    { "source": "/marathon-log", "destination": "/marathon-log/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

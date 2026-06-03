@@ -11,10 +11,11 @@
 - 출력: 최신순 목록
 
 ## 3) 마라톤 기록장
-- 입력: 거리, 페이스, 시간, 메모
-- 저장: localStorage (`cxr542-marathon-log-v1`)
-- 출력: 최신순 목록
-- 요약: 이번 달 기록 수/총 거리
+- **경로:** `/marathon-log/` (포털과 동일 origin · `public/marathon-log/`)
+- **UI:** 포털 홈 카드·사이드바 → iframe 또는 `/marathon-log/` 직접 접속
+- **저장:** IndexedDB `marathon-log` / fallback `marathon-log-races` (localStorage)
+- **기능:** 대회 기록·PB·통계, 거리/결과 필터, 기상청 조회, JSON 보내기/가져오기, Keep 시드
+- **이전:** [GitHub Pages marathon-log](https://cxr542.github.io/cxr542-ai/projects/marathon-log/) 데이터 → JSON보내기 후 포털 `/marathon-log/`에서 JSON 가져오기
 
 ## 4) 아이디어 뱅크
 - **경로:** `/idea-bank/` (포털과 동일 origin · `public/idea-bank/`)

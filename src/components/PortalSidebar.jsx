@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import EnvironmentBadge from './EnvironmentBadge';
 import { PORTAL_NAV_ITEMS } from '../constants/portalNav';
 
 export default function PortalSidebar({
@@ -36,7 +37,10 @@ export default function PortalSidebar({
           </span>
           <span className="sidebar__logo-text">cxr542</span>
         </h1>
-        <p className="sidebar__sub">개인 개발 포털</p>
+        <div className="sidebar__env-row">
+          <p className="sidebar__sub">개인 개발 포털</p>
+          <EnvironmentBadge className="portal-env-badge--sidebar" compact />
+        </div>
       </div>
 
       <nav className="sidebar__nav" aria-label="주 메뉴">

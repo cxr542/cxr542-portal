@@ -1,19 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import './App.css';
+import EnvironmentBadge from './components/EnvironmentBadge';
 import ModuleLinkBar from './components/ModuleLinkBar';
 import NavLabelsModal from './components/NavLabelsModal';
 import PortalSidebar from './components/PortalSidebar';
 import { MODULE_HINTS, NAV_IDS, PORTAL_NAV_ITEMS, SIDEBAR_COLLAPSED_KEY } from './constants/portalNav';
 import { useNavLabels } from './hooks/useNavLabels';
 import { getHomeSnapshots } from './utils/homeSnapshots';
-import { summarizeMonthlyDistance } from './utils/marathon';
 import { readList, writeList } from './utils/storage';
 
-const IDEA_BANK_APP_URL = '/idea-bank/';
+const IDEA_BANK_APP_URL = '/idea-bank/index.html';
+const MARATHON_LOG_APP_URL = '/marathon-log/index.html';
 
 const STORAGE_KEYS = {
   shoes: 'cxr542-today-shoes-v1',
-  marathon: 'cxr542-marathon-log-v1',
 };
 
 const FONT_PRESETS = [
@@ -212,78 +212,41 @@ function TodayShoesModule({ onGoHome }) {
   );
 }
 
-function MarathonModule({ onGoHome }) {
-  const external = findNavItem('marathon');
-  const [logs, setLogs] = useState(() => readList(STORAGE_KEYS.marathon));
-  const [distance, setDistance] = useState('');
-  const [pace, setPace] = useState('');
-  const [duration, setDuration] = useState('');
-  const [memo, setMemo] = useState('');
-
-  const summary = useMemo(() => summarizeMonthlyDistance(logs, new Date()), [logs]);
-
-  const addLog = (e) => {
-    e.preventDefault();
-    if (!distance) return;
-    const next = [{ id: `run-${Date.now()}`, distance: Number(distance), pace: pace.trim(), duration: duration.trim(), memo: memo.trim(), createdAt: new Date().toISOString() }, ...logs];
-    setLogs(next);
-    writeList(STORAGE_KEYS.marathon, next);
-    setDistance('');
-    setPace('');
-    setDuration('');
-    setMemo('');
-  };
-
+function MarathonLogModule({ onGoHome }) {
   return (
-    <>
-      <ModuleLinkBar
-        hint={
-          <>
-            포털 MVP 기록장과 연결됩니다. PB·대회 통계는{' '}
-            <strong>{external?.externalLabel || 'GitHub Pages'}</strong> 기록장을 사용하세요.
-          </>
-        }
-        actions={
-          <>
-            <button type="button" className="btn-ghost" onClick={onGoHome}>
-              ← 포털 홈
-            </button>
-            {external?.externalUrl ? (
-              <a className="btn-primary" href={external.externalUrl} target="_blank" rel="noopener noreferrer">
-                전체 기록장 열기
-              </a>
-            ) : null}
-          </>
-        }
+    <section className="module-embed">
+      <div className="module-embed__bar module-link-bar">
+        <p className="hint module-link-bar__hint" style={{ margin: 0 }}>
+          포털 홈과 연결 · 대회 기록·PB·통계는 <strong>이 포털 도메인</strong>에 저장됩니다.
+          예전{' '}
+          <a href="https://cxr542.github.io/cxr542-ai/projects/marathon-log/" target="_blank" rel="noopener noreferrer">
+            GitHub Pages
+          </a>{' '}
+          데이터는 기록장 안 <strong>JSON 가져오기</strong>로 1회 이전하세요.
+        </p>
+        <div className="module-link-bar__actions">
+          <button type="button" className="btn-ghost" onClick={onGoHome}>
+            ← 포털 홈
+          </button>
+          <a className="btn-primary" href={MARATHON_LOG_APP_URL} target="_blank" rel="noopener noreferrer">
+            전체 화면으로 열기
+          </a>
+        </div>
+      </div>
+      <iframe
+        className="module-embed__frame"
+        src={MARATHON_LOG_APP_URL}
+        title="마라톤 기록장"
+        loading="lazy"
       />
-      <section className="module-panel">
-      <h2>마라톤 기록장</h2>
-      <p className="hint">이번 달 {summary.count}회 / 총 {summary.totalKm.toFixed(1)}km</p>
-      <form className="grid-form" onSubmit={addLog}>
-        <input className="field" type="number" step="0.1" placeholder="거리(km)" value={distance} onChange={(e) => setDistance(e.target.value)} />
-        <input className="field" placeholder="페이스 (예: 5m30s)" value={pace} onChange={(e) => setPace(e.target.value)} />
-        <input className="field" placeholder="시간 (예: 00:42:10)" value={duration} onChange={(e) => setDuration(e.target.value)} />
-        <input className="field" placeholder="메모" value={memo} onChange={(e) => setMemo(e.target.value)} />
-        <button className="btn-primary" type="submit">기록 저장</button>
-      </form>
-      <ul className="list">
-        {logs.map((log) => (
-          <li key={log.id}>
-            <strong>{log.distance}km</strong>
-            <span>페이스 {log.pace || '-'} / 시간 {log.duration || '-'}</span>
-            <small>{log.memo || '메모 없음'} · {formatDate(log.createdAt)}</small>
-          </li>
-        ))}
-      </ul>
     </section>
-    </>
   );
 }
 
 function IdeaBankModule({ onGoHome }) {
   return (
-    <section className="idea-bank-embed">
-      <div className="idea-bank-embed__bar module-link-bar">
+    <section className="module-embed">
+      <div className="module-embed__bar module-link-bar">
         <p className="hint module-link-bar__hint" style={{ margin: 0 }}>
           포털 홈과 연결 · 아이디어·JSON은 <strong>이 포털 도메인</strong>에 저장됩니다.
           예전 <a href="https://cxr542.github.io/cxr542-ai/projects/idea-bank/" target="_blank" rel="noopener noreferrer">GitHub Pages</a> 데이터는 앱 안 <strong>JSON 가져오기</strong>로 1회 이전하세요.
@@ -298,7 +261,7 @@ function IdeaBankModule({ onGoHome }) {
         </div>
       </div>
       <iframe
-        className="idea-bank-embed__frame"
+        className="module-embed__frame"
         src={IDEA_BANK_APP_URL}
         title="idea-bank 아이디어 노트"
         loading="lazy"
@@ -310,7 +273,7 @@ function IdeaBankModule({ onGoHome }) {
 function ModuleContent({ active, onOpenModule, onGoHome, labels }) {
   if (active === 'vision-font') return <VisionFontModule onGoHome={onGoHome} />;
   if (active === 'today-shoes') return <TodayShoesModule onGoHome={onGoHome} />;
-  if (active === 'marathon') return <MarathonModule onGoHome={onGoHome} />;
+  if (active === 'marathon') return <MarathonLogModule onGoHome={onGoHome} />;
   if (active === 'idea-bank') return <IdeaBankModule onGoHome={onGoHome} />;
   return <HomeModule onOpenModule={onOpenModule} labels={labels} />;
 }
@@ -356,7 +319,10 @@ function App() {
       <main className={`content${moduleHasEmbed(activeModule) ? ' content--embed' : ''}`}>
         <header className="content-header">
           <h2>{activeTitle}</h2>
-          <span>v0.1.0 MVP</span>
+          <div className="content-header__meta">
+            <EnvironmentBadge className="portal-env-badge--header" compact />
+            <span className="content-header__version">v0.1.0 MVP</span>
+          </div>
         </header>
         <ModuleContent
           active={activeModule}

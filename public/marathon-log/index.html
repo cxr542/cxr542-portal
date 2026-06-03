@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="마라톤 기록장 — 대회 기록·PB·통계 (로컬 저장)" />
+    <title>마라톤 기록</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/shared/css/project-shell.css?v=portal2" />
+    <link rel="stylesheet" href="/marathon-log/css/app.css?v=portal2" />
+  </head>
+  <body class="project-app project-app--mobile-tabs theme-marathon">
+    <p class="app-banner">
+      <span class="app-banner__brand">
+        <span class="app-banner__icon" aria-hidden="true">🏃</span>
+        <span class="app-banner__title" id="app-banner-title">마라톤 기록</span>
+      </span>
+      <span class="app-banner__tagline" id="app-banner-tagline">대회 기록 · PB · 통계</span>
+      <span class="app-banner__meta storage-hint">🔒 이 포털 도메인에 저장 · JSON 백업 가능</span>
+    </p>
+    <div
+      class="project-nav-backdrop"
+      id="project-nav-backdrop"
+      hidden
+      aria-hidden="true"
+    ></div>
+    <div class="app-shell project-shell" id="app-shell">
+      <aside class="sidebar project-sidebar" id="sidebar" aria-label="서비스 메뉴">
+        <div class="sidebar__head project-sidebar__head">
+          <div class="logo-block project-logo">
+            <h1>
+              <span class="logo-block__icon project-logo__icon" aria-hidden="true">🏃</span>
+              <span class="logo-block__text project-logo__text" id="app-brand-title">마라톤 기록</span>
+            </h1>
+            <p class="logo-block__sub project-logo__sub" id="app-brand-sub">PB · 대회 기록</p>
+          </div>
+        </div>
+        <nav class="sidebar-nav project-sidebar-nav" aria-label="주 메뉴">
+          <button type="button" class="nav-item project-nav-item is-active" data-view="dashboard" title="기록 조회">
+            <span class="nav-item__icon project-nav-item__icon" aria-hidden="true">📊</span>
+            <span class="nav-item__label project-nav-item__label">기록 조회</span>
+            <span class="nav-item__badge project-nav-item__badge" id="nav-count-all" aria-label="전체 기록">0</span>
+          </button>
+          <button type="button" class="nav-item project-nav-item" data-view="input" title="기록 입력">
+            <span class="nav-item__icon project-nav-item__icon" aria-hidden="true">✏️</span>
+            <span class="nav-item__label project-nav-item__label">기록 입력</span>
+          </button>
+        </nav>
+        <a class="nav-item nav-item--hub project-nav-item project-nav-item--hub" href="/" title="cxr542 포털 홈으로">
+          <span class="nav-item__icon project-nav-item__icon" aria-hidden="true">🏠</span>
+          <span class="nav-item__label project-nav-item__label">포털 홈</span>
+        </a>
+        <p class="sidebar-note project-sidebar-note">
+          📍 로컬 저장 · JSON으로 백업·복원. 상단 소개 문구 옆 ✏️ 또는 더블클릭으로 수정할 수 있습니다.
+        </p>
+        <button
+          type="button"
+          class="sidebar-rail project-sidebar-rail"
+          id="sidebar-toggle"
+          aria-expanded="true"
+          aria-controls="sidebar"
+          title="메뉴 접기"
+        >
+          <span class="sidebar-rail__label project-sidebar-rail__label">접기</span>
+          <span class="sidebar-rail__icon project-sidebar-rail__icon" aria-hidden="true">‹</span>
+        </button>
+      </aside>
+      <div class="main project-main">
+        <div class="toolbar project-toolbar marathon-toolbar">
+          <button
+            type="button"
+            class="btn project-nav-toggle sidebar-toggle-toolbar"
+            id="sidebar-toggle-toolbar"
+            aria-expanded="false"
+            aria-controls="sidebar"
+            title="메뉴"
+          >
+            ☰
+          </button>
+          <a class="btn btn--hub" href="/" title="cxr542 포털 홈">← 포털</a>
+          <p class="project-toolbar__title" id="header-sub">PB · 대회 기록 대시보드</p>
+          <div class="project-toolbar__actions">
+            <button type="button" class="btn" id="btn-data-menu" aria-expanded="false" aria-haspopup="true">
+              데이터 ▾
+            </button>
+          </div>
+          <div class="data-menu" id="data-menu" role="menu">
+            <button type="button" id="btn-export">JSON보내기</button>
+            <label>
+              JSON 가져오기
+              <input type="file" id="import-file" accept="application/json,.json" hidden />
+            </label>
+            <button type="button" id="btn-import-replace">가져오기 (전체 교체)</button>
+            <button type="button" id="btn-reseed-keep">Keep 기록 다시 불러오기 (25건)</button>
+            <hr class="data-menu__sep" />
+            <label class="data-menu__key">
+              기상청 API 키
+              <input type="password" id="kma-api-key" placeholder="data.go.kr 발급 (선택)" autocomplete="off" />
+            </label>
+            <button type="button" id="btn-save-kma-key">API 키 저장</button>
+            <a class="data-menu__link" href="https://www.data.go.kr/data/15059093/openapi.do" target="_blank" rel="noopener">ASOS 일자료 신청 ↗</a>
+          </div>
+        </div>
+        <div class="content project-content marathon-content" id="app-content">
+          <section class="screen is-active" id="screen-dashboard" aria-label="기록 조회">
+            <p class="keep-motto" id="keep-motto" hidden></p>
+            <div class="stats-grid" id="stats-grid"></div>
+            <p class="section-title">전체 기록</p>
+            <div class="chips" id="year-chips"></div>
+            <div class="chips" id="dist-chips">
+              <button type="button" class="chip is-active" data-dist="all">전체</button>
+              <button type="button" class="chip" data-dist="full">풀</button>
+              <button type="button" class="chip" data-dist="half">하프</button>
+              <button type="button" class="chip" data-dist="10k">10K</button>
+              <button type="button" class="chip" data-dist="5k">5K</button>
+              <button type="button" class="chip" data-dist="other">32K·50K</button>
+            </div>
+            <ul class="race-list" id="race-list"></ul>
+          </section>
+
+          <section class="screen" id="screen-detail" aria-label="상세">
+            <div class="back-row">
+              <button type="button" id="btn-back-dashboard">← 기록 조회</button>
+            </div>
+            <div id="detail-body"></div>
+          </section>
+
+          <section class="screen" id="screen-input" aria-label="기록 입력">
+            <form class="form" id="race-form">
+              <p class="form-error" id="form-error" hidden></p>
+              <label>날짜<input type="date" id="field-date" required autocomplete="off" /></label>
+              <div class="name-suggestions" id="name-suggestions" hidden>
+                <p class="name-suggestions__label">대회명 후보</p>
+                <div class="name-suggestions__list" id="name-suggestions-list"></div>
+              </div>
+              <label>대회명<input type="text" id="field-name" placeholder="예: 서울마라톤" required autocomplete="off" /></label>
+              <label>
+                거리
+                <select id="field-distance" required>
+                  <option value="full">풀 (42.195km)</option>
+                  <option value="half">하프 (21.097km)</option>
+                  <option value="10k">10K</option>
+                  <option value="5k">5K</option>
+                  <option value="32k">32K</option>
+                  <option value="50k">50K</option>
+                </select>
+              </label>
+              <label>
+                결과
+                <select id="field-status">
+                  <option value="finished">완주</option>
+                  <option value="dnf">DNF</option>
+                  <option value="dns">DNS</option>
+                  <option value="planned">예정</option>
+                  <option value="postponed">연기</option>
+                </select>
+              </label>
+              <label>기록 (칩)<input type="text" id="field-chip" placeholder="3:42:15 · DNS/DNF는 결과만 선택" /></label>
+              <label>목표<input type="text" id="field-goal" placeholder="SUB4" /></label>
+              <div class="weather-field">
+                <div class="weather-field__head">
+                  <span>날씨</span>
+                  <button type="button" class="btn-link" id="btn-fetch-weather">기상청 조회</button>
+                </div>
+                <input type="text" id="field-weather" placeholder="날짜 선택 시 자동 조회" autocomplete="off" />
+                <p class="weather-hint" id="weather-hint" hidden></p>
+              </div>
+              <label>메모<textarea id="field-notes" placeholder="날씨, 컨디션, 페이스 메모…"></textarea></label>
+              <button type="submit" class="btn-primary" id="btn-save">기록 저장</button>
+            </form>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <nav class="project-mobile-tabs" aria-label="앱 메뉴">
+      <button type="button" class="project-mobile-tab is-active" data-view="dashboard">
+        <span class="project-mobile-tab__icon" aria-hidden="true">📊</span>
+        기록 조회
+      </button>
+      <button type="button" class="project-mobile-tab" data-view="input">
+        <span class="project-mobile-tab__icon" aria-hidden="true">✏️</span>
+        기록 입력
+      </button>
+    </nav>
+
+    <input type="file" id="import-file-hidden" accept="application/json,.json" hidden />
+
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem("marathon-log-sidebar-collapsed") === "1") {
+            document.documentElement.classList.add("project-sidebar-collapsed-boot");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <script src="/shared/js/project-shell.js?v=portal2"></script>
+    <script src="/marathon-log/js/time.js?v=portal2"></script>
+    <script src="/marathon-log/js/keep-seed.js?v=portal2"></script>
+    <script src="/marathon-log/js/events.js?v=portal2"></script>
+    <script src="/marathon-log/js/weather.js?v=portal2"></script>
+    <script src="/marathon-log/js/db.js?v=portal2"></script>
+    <script src="/marathon-log/js/app.js?v=portal2"></script>
+  </body>
+</html>

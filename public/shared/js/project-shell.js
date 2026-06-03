@@ -305,6 +305,65 @@
     });
   }
 
+  var PORTAL_ENV_CONFIG = {
+    development: {
+      label: "개발",
+      shortLabel: "DEV",
+      title: "로컬 개발 서버 · 이 origin의 브라우저 저장소",
+      className: "portal-env-badge--dev",
+    },
+    preview: {
+      label: "검증",
+      shortLabel: "PRE",
+      title: "Vercel Preview · PR/배포 전 확인용",
+      className: "portal-env-badge--preview",
+    },
+    production: {
+      label: "운영",
+      shortLabel: "PROD",
+      title: "Production · 실제 사용 데이터",
+      className: "portal-env-badge--prod",
+    },
+  };
+
+  var PRODUCTION_HOSTS = { "cxr542-portal.vercel.app": true };
+
+  function resolvePortalEnvironment(hostname) {
+    var host = hostname || global.location.hostname;
+    if (host === "localhost" || host === "127.0.0.1") {
+      return PORTAL_ENV_CONFIG.development;
+    }
+    if (PRODUCTION_HOSTS[host]) {
+      return PORTAL_ENV_CONFIG.production;
+    }
+    if (host.slice(-".vercel.app".length) === ".vercel.app") {
+      return PORTAL_ENV_CONFIG.preview;
+    }
+    return PORTAL_ENV_CONFIG.development;
+  }
+
+  function mountPortalEnvBadge() {
+    var banner = document.querySelector(".project-app .app-banner");
+    if (!banner || banner.querySelector(".portal-env-badge")) return;
+    var env = resolvePortalEnvironment();
+    var el = document.createElement("span");
+    el.className = "portal-env-badge " + env.className;
+    el.title = env.title;
+    el.setAttribute("aria-label", "배포 환경: " + env.label);
+    el.innerHTML =
+      '<span class="portal-env-badge__long">' +
+      env.label +
+      '</span><span class="portal-env-badge__short">' +
+      env.shortLabel +
+      "</span>";
+    var tagline = banner.querySelector(".app-banner__tagline");
+    if (tagline) {
+      banner.insertBefore(el, tagline);
+    } else {
+      banner.appendChild(el);
+    }
+  }
+
   global.ProjectShell = {
     init: init,
     setActiveView: setActiveView,
@@ -314,4 +373,16 @@
     initBranding: initBranding,
     bindInlineTitles: bindInlineTitles,
   };
+
+  global.PortalEnv = {
+    resolve: resolvePortalEnvironment,
+    mount: mountPortalEnvBadge,
+    CONFIG: PORTAL_ENV_CONFIG,
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", mountPortalEnvBadge);
+  } else {
+    mountPortalEnvBadge();
+  }
 })(window);
