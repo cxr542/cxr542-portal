@@ -9,11 +9,12 @@ Repository Settings -> Secrets and variables -> Actions:
 - `VERCEL_ORG_ID`
 - `VERCEL_PROJECT_ID`
 
-### GitHub Environment
-Repository Settings -> Environments:
+### GitHub Environment (선택)
+Repository **Settings → Environments**:
 
 - `production` 환경 생성
-- Required reviewers 설정 (운영 승인자)
+- Required reviewers에 **본인 계정**을 추가해야 Actions에 **Review deployments** 버튼이 보입니다
+- 승인 UI가 없으면 워크플로의 `environment: production` 줄을 비활성화해 자동 배포할 수 있습니다 (현재 기본)
 
 ## 2. 파이프라인 구성
 
