@@ -87,11 +87,11 @@ export const PORTAL_NAV_ITEMS = [
     id: 'gemini-tuner',
     icon: '✨',
     defaultLabel: 'GeminiTuner',
-    tooltip: 'Gemini FinOps · 토큰·예산 (Chrome 확장)',
+    tooltip: 'FinOps 패널 미리보기 · 스파클 · 한도·예산 (데모)',
     homeCta: 'GeminiTuner 열기 →',
-    embedPath: null,
+    embedPath: '/gemini-tuner/index.html',
     externalUrl: 'https://github.com/cxr542/GeminiTuner',
-    externalLabel: 'Chrome 확장 저장소',
+    externalLabel: 'Chrome 확장 (실사용)',
   },
 ];
 

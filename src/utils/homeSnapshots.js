@@ -2,7 +2,6 @@ import {
   readMarathonLogRacesFromStorage,
   summarizeMonthlyRaces,
 } from './marathon';
-import { isGeminiTunerWebDemoEmbed } from './geminiTunerDev';
 
 const TODAY_SHOES_LS_KEY = 'today-shoes-shoes-v1';
 const IDEA_LS_KEY = 'idea-bank-ideas';
@@ -115,8 +114,6 @@ export function getHomeSnapshots(now = new Date()) {
       ? `근무 ${career.employments || 0} · 프로젝트 ${career.projects || 0} · 자소서 ${career.documents || 0}`
       : '자기소개서·경력 구조화 · 미리보기·JSON',
     'ai-synapse-wiki': '한글 AI Wiki · 주제·허브·검색 · 정적 빌드',
-    'gemini-tuner': isGeminiTunerWebDemoEmbed()
-      ? '웹 데모 · Gemini FinOps · 스파클'
-      : 'Chrome 확장 · 토큰·예산 FinOps',
+    'gemini-tuner': 'FinOps 데모 · 스파클 · 한도·예산 · Chrome 확장',
   };
 }

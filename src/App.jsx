@@ -38,7 +38,6 @@ import {
   GEMINI_TUNER_APP_URL,
   GEMINI_TUNER_GITHUB_PAGES_URL,
   GEMINI_TUNER_REPO_URL,
-  isGeminiTunerWebDemoEmbed,
 } from './utils/geminiTunerDev';
 import { VISION_FONT_APP_URL } from './utils/visionFontDev';
 
@@ -61,7 +60,6 @@ function findNavItem(id) {
 }
 
 function moduleHasEmbed(id) {
-  if (id === 'gemini-tuner' && isGeminiTunerWebDemoEmbed()) return true;
   return Boolean(findNavItem(id)?.embedPath);
 }
 
@@ -410,87 +408,55 @@ function AiSynapseWikiModule({ onGoHome }) {
     );
 }
 
-function GeminiTunerMvpModule({ onGoHome }) {
+function GeminiTunerModule({ onGoHome }) {
   const external = findNavItem('gemini-tuner');
 
   return (
-    <>
-      <ModuleLinkBar
-        hint={
-          <>gemini.google.com FinOps Chrome 확장 · 웹 데모는 개발 환경에서만 포털에 표시됩니다.</>
-        }
-        actions={
-          <>
-            <button type="button" className="btn-ghost" onClick={onGoHome}>
-              ← 포털 홈
-            </button>
-            {external?.externalUrl ? (
-              <a className="btn-primary" href={GEMINI_TUNER_REPO_URL} target="_blank" rel="noopener noreferrer">
-                저장소
-              </a>
-            ) : null}
-          </>
-        }
-      />
-      <section className="module-panel">
-        <h2>GeminiTuner</h2>
-        <p>
-          gemini.google.com에서 토큰·예상 비용을 보는 Chrome 확장(FinOps). 데이터는 브라우저에만
-          저장됩니다.
+    <section className="module-embed">
+      <div className="module-embed__bar module-link-bar">
+        <p className="hint module-link-bar__hint" style={{ margin: 0 }}>
+          <strong>FinOps 패널·스파클·한도 위젯</strong> 웹 데모입니다. gemini.google.com에서의 실제
+          사용은{' '}
+          <a href={GEMINI_TUNER_REPO_URL} target="_blank" rel="noopener noreferrer">
+            Chrome 확장
+          </a>
+          이고, 데모 설정은 <strong>이 포털 도메인</strong> localStorage에 저장됩니다.
         </p>
-        <ul className="list">
-          <li>
-            <a href={GEMINI_TUNER_REPO_URL} target="_blank" rel="noopener noreferrer">
-              GitHub — GeminiTuner ↗
+        <div className="module-link-bar__actions">
+          <button type="button" className="btn-ghost" onClick={onGoHome}>
+            ← 포털 홈
+          </button>
+          <a
+            className="btn-ghost"
+            href={GEMINI_TUNER_GITHUB_PAGES_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            GitHub Pages 소개
+          </a>
+          {external?.externalUrl ? (
+            <a className="btn-ghost" href={external.externalUrl} target="_blank" rel="noopener noreferrer">
+              {external.externalLabel || 'Chrome 확장'}
             </a>
-          </li>
-          <li>
-            <a href={GEMINI_TUNER_GITHUB_PAGES_URL} target="_blank" rel="noopener noreferrer">
-              GitHub Pages 소개 ↗
-            </a>
-          </li>
-          <li>
-            <a href="https://gemini.google.com" target="_blank" rel="noopener noreferrer">
-              gemini.google.com ↗
-            </a>
-          </li>
-        </ul>
-      </section>
-    </>
-  );
-}
-
-function GeminiTunerModule({ onGoHome }) {
-  if (isGeminiTunerWebDemoEmbed()) {
-    return (
-      <section className="module-embed">
-        <div className="module-embed__bar module-link-bar">
-          <p className="hint module-link-bar__hint" style={{ margin: 0 }}>
-            개발 환경 전용 · <strong>GeminiTuner 웹 데모</strong> — 사이드 패널 FinOps · 스파클 캐릭터 ·
-            Gemini 한도 위젯. 실제 사용은 Chrome 확장·{' '}
-            <a href={GEMINI_TUNER_REPO_URL} target="_blank" rel="noopener noreferrer">
-              저장소
-            </a>
-          </p>
-          <div className="module-link-bar__actions">
-            <button type="button" className="btn-ghost" onClick={onGoHome}>
-              ← 포털 홈
-            </button>
-            <a className="btn-primary" href={GEMINI_TUNER_APP_URL} target="_blank" rel="noopener noreferrer">
-              전체 화면으로 열기
-            </a>
-          </div>
+          ) : null}
+          <a
+            className="btn-primary"
+            href={GEMINI_TUNER_APP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            전체 화면으로 열기
+          </a>
         </div>
-        <iframe
-          className="module-embed__frame"
-          src={GEMINI_TUNER_APP_URL}
-          title="GeminiTuner"
-          loading="lazy"
-        />
-      </section>
-    );
-  }
-  return <GeminiTunerMvpModule onGoHome={onGoHome} />;
+      </div>
+      <iframe
+        className="module-embed__frame"
+        src={GEMINI_TUNER_APP_URL}
+        title="GeminiTuner"
+        loading="lazy"
+      />
+    </section>
+  );
 }
 
 function MarathonLogModule({ onGoHome }) {

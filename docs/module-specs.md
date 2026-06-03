@@ -30,9 +30,11 @@
 - **소개:** `/ai-synapse-wiki/about.html`
 
 ## 5) GeminiTuner
-- **개발:** `/gemini-tuner/` — gemini.google.com FinOps 패널 미리보기 · 스파클 캐릭터 · 5h/1w 한도 위젯 · 월 예산 (localStorage)
-- **운영:** React MVP — Chrome 확장·저장소 링크
-- **본체:** [GeminiTuner](https://github.com/cxr542/GeminiTuner) · gemini.google.com 사이드 패널
+- **경로:** `/gemini-tuner/` (`public/gemini-tuner/`) — 개발·운영 동일
+- **UI:** 포털 iframe 또는 `/gemini-tuner/` 직접 접속
+- **기능:** FinOps 패널 미리보기 · 스파클 캐릭터 · 5h/1w 한도 · 월 예산 (localStorage·JSON)
+- **실사용:** [Chrome 확장](https://github.com/cxr542/GeminiTuner) · gemini.google.com 사이드 패널
+- **소개:** `/gemini-tuner/about.html`
 
 ## 6) 아이디어 뱅크
 - **경로:** `/idea-bank/` (포털과 동일 origin · `public/idea-bank/`)
