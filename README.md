@@ -2,6 +2,9 @@
 
 업무 외 개발 서비스(vision-font, today-shoes, 마라톤 기록장, 아이디어 뱅크, AI-Synapse Wiki, GeminiTuner)를 한곳에서 관리하는 개인 포털입니다.
 
+> **워크스페이스:** 이 repo(`cxr542-portal`)만 clone·열어도 됩니다.  
+> 교육팀 TMS(업무)는 별도 repo [`edu-team-tms`](https://github.com/cxr542/edu-team-tms) — 집(윈도우)에서는 포털, 회사(맥)에서는 TMS.
+
 ## 환경
 
 | 환경 | URL | 용도 |

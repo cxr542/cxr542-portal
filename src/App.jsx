@@ -17,6 +17,7 @@ import { RELEASE_NOTES_LABEL, latestReleaseVersion } from './constants/releaseNo
 import { useNavLabels } from './hooks/useNavLabels';
 import { useNavOrder } from './hooks/useNavOrder';
 import { getHomeSnapshots } from './utils/homeSnapshots';
+import { getWorkspaceUrl } from './constants/workspaceUrl';
 import {
   fetchWikiAdminConfig,
   AI_SYNAPSE_WIKI_APP_URL,
@@ -649,6 +650,7 @@ function App() {
     activeModule === RELEASE_NOTES_MODULE_ID
       ? RELEASE_NOTES_LABEL
       : labels[activeModule] || findNavItem(activeModule)?.defaultLabel;
+  const workspaceUrl = getWorkspaceUrl();
 
   return (
     <div className={`portal-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}`}>
@@ -664,7 +666,12 @@ function App() {
       />
       <main className={`content${moduleHasEmbed(activeModule) ? ' content--embed' : ''}`}>
         <header className="content-header">
-          <h2>{activeTitle}</h2>
+          <div className="content-header__start">
+            <a className="btn-workspace" href={workspaceUrl} title="cxr542 Workspace 랜딩">
+              ← Workspace
+            </a>
+            <h2>{activeTitle}</h2>
+          </div>
           <div className="content-header__meta">
             <EnvironmentBadge className="portal-env-badge--header" compact />
             <span className="content-header__version">v{latestReleaseVersion()}</span>

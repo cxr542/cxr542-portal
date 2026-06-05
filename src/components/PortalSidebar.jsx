@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import EnvironmentBadge from './EnvironmentBadge';
 import { RELEASE_NOTES_LABEL, RELEASE_NOTES_MODULE_ID } from '../constants/releaseNotes';
+import { getWorkspaceUrl } from '../constants/workspaceUrl';
 
 export default function PortalSidebar({
   activeModule,
@@ -29,6 +30,7 @@ export default function PortalSidebar({
   };
 
   const railLabel = collapsed ? '펼침' : '접기';
+  const workspaceUrl = getWorkspaceUrl();
 
   return (
     <aside className="sidebar" id="portal-sidebar" aria-label="포털 메뉴">
@@ -66,6 +68,17 @@ export default function PortalSidebar({
       </nav>
 
       <div className="sidebar__bottom">
+        <a
+          className="nav-btn nav-btn--workspace"
+          href={workspaceUrl}
+          title="cxr542 Workspace 랜딩"
+          {...navTooltipProps({ id: 'workspace', icon: '↩', defaultLabel: '← Workspace', tooltip: 'Workspace 랜딩으로' })}
+        >
+          <span className="nav-btn__icon" aria-hidden="true">
+            ↩
+          </span>
+          <span className="nav-btn__label">← Workspace</span>
+        </a>
         <button
           type="button"
           className={`nav-btn nav-btn--utility${activeModule === RELEASE_NOTES_MODULE_ID ? ' active' : ''}`}
