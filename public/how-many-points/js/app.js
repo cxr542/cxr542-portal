@@ -186,8 +186,27 @@
     if (!list.length) {
       $("content").innerHTML =
         meta +
-        '<p class="empty">아직 평가한 작품이 없어요.</p>' +
-        '<p class="list-meta">✨ <strong>평가하기</strong>로 추가하거나, <strong>가져오기</strong>에서 왓챠피디아 CSV를 넣어 보세요.</p>';
+        '<div class="empty empty--watcha">' +
+        '<p class="empty__eyebrow">왓챠피디아 평점 이관</p>' +
+        "<h2>이전에 남긴 별점을 먼저 가져오세요.</h2>" +
+        "<p>왓챠피디아에서 CSV를 만든 뒤 가져오면, 이후 평점은 이곳에서 계속 추가하고 JSON으로 백업할 수 있습니다.</p>" +
+        '<div class="empty__actions">' +
+        '<button type="button" class="btn btn--primary" id="empty-open-import">왓챠 평점 가져오기</button>' +
+        '<button type="button" class="btn" id="empty-open-new">직접 평가 추가</button>' +
+        "</div>" +
+        '<p class="empty__note">운영·로컬·모바일은 저장소가 분리됩니다. 한 번 가져온 뒤 JSON보내기로 백업해두면 다른 기기에도 옮길 수 있어요.</p>' +
+        "</div>";
+      $("empty-open-import").onclick = function () {
+        state.view = "import";
+        render();
+      };
+      $("empty-open-new").onclick = function () {
+        state.view = "edit";
+        state.isNew = true;
+        state.editId = null;
+        state.draft = null;
+        render();
+      };
       return;
     }
 
@@ -419,6 +438,13 @@
           HowManyPointsDb.importItems(items, !merge).then(function () {
             state.view = "library";
             render();
+            if (window.ProjectShell) {
+              ProjectShell.notifyTaskDone({
+                module: "너는몇점?",
+                action: "왓챠 CSV 가져오기 완료",
+                title: items.length + "건 반영",
+              });
+            }
             window.alert(items.length + "건을 반영했습니다.");
           });
         } catch (err) {

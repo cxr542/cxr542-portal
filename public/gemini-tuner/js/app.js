@@ -282,6 +282,13 @@
         persist();
         renderDashboard();
         alert("설정을 저장했습니다.");
+        if (window.ProjectShell) {
+          ProjectShell.notifyTaskDone({
+            module: "GeminiTuner",
+            action: "설정 저장 완료",
+            title: "FinOps settings",
+          });
+        }
       });
     }
     var shortSlider = $("quota-short");

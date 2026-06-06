@@ -364,6 +364,39 @@
     }
   }
 
+  function notifyTaskDone(detail) {
+    detail = detail || {};
+    var enabled = true;
+    try {
+      enabled = localStorage.getItem("cxr542-task-email-notify") !== "0";
+    } catch (e) {}
+    if (!enabled || !global.fetch) return Promise.resolve({ ok: false, skipped: "disabled" });
+
+    var payload = {
+      module: detail.module || document.title || "cxr542-portal",
+      action: detail.action || "Task complete",
+      title: detail.title || "",
+      url: detail.url || global.location.href,
+      completedAt: detail.completedAt || new Date().toISOString(),
+    };
+
+    return fetch("/api/notify-task-done", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(payload),
+      keepalive: true,
+    })
+      .then(function (res) {
+        return res.json().catch(function () {
+          return { ok: res.ok };
+        });
+      })
+      .catch(function (err) {
+        console.warn("task notification failed", err);
+        return { ok: false, error: "request_failed" };
+      });
+  }
+
   global.ProjectShell = {
     init: init,
     setActiveView: setActiveView,

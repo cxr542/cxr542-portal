@@ -515,6 +515,13 @@
       .then(function () {
         resetForm();
         showScreen("dashboard");
+        if (window.ProjectShell) {
+          ProjectShell.notifyTaskDone({
+            module: "마라톤 기록장",
+            action: existing ? "대회 기록 수정 완료" : "대회 기록 저장 완료",
+            title: race.name || race.date || "대회 기록",
+          });
+        }
       })
       .catch(function () {
         showFormError("저장에 실패했습니다.");

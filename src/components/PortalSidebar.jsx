@@ -12,6 +12,8 @@ export default function PortalSidebar({
   onOpenNavOrder,
   collapsed,
   onCollapsedChange,
+  fontScale,
+  onFontScaleChange,
 }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -29,7 +31,7 @@ export default function PortalSidebar({
       : { title: text };
   };
 
-  const railLabel = collapsed ? '펼침' : '접기';
+  const collapseLabel = collapsed ? '메뉴 펼치기' : '메뉴 접기';
   const workspaceUrl = getWorkspaceUrl();
 
   return (
@@ -37,7 +39,7 @@ export default function PortalSidebar({
       <div className="sidebar__head">
         <h1>
           <span className="sidebar__logo-icon" aria-hidden="true">
-            ⚡
+            🧭
           </span>
           <span className="sidebar__logo-text">cxr542</span>
         </h1>
@@ -72,7 +74,12 @@ export default function PortalSidebar({
           className="nav-btn nav-btn--workspace"
           href={workspaceUrl}
           title="cxr542 Workspace 랜딩"
-          {...navTooltipProps({ id: 'workspace', icon: '↩', defaultLabel: '← Workspace', tooltip: 'Workspace 랜딩으로' })}
+          {...navTooltipProps({
+            id: 'workspace',
+            icon: '↩',
+            defaultLabel: '← Workspace',
+            tooltip: 'Workspace 랜딩으로',
+          })}
         >
           <span className="nav-btn__icon" aria-hidden="true">
             ↩
@@ -96,6 +103,25 @@ export default function PortalSidebar({
           <span className="nav-btn__label">{RELEASE_NOTES_LABEL}</span>
         </button>
 
+        <button
+          type="button"
+          className="nav-btn nav-btn--utility nav-btn--collapse"
+          onClick={() => onCollapsedChange(!collapsed)}
+          aria-expanded={!collapsed}
+          aria-controls="portal-sidebar"
+          {...navTooltipProps({
+            id: 'collapse',
+            icon: collapsed ? '📖' : '📕',
+            defaultLabel: collapseLabel,
+            tooltip: collapseLabel,
+          })}
+        >
+          <span className="nav-btn__icon" aria-hidden="true">
+            {collapsed ? '📖' : '📕'}
+          </span>
+          <span className="nav-btn__label">{collapseLabel}</span>
+        </button>
+
         <div className="sidebar__settings-wrap">
           <button
             type="button"
@@ -104,7 +130,12 @@ export default function PortalSidebar({
               e.stopPropagation();
               setSettingsOpen((open) => !open);
             }}
-            {...navTooltipProps({ id: 'settings', icon: '⚙️', defaultLabel: '설정', tooltip: '메뉴 이름·환경 설정' })}
+            {...navTooltipProps({
+              id: 'settings',
+              icon: '⚙️',
+              defaultLabel: '설정',
+              tooltip: '메뉴 이름·순서·글자 크기 설정',
+            })}
             aria-expanded={settingsOpen}
             aria-haspopup="menu"
           >
@@ -132,7 +163,8 @@ export default function PortalSidebar({
                   onOpenNavLabels();
                 }}
               >
-                ✏️ 메뉴 이름 변경
+                <span aria-hidden="true">✏️</span>
+                <span>메뉴 이름 변경</span>
               </button>
               <button
                 type="button"
@@ -143,25 +175,32 @@ export default function PortalSidebar({
                   onOpenNavOrder();
                 }}
               >
-                ↕️ 메뉴 순서 변경
+                <span aria-hidden="true">↕️</span>
+                <span>메뉴 순서 변경</span>
               </button>
+              <div className="sidebar__settings-field" role="group" aria-label="글자 크기">
+                <span className="sidebar__settings-field-label">글자 크기</span>
+                <div className="sidebar__font-options">
+                  {[
+                    ['small', '작게'],
+                    ['normal', '기본'],
+                    ['large', '크게'],
+                  ].map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className={`sidebar__font-option${fontScale === value ? ' is-active' : ''}`}
+                      onClick={() => onFontScaleChange(value)}
+                      aria-pressed={fontScale === value}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </div>
-
-        <button
-          type="button"
-          className="sidebar-rail"
-          onClick={() => onCollapsedChange(!collapsed)}
-          aria-expanded={!collapsed}
-          aria-controls="portal-sidebar"
-          title={collapsed ? '메뉴 펼치기' : '메뉴 접기'}
-        >
-          <span className="sidebar-rail__label">{railLabel}</span>
-          <span className="sidebar-rail__icon" aria-hidden="true">
-            {collapsed ? '›' : '‹'}
-          </span>
-        </button>
       </div>
     </aside>
   );

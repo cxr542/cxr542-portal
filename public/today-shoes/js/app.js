@@ -310,6 +310,13 @@
     });
     reloadShoes();
     alert("신발장에 저장했습니다.");
+    if (window.ProjectShell) {
+      ProjectShell.notifyTaskDone({
+        module: "today-shoes",
+        action: "신발 저장 완료",
+        title: nickname,
+      });
+    }
     navigateToView("closet");
   }
 

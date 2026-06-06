@@ -49,6 +49,18 @@ npm run dev
 
 전체 개선 로드맵: [docs/ai-synapse-wiki-improve.md](docs/ai-synapse-wiki-improve.md)
 
+## 작업 완료 이메일 알림
+
+포털 하위 모듈에서 저장 작업이 끝나면 `/api/notify-task-done`으로 완료 알림을 보냅니다. Vercel 환경변수가 설정되어 있으면 Resend로 이메일이 발송되고, 설정이 없으면 저장 기능은 그대로 동작하며 서버 로그에만 `missing_email_config`로 남습니다.
+
+필수 환경변수:
+
+- `RESEND_API_KEY`: Resend API Key
+- `NOTIFY_EMAIL_TO`: 알림 받을 이메일. 여러 개면 쉼표로 구분
+- `NOTIFY_EMAIL_FROM`: 발신자 주소. 미설정 시 `cxr542 Portal <onboarding@resend.dev>` 사용
+
+브라우저에서 알림 호출을 임시로 끄려면 콘솔에서 `localStorage.setItem('cxr542-task-email-notify', '0')`을 실행하세요. 다시 켜려면 값을 삭제하거나 `1`로 바꾸면 됩니다.
+
 ## 품질 명령
 
 ```bash

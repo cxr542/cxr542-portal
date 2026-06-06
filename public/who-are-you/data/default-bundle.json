@@ -1,0 +1,374 @@
+{
+  "version": 1,
+  "source": {
+    "kind": "google-drive",
+    "documents": [
+      "자기소개서.md",
+      "이력서(김윤형)_20241212.md",
+      "포트폴리오(김윤형)_241212.md"
+    ],
+    "generatedAt": "2026-06-06"
+  },
+  "bundle": {
+    "profile": {
+      "id": "profile",
+      "name": "김윤형",
+      "nameEn": "",
+      "email": "",
+      "phone": "",
+      "headline": "(주)오케스트로 전략사업본부 솔루션 교육팀 팀장",
+      "targetRole": "솔루션 교육·컨설턴트 / 클라우드 제안·enablement",
+      "summary": "한양대학교 전자전기컴퓨터공학부를 졸업하고 컴퓨터공학 석사, 컴퓨터공학 박사 수료, e-Business 경영학박사 학위를 취득했습니다.\n오케스트로에서는 제안 조직과 업무 프로세스를 구축하고 공공·금융 클라우드 제안 PL·PM으로 수주 전략, 제안서, 발표자료를 이끌었습니다.\n현재는 전략사업본부 솔루션 교육팀 팀장으로 자사 제품 교육, Solution Sales Deck, OKESTRO CLOUD WEBINAR, 내부 enablement에 집중하고 있습니다.",
+      "skills": [
+        "클라우드 제안 컨설팅",
+        "제안 PL/PM",
+        "제안서·발표자료",
+        "솔루션 교육",
+        "Sales Deck",
+        "WEBINAR",
+        "공공·금융 SI",
+        "CMP",
+        "AI",
+        "빅데이터",
+        "U-City·스마트시티"
+      ],
+      "links": [
+        {
+          "label": "경력 소개",
+          "url": "https://cxr542.github.io/"
+        },
+        {
+          "label": "AI 학습·실험 허브",
+          "url": "https://cxr542.github.io/cxr542-ai/"
+        },
+        {
+          "label": "GitHub",
+          "url": "https://github.com/cxr542"
+        }
+      ]
+    },
+    "employments": [
+      {
+        "id": "okestro",
+        "companyName": "(주)오케스트로",
+        "businessNo": "",
+        "department": "전략사업본부 / 솔루션 교육팀",
+        "position": "팀장",
+        "employmentType": "regular",
+        "startDate": "2020-11",
+        "endDate": "",
+        "isCurrent": true,
+        "duties": "클라우드 제안 컨설팅, 제안 조직·프로세스 구축, 공공·금융 제안 PL·PM, Solution Sales Deck 총괄, OKESTRO CLOUD WEBINAR, 솔루션 제품 교육 기획·운영"
+      },
+      {
+        "id": "eselab",
+        "companyName": "(주)에스이랩",
+        "businessNo": "",
+        "department": "전략기획실",
+        "position": "실장",
+        "employmentType": "regular",
+        "startDate": "2019-02",
+        "endDate": "2020-11",
+        "isCurrent": false,
+        "duties": "사업·제품 전략, 대외 협력, 기획 업무"
+      },
+      {
+        "id": "wisenut",
+        "companyName": "(주)와이즈넛",
+        "businessNo": "",
+        "department": "공공사업부 공공컨설팅팀",
+        "position": "차장",
+        "employmentType": "regular",
+        "startDate": "2016-12",
+        "endDate": "2019-01",
+        "isCurrent": false,
+        "duties": "공공 SI·컨설팅 제안, 제안 PM 지원, 챗봇·빅데이터·검색 관련 공공 제안"
+      },
+      {
+        "id": "asadal",
+        "companyName": "(주)아사달",
+        "businessNo": "",
+        "department": "제안팀",
+        "position": "과장",
+        "employmentType": "regular",
+        "startDate": "2016-06",
+        "endDate": "2016-11",
+        "isCurrent": false,
+        "duties": "입찰 대응 및 제안서 작성"
+      },
+      {
+        "id": "techvalue",
+        "companyName": "(주)기술과가치",
+        "businessNo": "",
+        "department": "MIS본부",
+        "position": "팀장",
+        "employmentType": "regular",
+        "startDate": "2014-01",
+        "endDate": "2016-05",
+        "isCurrent": false,
+        "duties": "U-City·스마트시티 MIS, 사업 기획, 공공 연구·컨설팅"
+      },
+      {
+        "id": "daeyoung-ubitec",
+        "companyName": "대영유비텍(주)",
+        "businessNo": "",
+        "department": "U-Biz본부 U-ENG팀",
+        "position": "과장",
+        "employmentType": "regular",
+        "startDate": "2012-08",
+        "endDate": "2013-12",
+        "isCurrent": false,
+        "duties": "U-City·Ubiquitous 엔지니어링, 스마트시티 구축·설계 관련 업무"
+      },
+      {
+        "id": "hanyang-knowledge-service-lab",
+        "companyName": "한양대학교 지식서비스연구소",
+        "businessNo": "",
+        "department": "연구소",
+        "position": "선임연구원",
+        "employmentType": "regular",
+        "startDate": "2010-01",
+        "endDate": "2012-07",
+        "isCurrent": false,
+        "duties": "U-City·스마트시티 연구, 학술·정책 과제, 한양대 경상대학 강의 병행"
+      }
+    ],
+    "projects": [
+      {
+        "id": "okestro-solution-education",
+        "projectName": "오케스트로 솔루션 제품 교육",
+        "startDate": "2024-10",
+        "endDate": "",
+        "client": "내부",
+        "employer": "(주)오케스트로",
+        "position": "솔루션 교육팀장",
+        "employmentId": "okestro",
+        "tasks": "자사 솔루션 제품 교육 기획·운영, 강의 자료·FAQ·KB 정리, enablement 체계화",
+        "techStack": "Cloud, CMP, 교육 설계, Sales Enablement, Webinar",
+        "rating": 5
+      },
+      {
+        "id": "solution-sales-deck",
+        "projectName": "OKESTRO Solution Sales Deck",
+        "startDate": "2024-03",
+        "endDate": "2024-09",
+        "client": "내부",
+        "employer": "(주)오케스트로",
+        "position": "업무 총괄",
+        "employmentId": "okestro",
+        "tasks": "제품 가치·세일즈 메시지 정리, 교육·제안 자료로 활용 가능한 표준 자료 구성",
+        "techStack": "Sales Deck, Cloud Solution, 문서화, 제안 전략",
+        "rating": 5
+      },
+      {
+        "id": "okestro-cloud-webinar",
+        "projectName": "OKESTRO CLOUD WEBINAR",
+        "startDate": "2024-08",
+        "endDate": "2024-09",
+        "client": "대외 세미나",
+        "employer": "(주)오케스트로",
+        "position": "발표자료·발표",
+        "employmentId": "okestro",
+        "tasks": "성공적인 비즈니스를 위한 OKESTRO CLOUD WEBINAR 발표자료 작성 및 발표",
+        "techStack": "Cloud, Webinar, 발표자료, 기술세미나",
+        "rating": 5
+      },
+      {
+        "id": "hana-cloudia",
+        "projectName": "Hana Cloudia 고도화 1차",
+        "startDate": "2022-04",
+        "endDate": "2022-05",
+        "client": "하나금융티아이",
+        "employer": "(주)오케스트로",
+        "position": "제안 PL",
+        "employmentId": "okestro",
+        "tasks": "금융 최초 주관 사업 제안 PL. 차별화 전략, 제안서, 발표자료 작성 및 수주 기여",
+        "techStack": "Cloud, CMP, 금융 클라우드, 제안 PL",
+        "rating": 5
+      },
+      {
+        "id": "egov-cloud-platform-3",
+        "projectName": "전자정부 클라우드 플랫폼 구축 3차",
+        "startDate": "2021-11",
+        "endDate": "2021-11",
+        "client": "행정안전부",
+        "employer": "(주)오케스트로",
+        "position": "제안 PL",
+        "employmentId": "okestro",
+        "tasks": "대형 공공 클라우드 사업 제안 총괄. 제안서 작성 체계와 발표자료 준비 리딩",
+        "techStack": "전자정부, Cloud Platform, 공공 SI, 제안서",
+        "rating": 5
+      },
+      {
+        "id": "nh-private-cloud",
+        "projectName": "프라이빗 클라우드 구축",
+        "startDate": "2023-08",
+        "endDate": "2023-08",
+        "client": "NH농협손해보험",
+        "employer": "(주)오케스트로",
+        "position": "제안 PL",
+        "employmentId": "okestro",
+        "tasks": "짧은 제안 기간에 제안 PL로 참여해 제안서 작성과 발표자료 품질 확보를 리딩",
+        "techStack": "Private Cloud, 제안 PL, 금융 SI",
+        "rating": 5
+      },
+      {
+        "id": "nia-public-saas",
+        "projectName": "공공부문 민간 SaaS 활용 촉진",
+        "startDate": "2023-07",
+        "endDate": "2023-08",
+        "client": "한국지능정보사회진흥원",
+        "employer": "(주)오케스트로",
+        "position": "제안 참여",
+        "employmentId": "okestro",
+        "tasks": "공공 SaaS 활용 촉진 사업 제안 지원",
+        "techStack": "SaaS, 공공 클라우드, 제안",
+        "rating": 4
+      },
+      {
+        "id": "daegu-cloud-integrated-operation",
+        "projectName": "대구센터 클라우드 통합운영관리시스템 도입",
+        "startDate": "2020-12",
+        "endDate": "2021-02",
+        "client": "국가정보자원관리원",
+        "employer": "(주)오케스트로",
+        "position": "제안 PL",
+        "employmentId": "okestro",
+        "tasks": "오케스트로 주요 제품이 포함된 공공 클라우드 제안. 표준 제안서의 기초가 되는 사업",
+        "techStack": "Cloud, 통합운영관리, 공공 SI, 제안 PL",
+        "rating": 5
+      },
+      {
+        "id": "local-tax-finance-systems",
+        "projectName": "차세대 지방재정·지방세입정보시스템 구축",
+        "startDate": "2020-11",
+        "endDate": "2021-01",
+        "client": "한국지역정보개발원",
+        "employer": "(주)오케스트로",
+        "position": "제안 PL",
+        "employmentId": "okestro",
+        "tasks": "차세대 지방재정관리시스템과 차세대 지방세입정보시스템 2단계 제안 PL로 수주·매출 기여",
+        "techStack": "공공 SI, Cloud, 제안 PL",
+        "rating": 5
+      },
+      {
+        "id": "hanyang-lectures",
+        "projectName": "한양대학교 경상대학 강의",
+        "startDate": "2008-09",
+        "endDate": "2012-08",
+        "client": "한양대학교",
+        "employer": "한양대학교 지식서비스연구소",
+        "position": "강사",
+        "employmentId": "hanyang-knowledge-service-lab",
+        "tasks": "경영자료분석, 경영과데이터베이스 과목을 8개 학기 강의",
+        "techStack": "강의, 데이터베이스, 경영자료분석",
+        "rating": 5
+      }
+    ],
+    "educations": [
+      {
+        "id": "hanyang-bs",
+        "school": "한양대학교",
+        "major": "전자전기컴퓨터공학부",
+        "degree": "공학사",
+        "startDate": "1997-03",
+        "endDate": "2004-02"
+      },
+      {
+        "id": "hanyang-ms",
+        "school": "한양대학교 일반대학원",
+        "major": "컴퓨터공학과",
+        "degree": "공학석사",
+        "startDate": "2004-03",
+        "endDate": "2006-02"
+      },
+      {
+        "id": "hanyang-phd-coursework",
+        "school": "한양대학교 일반대학원",
+        "major": "컴퓨터공학과",
+        "degree": "박사 수료",
+        "startDate": "2006-03",
+        "endDate": "2008-02"
+      },
+      {
+        "id": "hanyang-ebusiness-phd",
+        "school": "한양대학교 일반대학원",
+        "major": "e-Business 경영학과",
+        "degree": "경영학박사",
+        "startDate": "2008-03",
+        "endDate": "2012-02"
+      }
+    ],
+    "certifications": [
+      {
+        "id": "information-processing-engineer",
+        "name": "정보처리기사",
+        "issuer": "한국산업인력공단",
+        "certDate": "2003-12",
+        "certNo": "",
+        "kind": "cert"
+      },
+      {
+        "id": "computer-literacy-2",
+        "name": "컴퓨터활용능력 2급",
+        "issuer": "대한상공회의소",
+        "certDate": "2000-12",
+        "certNo": "",
+        "kind": "cert"
+      },
+      {
+        "id": "deep-learning-practice",
+        "name": "Deep Learning 실습과정 11차",
+        "issuer": "한국소프트웨어인재개발원",
+        "certDate": "2017-03",
+        "certNo": "",
+        "kind": "edu"
+      },
+      {
+        "id": "ntis-training",
+        "name": "NTIS 활용",
+        "issuer": "국가과학기술인력개발원",
+        "certDate": "2019-01",
+        "certNo": "",
+        "kind": "edu"
+      }
+    ],
+    "documents": [
+      {
+        "id": "about-role-motivation",
+        "title": "지원·역할 동기",
+        "category": "motivation",
+        "targetCompany": "",
+        "body": "기술과 경영을 함께 이해하는 기반 위에서 연구소·U-City·공공 SI·제안·클라우드 컨설팅을 거치며 복잡한 기술을 사업 언어로 설명하고 실제 현장에서 쓸 수 있는 체계로 정리해왔습니다. 현재는 솔루션 교육팀 팀장으로 제안·교육·문서화를 연결해 조직이 반복해서 성과를 낼 수 있는 구조를 만드는 역할에 집중하고 있습니다."
+      },
+      {
+        "id": "core-competencies",
+        "title": "직무역량",
+        "category": "strength",
+        "targetCompany": "",
+        "body": "RFP 검토, Why OKESTRO? 도출, 제안서·발표자료 작성, 기술세미나·웨비나, 제안 A-Z 프로세스와 표준 템플릿 정리, 솔루션 제품 교육과 Sales Enablement에 강점이 있습니다."
+      },
+      {
+        "id": "collaboration-style",
+        "title": "협업 및 업무 태도",
+        "category": "growth",
+        "targetCompany": "",
+        "body": "일정은 커리큘럼·릴리즈·강의·인력을 역산해 병목을 미리 공유합니다. 난이도는 수강자와 고객 수준에 맞춰 트랙을 나누고, 품질은 피드백과 이슈를 KB·FAQ·가이드로 남겨 다음 회차에 반영합니다."
+      },
+      {
+        "id": "future-goals",
+        "title": "역할 목표",
+        "category": "vision",
+        "targetCompany": "",
+        "body": "90일 안에는 담당 솔루션과 교육 자료, 수강자 페르소나를 파악하고 표준 과정을 정리합니다. 1년 안에는 핵심 솔루션 표준 교육 과정을 정착시키고, 중장기적으로는 강사 가이드·멘토링·LMS 기반 교육 자산화를 확장하겠습니다."
+      },
+      {
+        "id": "integrated-cover-letter",
+        "title": "통합 자기소개서",
+        "category": "full",
+        "targetCompany": "",
+        "body": "저는 기술과 경영, 제안과 교육을 함께 연결해 온 솔루션 교육·컨설턴트입니다. 오케스트로 입사 후 제안 컨설팅 조직과 업무 프로세스를 만들고 공공·금융 클라우드 제안 PL·PM으로 수주 전략, 제안서, 발표자료를 주도했습니다. 현재는 전략사업본부 솔루션 교육팀 팀장으로 자사 제품 교육, Solution Sales Deck, OKESTRO CLOUD WEBINAR, 내부 enablement 업무를 맡고 있습니다."
+      }
+    ]
+  }
+}

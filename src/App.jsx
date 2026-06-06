@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import './App.css';
 import EnvironmentBadge from './components/EnvironmentBadge';
-import ModuleLinkBar from './components/ModuleLinkBar';
 import NavLabelsModal from './components/NavLabelsModal';
 import NavOrderModal from './components/NavOrderModal';
 import PortalSidebar from './components/PortalSidebar';
@@ -20,7 +19,6 @@ import { getHomeSnapshots } from './utils/homeSnapshots';
 import { getWorkspaceUrl } from './constants/workspaceUrl';
 import {
   fetchWikiAdminConfig,
-  AI_SYNAPSE_WIKI_APP_URL,
   isWikiLocalDevServerAvailable,
   resolveWikiFrameUrl,
   WIKI_DEV_PATH_HOME,
@@ -31,8 +29,6 @@ import {
   wikiDevFrameUrl,
   wikiStaticFrameUrl,
   WIKI_DEV_API_DEFAULT_URL,
-  AI_SYNAPSE_WIKI_GITHUB_PAGES_URL,
-  AI_SYNAPSE_WIKI_REPO_URL,
 } from './utils/aiSynapseWikiDev';
 import { TODAY_SHOES_APP_URL } from './utils/todayShoesDev';
 import {
@@ -47,6 +43,23 @@ const PROMPT_COLLECTION_APP_URL = '/prompt-collection/index.html';
 const HOW_MANY_POINTS_APP_URL = '/how-many-points/index.html';
 const WHO_ARE_YOU_APP_URL = '/who-are-you/index.html';
 const MARATHON_LOG_APP_URL = '/marathon-log/index.html';
+
+const PORTAL_FONT_SCALE_KEY = 'cxr542-portal-font-scale';
+const FONT_SCALE_OPTIONS = new Set(['small', 'normal', 'large']);
+const FONT_SCALE_VALUES = {
+  small: '93.75%',
+  normal: '100%',
+  large: '112.5%',
+};
+
+function readFontScale() {
+  try {
+    const saved = localStorage.getItem(PORTAL_FONT_SCALE_KEY);
+    return FONT_SCALE_OPTIONS.has(saved) ? saved : 'normal';
+  } catch {
+    return 'normal';
+  }
+}
 
 function readSidebarCollapsed() {
   try {
@@ -76,24 +89,69 @@ function readModuleFromUrl() {
 function HomeModule({ onOpenModule, labels, navItems }) {
   const cards = navItems.filter((item) => item.id !== 'home');
   const snapshots = useMemo(() => getHomeSnapshots(), []);
+  const primaryCards = cards.slice(0, 3);
+  const localCount = cards.filter((item) => item.embedPath).length;
+  const externalCount = cards.filter((item) => item.externalUrl).length;
 
   return (
-    <section className="module-panel">
-      <h2>cxr542 포털</h2>
-      <p>업무 외 모든 개발 서비스를 한 곳에서 열고, 각 모듈 데이터와 바로 연결됩니다.</p>
+    <section className="home-module" aria-labelledby="portal-home-title">
+      <div className="home-hero">
+        <div className="home-hero__copy">
+          <span className="home-eyebrow">Personal operations portal</span>
+          <h2 id="portal-home-title">cxr542 포털</h2>
+          <p>
+            경력 정리, 개인 도구, 지식 저장소를 한 화면에서 바로 열고 이어서 작업합니다.
+            자주 쓰는 모듈은 왼쪽 메뉴에서 순서와 이름을 바꿀 수 있습니다.
+          </p>
+        </div>
+        <dl className="home-metrics" aria-label="포털 구성 요약">
+          <div>
+            <dt>{cards.length}</dt>
+            <dd>연결 모듈</dd>
+          </div>
+          <div>
+            <dt>{localCount}</dt>
+            <dd>내장 앱</dd>
+          </div>
+          <div>
+            <dt>{externalCount}</dt>
+            <dd>외부 연결</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div className="home-focus-row" aria-label="추천 시작점">
+        {primaryCards.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className={`home-focus home-focus--${item.id}`}
+            onClick={() => onOpenModule(item.id)}
+          >
+            <span className="home-focus__icon" aria-hidden="true">
+              {item.icon}
+            </span>
+            <span>
+              <strong>{labels[item.id] || item.defaultLabel}</strong>
+              <em>{snapshots[item.id]}</em>
+            </span>
+          </button>
+        ))}
+      </div>
+
       <ul className="home-cards">
         {cards.map((item) => (
           <li key={item.id} className={`home-card home-card--${item.id}`}>
             <button type="button" className="home-card-btn" onClick={() => onOpenModule(item.id)}>
-              <strong>
+              <span className="home-card__head">
                 <span className="home-card__icon" aria-hidden="true">
                   {item.icon}
-                </span>{' '}
-                {labels[item.id] || item.defaultLabel}
-              </strong>
-              <span>{MODULE_HINTS[item.id]}</span>
+                </span>
+                <strong>{labels[item.id] || item.defaultLabel}</strong>
+              </span>
+              <span className="home-card__hint">{MODULE_HINTS[item.id]}</span>
               <span className="home-card-snapshot">{snapshots[item.id]}</span>
-              <em className="home-card-cta">{item.homeCta || '모듈 열기 →'}</em>
+              <em className="home-card-cta">{item.homeCta || '모듈 열기 ->'}</em>
             </button>
             {item.externalUrl ? (
               <div className="home-card__extra">
@@ -621,6 +679,7 @@ function ModuleContent({ active, onOpenModule, onGoHome, labels, navItems }) {
 function App() {
   const [activeModule, setActiveModule] = useState(readModuleFromUrl);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(readSidebarCollapsed);
+  const [fontScale, setFontScale] = useState(readFontScale);
   const [navLabelsOpen, setNavLabelsOpen] = useState(false);
   const [navOrderOpen, setNavOrderOpen] = useState(false);
   const { labels, updateLabels, resetLabels, defaults } = useNavLabels();
@@ -633,6 +692,16 @@ function App() {
       /* ignore */
     }
   }, [sidebarCollapsed]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(PORTAL_FONT_SCALE_KEY, fontScale);
+    } catch {
+      /* ignore */
+    }
+    document.documentElement.style.fontSize =
+      FONT_SCALE_VALUES[fontScale] || FONT_SCALE_VALUES.normal;
+  }, [fontScale]);
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -661,6 +730,8 @@ function App() {
         labels={labels}
         collapsed={sidebarCollapsed}
         onCollapsedChange={setSidebarCollapsed}
+        fontScale={fontScale}
+        onFontScaleChange={setFontScale}
         onOpenNavLabels={() => setNavLabelsOpen(true)}
         onOpenNavOrder={() => setNavOrderOpen(true)}
       />

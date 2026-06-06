@@ -306,6 +306,13 @@
         state.isNew = false;
         state.view = "list";
         render();
+        if (window.ProjectShell) {
+          ProjectShell.notifyTaskDone({
+            module: "프롬프트 모음",
+            action: "프롬프트 저장 완료",
+            title: item.title,
+          });
+        }
       });
     };
     if (state.isNew) {

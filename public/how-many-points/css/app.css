@@ -585,3 +585,53 @@ body.project-app.theme-how-many-points {
 .empty strong {
   color: var(--hmp-accent);
 }
+
+
+/* Watcha migration empty state */
+.empty--watcha {
+  margin: 0;
+  padding: clamp(1.1rem, 3vw, 1.7rem);
+  border: 1px solid rgba(var(--hmp-accent-rgb), 0.28);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(var(--hmp-accent-rgb), 0.22), transparent 34%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.16));
+  color: var(--hmp-text);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.22);
+}
+
+.empty__eyebrow {
+  width: fit-content;
+  margin: 0 0 0.65rem;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(var(--hmp-accent-rgb), 0.16);
+  color: #ff9ab8;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.empty--watcha h2 {
+  margin: 0;
+  font-size: clamp(1.2rem, 4vw, 1.85rem);
+  line-height: 1.22;
+}
+
+.empty--watcha p {
+  max-width: 42rem;
+  margin: 0.75rem 0 0;
+  color: #c7c7d4;
+  line-height: 1.65;
+}
+
+.empty__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.empty__note {
+  font-size: 0.78rem;
+  color: var(--hmp-muted) !important;
+}

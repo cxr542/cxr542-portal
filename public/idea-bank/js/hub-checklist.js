@@ -195,7 +195,7 @@
           cat +
           "/" +
           encodeURIComponent(id) +
-          '" target="_blank" rel="noopener noreferrer">허브에서 열기</a> · " +
+          '" target="_blank" rel="noopener noreferrer">허브에서 열기</a> · ' +
           '<a href="' +
           HUB_PAGES +
           "/projects/" +

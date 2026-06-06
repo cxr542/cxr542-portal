@@ -371,7 +371,17 @@
   function seedIfEmpty() {
     return loadBundle().then(function (b) {
       if (!b.profile.name && !b.employments.length && !b.documents.length) {
-        return b;
+        return fetch("data/default-bundle.json", { cache: "no-store" })
+          .then(function (res) {
+            if (!res.ok) throw new Error("seed-not-found");
+            return res.json();
+          })
+          .then(function (seed) {
+            return importBundle(seed.bundle || seed, true).then(loadBundle);
+          })
+          .catch(function () {
+            return b;
+          });
       }
       return b;
     });

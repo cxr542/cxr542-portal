@@ -600,6 +600,13 @@
         state.isNew = false;
         state.view = "list";
         render();
+        if (window.ProjectShell) {
+          ProjectShell.notifyTaskDone({
+            module: "아이디어 뱅크",
+            action: "아이디어 저장 완료",
+            title: idea.title,
+          });
+        }
       });
     };
     if (state.isNew) {

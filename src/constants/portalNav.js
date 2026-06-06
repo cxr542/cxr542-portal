@@ -5,10 +5,10 @@ export const NAV_ORDER_STORAGE_KEY = 'cxr542-portal-nav-order-v1';
 export const SIDEBAR_COLLAPSED_KEY = 'cxr542-portal-sidebar-collapsed';
 
 export const PORTAL_NAV_ITEMS = [
-  { id: 'home', icon: '🏠', defaultLabel: '포털 홈', tooltip: '모듈 목록·바로가기 홈' },
+  { id: 'home', icon: '🧭', defaultLabel: '포털 홈', tooltip: '모듈 목록·바로가기 홈' },
   {
     id: 'who-are-you',
-    icon: '👤',
+    icon: '🪪',
     defaultLabel: '나는누구?',
     tooltip: '자기소개서·근무·기술경력·학력 관리 · 미리보기',
     homeCta: '나는누구? 열기 →',
@@ -18,7 +18,7 @@ export const PORTAL_NAV_ITEMS = [
   },
   {
     id: 'vision-font',
-    icon: '🔤',
+    icon: '🔎',
     defaultLabel: 'vision-font',
     tooltip: '시력 테스트 · 맞춤 글꼴 · 기사 읽기 · JSON 백업',
     homeCta: 'vision-font 열기 →',
@@ -38,7 +38,7 @@ export const PORTAL_NAV_ITEMS = [
   },
   {
     id: 'marathon',
-    icon: '🏃',
+    icon: '🏁',
     defaultLabel: '마라톤 기록장',
     tooltip: '대회 기록·PB·통계·JSON 백업',
     homeCta: '마라톤 기록장 열기 →',
@@ -57,7 +57,7 @@ export const PORTAL_NAV_ITEMS = [
   },
   {
     id: 'prompt-collection',
-    icon: '📝',
+    icon: '✍️',
     defaultLabel: '프롬프트 모음',
     tooltip: 'AI·업무 프롬프트 제목·본문 저장·복사·JSON 백업',
     homeCta: '프롬프트 모음 열기 →',
@@ -66,7 +66,7 @@ export const PORTAL_NAV_ITEMS = [
   },
   {
     id: 'how-many-points',
-    icon: '⭐',
+    icon: '🎬',
     defaultLabel: '너는몇점?',
     tooltip: '영화·시리즈·책·웹툰 평점 · 왓챠 CSV 가져오기',
     homeCta: '너는몇점? 열기 →',
@@ -85,7 +85,7 @@ export const PORTAL_NAV_ITEMS = [
   },
   {
     id: 'gemini-tuner',
-    icon: '✨',
+    icon: '🎛️',
     defaultLabel: 'GeminiTuner',
     tooltip: 'FinOps 패널 미리보기 · 스파클 · 한도·예산 (데모)',
     homeCta: 'GeminiTuner 열기 →',

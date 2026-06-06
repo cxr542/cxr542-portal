@@ -162,7 +162,7 @@
       view +
       '"><span class="dash-card__icon">' +
       icon +
-      "</span><span class="dash-card__n'>" +
+      '</span><span class="dash-card__n">' +
       n +
       '</span><span class="dash-card__label">' +
       escapeHtml(label) +
@@ -222,6 +222,13 @@
       WhoAreYouDb.saveProfile(profile).then(function () {
         state.draft = null;
         render();
+        if (window.ProjectShell) {
+          ProjectShell.notifyTaskDone({
+            module: "나는누구?",
+            action: "프로필 저장 완료",
+            title: profile.name || "profile",
+          });
+        }
       });
     };
   }
@@ -282,7 +289,7 @@
             escapeHtml(p.id) +
             '"><td><strong>' +
             escapeHtml(p.projectName) +
-            "</strong><br><span class="muted">" +
+            '</strong><br><span class="muted">' +
             escapeHtml((p.tasks || "").slice(0, 60)) +
             "</span></td><td>" +
             fmtPeriod(p.startDate, p.endDate) +
@@ -348,7 +355,7 @@
             fmtPeriod(item.startDate, item.endDate, item.isCurrent) +
             "</span><strong>" +
             escapeHtml(title) +
-            "</strong><span class="timeline__sub">" +
+            '</strong><span class="timeline__sub">' +
             escapeHtml(sub.trim()) +
             "</span></button></li>"
           );
@@ -430,7 +437,7 @@
             (d.targetCompany ? '<p class="muted">→ ' + escapeHtml(d.targetCompany) + "</p>" : "") +
             '<p class="doc-card__preview">' +
             escapeHtml((d.body || "").slice(0, 120)) +
-            "</p><span class="doc-card__meta">' +
+            '</p><span class="doc-card__meta">' +
             (d.body ? d.body.length + "자" : "0자") +
             "</span></article>"
           );
@@ -783,6 +790,13 @@
         state.editId = null;
         state.draft = null;
         render();
+        if (window.ProjectShell) {
+          ProjectShell.notifyTaskDone({
+            module: "나는누구?",
+            action: "항목 저장 완료",
+            title: fields[titleKey],
+          });
+        }
       });
     };
     if (state.isNew) {
