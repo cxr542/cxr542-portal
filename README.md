@@ -2,8 +2,20 @@
 
 업무 외 개발 서비스(vision-font, today-shoes, 마라톤 기록장, 아이디어 뱅크, AI-Synapse Wiki, GeminiTuner)를 한곳에서 관리하는 개인 포털입니다.
 
+## Portal Role
+
+`cxr542-ai-portal`은 개인 프로젝트 포털입니다.
+
 > **워크스페이스:** 이 repo(`cxr542-portal`)만 clone·열어도 됩니다.  
 > 교육팀 TMS(업무)는 별도 repo [`edu-team-tms`](https://github.com/cxr542/edu-team-tms) — 집(윈도우)에서는 포털, 회사(맥)에서는 TMS.
+
+## Project Status Board
+
+홈 화면은 프로젝트를 `Active Projects`, `Experiments`, `Paused`, `Ideas`로 분류합니다.
+
+## Project Card Metadata
+
+각 프로젝트 카드는 상태, 한 줄 설명, 다음 할 일을 표시합니다.
 
 ## 환경
 
@@ -84,6 +96,12 @@ npm run lint
 
 - [docs/deployment-process.md](docs/deployment-process.md)
 - [docs/module-specs.md](docs/module-specs.md)
+
+## Safety Notes
+
+- Wiki admin/API는 별도 승인 없이 변경하지 않습니다.
+- 모듈 라우팅과 외부 링크는 별도 승인 없이 변경하지 않습니다.
+- 홈 화면 상태 보드는 기존 라우팅을 보조하는 표시용 구조입니다.
 
 - ci/cd smoke test
 

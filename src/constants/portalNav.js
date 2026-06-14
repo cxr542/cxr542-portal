@@ -15,6 +15,10 @@ export const PORTAL_NAV_ITEMS = [
     embedPath: '/who-are-you/index.html',
     externalUrl: 'https://career.sw.or.kr',
     externalLabel: 'SW기술자 경력관리(공식)',
+    boardSection: 'active',
+    boardStatus: 'Active',
+    boardDescription: '정체성/소개 페이지 실험 모듈입니다.',
+    boardNextAction: '최신 스냅샷과 소개 문구를 점검합니다.',
   },
   {
     id: 'vision-font',
@@ -25,6 +29,10 @@ export const PORTAL_NAV_ITEMS = [
     embedPath: '/vision-font/index.html',
     externalUrl: 'https://cxr542.github.io/cxr542-ai/projects/vision-font/',
     externalLabel: 'GitHub Pages (이전 데모)',
+    boardSection: 'active',
+    boardStatus: 'Active',
+    boardDescription: '시각/폰트 실험 프로젝트입니다.',
+    boardNextAction: '샘플 페이지와 외부 링크를 정리합니다.',
   },
   {
     id: 'today-shoes',
@@ -35,6 +43,10 @@ export const PORTAL_NAV_ITEMS = [
     embedPath: '/today-shoes/index.html',
     externalUrl: 'https://cxr542.github.io/today-shoes/',
     externalLabel: 'Expo 앱 (GitHub Pages)',
+    boardSection: 'active',
+    boardStatus: 'Active',
+    boardDescription: '오늘의 신발/스타일 기록 프로젝트입니다.',
+    boardNextAction: '최근 기록 화면과 링크 상태를 확인합니다.',
   },
   {
     id: 'marathon',
@@ -45,6 +57,10 @@ export const PORTAL_NAV_ITEMS = [
     embedPath: '/marathon-log/index.html',
     externalUrl: 'https://cxr542.github.io/cxr542-ai/projects/marathon-log/',
     externalLabel: 'GitHub Pages (이전 데이터)',
+    boardSection: 'experiments',
+    boardStatus: 'Experiment',
+    boardDescription: '마라톤 기록/훈련 로그 실험 프로젝트입니다.',
+    boardNextAction: '데이터 구조와 표시 방식을 점검합니다.',
   },
   {
     id: 'idea-bank',
@@ -54,6 +70,10 @@ export const PORTAL_NAV_ITEMS = [
     homeCta: '아이디어 뱅크 열기 →',
     embedPath: '/idea-bank/index.html',
     externalUrl: null,
+    boardSection: 'experiments',
+    boardStatus: 'Experiment',
+    boardDescription: '아이디어와 실험 후보를 모아두는 프로젝트입니다.',
+    boardNextAction: 'workspace ideabank와의 관계를 정리합니다.',
   },
   {
     id: 'prompt-collection',
@@ -63,6 +83,10 @@ export const PORTAL_NAV_ITEMS = [
     homeCta: '프롬프트 모음 열기 →',
     embedPath: '/prompt-collection/index.html',
     externalUrl: null,
+    boardSection: 'experiments',
+    boardStatus: 'Experiment',
+    boardDescription: '프롬프트 모음과 작업 지시문을 정리하는 프로젝트입니다.',
+    boardNextAction: 'Codex/Cursor용 프롬프트 분류를 정리합니다.',
   },
   {
     id: 'how-many-points',
@@ -72,6 +96,10 @@ export const PORTAL_NAV_ITEMS = [
     homeCta: '너는몇점? 열기 →',
     embedPath: '/how-many-points/index.html',
     externalUrl: null,
+    boardSection: 'paused',
+    boardStatus: 'Paused',
+    boardDescription: '점수/계산 실험 모듈입니다.',
+    boardNextAction: '유지 여부를 검토합니다.',
   },
   {
     id: 'ai-synapse-wiki',
@@ -82,6 +110,10 @@ export const PORTAL_NAV_ITEMS = [
     embedPath: '/ai-synapse-wiki/index.html',
     externalUrl: 'https://cxr542.github.io/cxr542-ai/projects/ai-synapse-wiki/',
     externalLabel: 'GitHub Pages Wiki (미러)',
+    boardSection: 'active',
+    boardStatus: 'Active',
+    boardDescription: 'AI Synapse Wiki 문서를 관리하는 지식 모듈입니다.',
+    boardNextAction: '편집 모드와 정적 모드 안내를 분리합니다.',
   },
   {
     id: 'gemini-tuner',
@@ -92,6 +124,10 @@ export const PORTAL_NAV_ITEMS = [
     embedPath: '/gemini-tuner/index.html',
     externalUrl: 'https://github.com/cxr542/GeminiTuner',
     externalLabel: 'Chrome 확장 (실사용)',
+    boardSection: 'experiments',
+    boardStatus: 'Experiment',
+    boardDescription: 'Gemini 관련 튜닝/실험 도구입니다.',
+    boardNextAction: 'GitHub 링크와 사용 목적을 명확히 합니다.',
   },
 ];
 

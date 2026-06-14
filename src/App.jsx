@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
 import EnvironmentBadge from './components/EnvironmentBadge';
 import NavLabelsModal from './components/NavLabelsModal';
@@ -6,7 +6,6 @@ import NavOrderModal from './components/NavOrderModal';
 import PortalSidebar from './components/PortalSidebar';
 import ReleaseNotesPanel from './components/ReleaseNotesPanel';
 import {
-  MODULE_HINTS,
   PORTAL_NAV_ITEMS,
   RELEASE_NOTES_MODULE_ID,
   SIDEBAR_COLLAPSED_KEY,
@@ -15,7 +14,6 @@ import {
 import { RELEASE_NOTES_LABEL, latestReleaseVersion } from './constants/releaseNotes';
 import { useNavLabels } from './hooks/useNavLabels';
 import { useNavOrder } from './hooks/useNavOrder';
-import { getHomeSnapshots } from './utils/homeSnapshots';
 import { getWorkspaceUrl } from './constants/workspaceUrl';
 import {
   fetchWikiAdminConfig,
@@ -43,6 +41,44 @@ const PROMPT_COLLECTION_APP_URL = '/prompt-collection/index.html';
 const HOW_MANY_POINTS_APP_URL = '/how-many-points/index.html';
 const WHO_ARE_YOU_APP_URL = '/who-are-you/index.html';
 const MARATHON_LOG_APP_URL = '/marathon-log/index.html';
+
+const PROJECT_BOARD_SECTIONS = [
+  {
+    key: 'active',
+    title: 'Active Projects',
+    description: '현재 진행 중인 개인 프로젝트를 바로 엽니다.',
+    ids: ['who-are-you', 'vision-font', 'today-shoes', 'ai-synapse-wiki'],
+  },
+  {
+    key: 'experiments',
+    title: 'Experiments',
+    description: '실험 중인 도구와 후보 프로젝트를 모아둡니다.',
+    ids: ['marathon', 'idea-bank', 'prompt-collection', 'gemini-tuner'],
+  },
+  {
+    key: 'paused',
+    title: 'Paused',
+    description: '잠시 멈춘 프로젝트는 유지 여부를 따로 검토합니다.',
+    ids: ['how-many-points'],
+  },
+  {
+    key: 'ideas',
+    title: 'Ideas',
+    description: '아직 구현 전인 개인 프로젝트 후보를 정리합니다.',
+    ids: [],
+  },
+];
+
+const IDEAS_PLACEHOLDER_CARD = {
+  id: 'ideas-placeholder',
+  icon: '💭',
+  defaultLabel: 'Ideas',
+  boardStatus: 'Ideas',
+  boardDescription: '아직 구현 전인 개인 프로젝트 후보를 모아둘 예정입니다.',
+  boardNextAction: '신규 아이디어 입력 방식을 정합니다.',
+  boardSection: 'ideas',
+  isPlaceholder: true,
+};
 
 const PORTAL_FONT_SCALE_KEY = 'cxr542-portal-font-scale';
 const FONT_SCALE_OPTIONS = new Set(['small', 'normal', 'large']);
@@ -77,6 +113,16 @@ function moduleHasEmbed(id) {
   return Boolean(findNavItem(id)?.embedPath);
 }
 
+function getProjectBoardItems(navItems) {
+  const itemsById = new Map(navItems.filter((item) => item.id !== 'home').map((item) => [item.id, item]));
+  return PROJECT_BOARD_SECTIONS.map((section) => ({
+    ...section,
+    items: section.ids
+      .map((id) => itemsById.get(id))
+      .filter(Boolean),
+  }));
+}
+
 function readModuleFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const fromQuery = params.get('m');
@@ -87,87 +133,124 @@ function readModuleFromUrl() {
 }
 
 function HomeModule({ onOpenModule, labels, navItems }) {
-  const cards = navItems.filter((item) => item.id !== 'home');
-  const snapshots = useMemo(() => getHomeSnapshots(), []);
-  const primaryCards = cards.slice(0, 3);
-  const localCount = cards.filter((item) => item.embedPath).length;
-  const externalCount = cards.filter((item) => item.externalUrl).length;
+  const boardSections = getProjectBoardItems(navItems);
+  const totalCards = boardSections.reduce((sum, section) => sum + section.items.length, 0) + 1;
+  const activeCount = boardSections.find((section) => section.key === 'active')?.items.length || 0;
+  const experimentCount = boardSections.find((section) => section.key === 'experiments')?.items.length || 0;
+  const pausedCount = boardSections.find((section) => section.key === 'paused')?.items.length || 0;
+  const ideaCount = 1;
 
   return (
     <section className="home-module" aria-labelledby="portal-home-title">
       <div className="home-hero">
         <div className="home-hero__copy">
-          <span className="home-eyebrow">Personal operations portal</span>
-          <h2 id="portal-home-title">cxr542 포털</h2>
+          <span className="home-eyebrow">Personal project portal</span>
+          <h2 id="portal-home-title">cxr542-ai-portal</h2>
           <p>
-            경력 정리, 개인 도구, 지식 저장소를 한 화면에서 바로 열고 이어서 작업합니다.
+            개인 프로젝트를 상태별로 분류해 한 화면에서 정리합니다.
             자주 쓰는 모듈은 왼쪽 메뉴에서 순서와 이름을 바꿀 수 있습니다.
           </p>
         </div>
         <dl className="home-metrics" aria-label="포털 구성 요약">
           <div>
-            <dt>{cards.length}</dt>
-            <dd>연결 모듈</dd>
+            <dt>{totalCards}</dt>
+            <dd>프로젝트 카드</dd>
           </div>
           <div>
-            <dt>{localCount}</dt>
-            <dd>내장 앱</dd>
+            <dt>{activeCount}</dt>
+            <dd>Active Projects</dd>
           </div>
           <div>
-            <dt>{externalCount}</dt>
-            <dd>외부 연결</dd>
+            <dt>{experimentCount}</dt>
+            <dd>Experiments</dd>
+          </div>
+          <div>
+            <dt>{pausedCount + ideaCount}</dt>
+            <dd>Paused + Ideas</dd>
           </div>
         </dl>
       </div>
 
-      <div className="home-focus-row" aria-label="추천 시작점">
-        {primaryCards.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className={`home-focus home-focus--${item.id}`}
-            onClick={() => onOpenModule(item.id)}
-          >
-            <span className="home-focus__icon" aria-hidden="true">
-              {item.icon}
-            </span>
-            <span>
-              <strong>{labels[item.id] || item.defaultLabel}</strong>
-              <em>{snapshots[item.id]}</em>
-            </span>
-          </button>
-        ))}
-      </div>
+      {boardSections.map((section) => (
+        <section
+          key={section.key}
+          className={`board-section board-section--${section.key}`}
+          aria-labelledby={`board-${section.key}`}
+        >
+          <div className="board-section__head">
+            <div>
+              <div className="home-eyebrow home-eyebrow--section">{section.title}</div>
+              <h3 id={`board-${section.key}`}>{section.title}</h3>
+              <p>{section.description}</p>
+            </div>
+            <span className={`board-badge board-badge--${section.key}`}>{section.title}</span>
+          </div>
 
-      <ul className="home-cards">
-        {cards.map((item) => (
-          <li key={item.id} className={`home-card home-card--${item.id}`}>
-            <button type="button" className="home-card-btn" onClick={() => onOpenModule(item.id)}>
-              <span className="home-card__head">
-                <span className="home-card__icon" aria-hidden="true">
-                  {item.icon}
-                </span>
-                <strong>{labels[item.id] || item.defaultLabel}</strong>
-              </span>
-              <span className="home-card__hint">{MODULE_HINTS[item.id]}</span>
-              <span className="home-card-snapshot">{snapshots[item.id]}</span>
-              <em className="home-card-cta">{item.homeCta || '모듈 열기 ->'}</em>
-            </button>
-            {item.externalUrl ? (
-              <div className="home-card__extra">
-                <a
-                  href={item.externalUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="home-card__external"
-                >
-                  {item.externalLabel || '외부 앱'} ↗
-                </a>
-              </div>
-            ) : null}
-          </li>
-        ))}
-      </ul>
+          <div className={`board-grid board-grid--${section.key}`}>
+            {section.items.length > 0 ? (
+              section.items.map((item) => (
+                <article key={item.id} className={`project-card project-card--${item.id}`}>
+                  <div className="project-card__top">
+                    <div className="project-card__icon" aria-hidden="true">
+                      {item.icon}
+                    </div>
+                    <div className="project-card__meta">
+                      <span className="project-card__status">{item.boardStatus || 'Active'}</span>
+                      <h4>{labels[item.id] || item.defaultLabel}</h4>
+                      <p>{item.boardDescription}</p>
+                    </div>
+                  </div>
+                  <div className="project-card__bottom">
+                    <div className="project-card__next">
+                      <span>Next</span>
+                      <strong>{item.boardNextAction}</strong>
+                    </div>
+                    <div className="project-card__actions">
+                      <button type="button" className="project-card__open" onClick={() => onOpenModule(item.id)}>
+                        {item.homeCta || '열기 →'}
+                      </button>
+                      {item.externalUrl ? (
+                        <a
+                          href={item.externalUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="project-card__external"
+                        >
+                          {item.externalLabel || '외부 링크'}
+                        </a>
+                      ) : null}
+                    </div>
+                  </div>
+                </article>
+              ))
+            ) : (
+              <article className="project-card project-card--placeholder">
+                <div className="project-card__top">
+                  <div className="project-card__icon" aria-hidden="true">
+                    {IDEAS_PLACEHOLDER_CARD.icon}
+                  </div>
+                  <div className="project-card__meta">
+                    <span className="project-card__status">{IDEAS_PLACEHOLDER_CARD.boardStatus}</span>
+                    <h4>{IDEAS_PLACEHOLDER_CARD.defaultLabel}</h4>
+                    <p>{IDEAS_PLACEHOLDER_CARD.boardDescription}</p>
+                  </div>
+                </div>
+                <div className="project-card__bottom">
+                  <div className="project-card__next">
+                    <span>Next</span>
+                    <strong>{IDEAS_PLACEHOLDER_CARD.boardNextAction}</strong>
+                  </div>
+                  <div className="project-card__actions">
+                    <button type="button" className="project-card__open project-card__open--disabled" disabled>
+                      준비 중
+                    </button>
+                  </div>
+                </div>
+              </article>
+            )}
+          </div>
+        </section>
+      ))}
     </section>
   );
 }
