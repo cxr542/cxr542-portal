@@ -304,6 +304,16 @@ function HomeModule({ onOpenModule, labels, navItems, favoriteIds, onToggleFavor
                     <h4>{IDEAS_PLACEHOLDER_CARD.defaultLabel}</h4>
                     <p>{IDEAS_PLACEHOLDER_CARD.boardDescription}</p>
                   </div>
+                  <button
+                    type="button"
+                    className="favorite-toggle favorite-toggle--unavailable"
+                    disabled
+                    aria-label="자주 쓰는 도구에 추가"
+                    aria-pressed="false"
+                    title="프로젝트를 추가하면 즐겨찾기에 넣을 수 있습니다"
+                  >
+                    ☆
+                  </button>
                 </div>
                 <div className="project-card__bottom">
                   <div className="project-card__next">
