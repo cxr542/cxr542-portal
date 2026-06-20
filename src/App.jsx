@@ -35,6 +35,7 @@ import {
   GEMINI_TUNER_REPO_URL,
 } from './utils/geminiTunerDev';
 import { VISION_FONT_APP_URL } from './utils/visionFontDev';
+import { readFavoriteIds, toggleFavoriteId, writeFavoriteIds } from './utils/favorites';
 
 const IDEA_BANK_APP_URL = '/idea-bank/index.html';
 const PROMPT_COLLECTION_APP_URL = '/prompt-collection/index.html';
@@ -87,6 +88,9 @@ const FONT_SCALE_VALUES = {
   normal: '100%',
   large: '112.5%',
 };
+const FAVORITABLE_PROJECT_IDS = PORTAL_NAV_ITEMS
+  .filter((item) => item.id !== 'home')
+  .map((item) => item.id);
 
 function readFontScale() {
   try {
@@ -132,8 +136,10 @@ function readModuleFromUrl() {
   return 'home';
 }
 
-function HomeModule({ onOpenModule, labels, navItems }) {
+function HomeModule({ onOpenModule, labels, navItems, favoriteIds, onToggleFavorite }) {
   const boardSections = getProjectBoardItems(navItems);
+  const favoritesById = new Map(navItems.map((item) => [item.id, item]));
+  const favoriteItems = favoriteIds.map((id) => favoritesById.get(id)).filter(Boolean);
   const totalCards = boardSections.reduce((sum, section) => sum + section.items.length, 0) + 1;
   const activeCount = boardSections.find((section) => section.key === 'active')?.items.length || 0;
   const experimentCount = boardSections.find((section) => section.key === 'experiments')?.items.length || 0;
@@ -171,6 +177,53 @@ function HomeModule({ onOpenModule, labels, navItems }) {
         </dl>
       </div>
 
+      <section className="favorite-tools" aria-labelledby="favorite-tools-title">
+        <div className="favorite-tools__head">
+          <div>
+            <div className="home-eyebrow home-eyebrow--section">오늘 바로 쓰기</div>
+            <h3 id="favorite-tools-title">자주 쓰는 도구</h3>
+          </div>
+        </div>
+        {favoriteItems.length > 0 ? (
+          <div className="favorite-tools__list">
+            {favoriteItems.map((item) => {
+              const isFavorite = favoriteIds.includes(item.id);
+              const label = labels[item.id] || item.defaultLabel;
+              return (
+                <article key={item.id} className="favorite-tool">
+                  <button
+                    type="button"
+                    className="favorite-tool__open"
+                    onClick={() => onOpenModule(item.id)}
+                  >
+                    <span className="favorite-tool__icon" aria-hidden="true">{item.icon}</span>
+                    <span>
+                      <strong>{label}</strong>
+                      <small>{item.boardStatus || 'Project'}</small>
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    className="favorite-toggle"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onToggleFavorite(item.id);
+                    }}
+                    aria-label={`${label} 자주 쓰는 도구에서 제거`}
+                    aria-pressed={isFavorite}
+                    title="자주 쓰는 도구에서 제거"
+                  >
+                    ★
+                  </button>
+                </article>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="favorite-tools__empty">자주 쓰는 도구를 추가해보세요.</p>
+        )}
+      </section>
+
       {boardSections.map((section) => (
         <section
           key={section.key}
@@ -188,7 +241,10 @@ function HomeModule({ onOpenModule, labels, navItems }) {
 
           <div className={`board-grid board-grid--${section.key}`}>
             {section.items.length > 0 ? (
-              section.items.map((item) => (
+              section.items.map((item) => {
+                const isFavorite = favoriteIds.includes(item.id);
+                const label = labels[item.id] || item.defaultLabel;
+                return (
                 <article key={item.id} className={`project-card project-card--${item.id}`}>
                   <div className="project-card__top">
                     <div className="project-card__icon" aria-hidden="true">
@@ -196,9 +252,22 @@ function HomeModule({ onOpenModule, labels, navItems }) {
                     </div>
                     <div className="project-card__meta">
                       <span className="project-card__status">{item.boardStatus || 'Active'}</span>
-                      <h4>{labels[item.id] || item.defaultLabel}</h4>
+                      <h4>{label}</h4>
                       <p>{item.boardDescription}</p>
                     </div>
+                    <button
+                      type="button"
+                      className={`favorite-toggle${isFavorite ? ' is-favorite' : ''}`}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onToggleFavorite(item.id);
+                      }}
+                      aria-label={`${label} ${isFavorite ? '자주 쓰는 도구에서 제거' : '자주 쓰는 도구에 추가'}`}
+                      aria-pressed={isFavorite}
+                      title={isFavorite ? '자주 쓰는 도구에서 제거' : '자주 쓰는 도구에 추가'}
+                    >
+                      {isFavorite ? '★' : '☆'}
+                    </button>
                   </div>
                   <div className="project-card__bottom">
                     <div className="project-card__next">
@@ -222,7 +291,8 @@ function HomeModule({ onOpenModule, labels, navItems }) {
                     </div>
                   </div>
                 </article>
-              ))
+                );
+              })
             ) : (
               <article className="project-card project-card--placeholder">
                 <div className="project-card__top">
@@ -745,7 +815,7 @@ function WhoAreYouModule({ onGoHome }) {
   );
 }
 
-function ModuleContent({ active, onOpenModule, onGoHome, labels, navItems }) {
+function ModuleContent({ active, onOpenModule, onGoHome, labels, navItems, favoriteIds, onToggleFavorite }) {
   if (active === RELEASE_NOTES_MODULE_ID) return <ReleaseNotesPanel onGoHome={onGoHome} />;
   if (active === 'vision-font') return <VisionFontModule onGoHome={onGoHome} />;
   if (active === 'today-shoes') return <TodayShoesModule onGoHome={onGoHome} />;
@@ -756,7 +826,15 @@ function ModuleContent({ active, onOpenModule, onGoHome, labels, navItems }) {
   if (active === 'who-are-you') return <WhoAreYouModule onGoHome={onGoHome} />;
   if (active === 'ai-synapse-wiki') return <AiSynapseWikiModule onGoHome={onGoHome} />;
   if (active === 'gemini-tuner') return <GeminiTunerModule onGoHome={onGoHome} />;
-  return <HomeModule onOpenModule={onOpenModule} labels={labels} navItems={navItems} />;
+  return (
+    <HomeModule
+      onOpenModule={onOpenModule}
+      labels={labels}
+      navItems={navItems}
+      favoriteIds={favoriteIds}
+      onToggleFavorite={onToggleFavorite}
+    />
+  );
 }
 
 function App() {
@@ -767,6 +845,8 @@ function App() {
   const [navOrderOpen, setNavOrderOpen] = useState(false);
   const { labels, updateLabels, resetLabels, defaults } = useNavLabels();
   const { navItems, order, setOrder, resetOrder } = useNavOrder();
+  const [favoriteIds, setFavoriteIds] = useState(() => readFavoriteIds(FAVORITABLE_PROJECT_IDS));
+  const [favoriteNotice, setFavoriteNotice] = useState('');
 
   useEffect(() => {
     try {
@@ -797,6 +877,19 @@ function App() {
     window.history.replaceState(null, '', `${url.pathname}?${url.searchParams.toString()}`);
   }, [activeModule]);
 
+  useEffect(() => {
+    if (!favoriteNotice) return undefined;
+    const timeoutId = window.setTimeout(() => setFavoriteNotice(''), 2400);
+    return () => window.clearTimeout(timeoutId);
+  }, [favoriteNotice]);
+
+  const handleFavoriteToggle = (id) => {
+    const nextIds = toggleFavoriteId(favoriteIds, id, FAVORITABLE_PROJECT_IDS);
+    writeFavoriteIds(nextIds, FAVORITABLE_PROJECT_IDS);
+    setFavoriteIds(nextIds);
+    setFavoriteNotice(nextIds.includes(id) ? '자주 쓰는 도구에 추가했어요.' : '자주 쓰는 도구에서 제거했어요.');
+  };
+
   const goHome = () => setActiveModule('home');
   const activeTitle =
     activeModule === RELEASE_NOTES_MODULE_ID
@@ -817,6 +910,7 @@ function App() {
         onFontScaleChange={setFontScale}
         onOpenNavLabels={() => setNavLabelsOpen(true)}
         onOpenNavOrder={() => setNavOrderOpen(true)}
+        favoriteIds={favoriteIds}
       />
       <main className={`content${moduleHasEmbed(activeModule) ? ' content--embed' : ''}`}>
         <header className="content-header">
@@ -837,8 +931,11 @@ function App() {
           onGoHome={goHome}
           labels={labels}
           navItems={navItems}
+          favoriteIds={favoriteIds}
+          onToggleFavorite={handleFavoriteToggle}
         />
       </main>
+      {favoriteNotice ? <p className="portal-toast" role="status" aria-live="polite">{favoriteNotice}</p> : null}
       <NavLabelsModal
         isOpen={navLabelsOpen}
         onClose={() => setNavLabelsOpen(false)}

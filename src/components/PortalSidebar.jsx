@@ -14,6 +14,7 @@ export default function PortalSidebar({
   onCollapsedChange,
   fontScale,
   onFontScaleChange,
+  favoriteIds,
 }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -33,6 +34,8 @@ export default function PortalSidebar({
 
   const collapseLabel = collapsed ? '메뉴 펼치기' : '메뉴 접기';
   const workspaceUrl = getWorkspaceUrl();
+  const favoritesById = new Map(navItems.map((item) => [item.id, item]));
+  const favoriteItems = favoriteIds.map((id) => favoritesById.get(id)).filter(Boolean);
 
   return (
     <aside className="sidebar" id="portal-sidebar" aria-label="포털 메뉴">
@@ -50,6 +53,28 @@ export default function PortalSidebar({
       </div>
 
       <nav className="sidebar__nav" aria-label="주 메뉴">
+        <section className="sidebar-favorites" aria-labelledby="sidebar-favorites-title">
+          <span id="sidebar-favorites-title" className="sidebar-favorites__title">자주 쓰는 도구</span>
+          {favoriteItems.length > 0 ? (
+            favoriteItems.map((item) => {
+              const label = labels[item.id] || item.defaultLabel;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`nav-btn nav-btn--favorite${activeModule === item.id ? ' active' : ''}`}
+                  onClick={() => onModuleChange(item.id)}
+                  {...navTooltipProps(item)}
+                >
+                  <span className="nav-btn__icon" aria-hidden="true">{item.icon}</span>
+                  <span className="nav-btn__label">{label}</span>
+                </button>
+              );
+            })
+          ) : (
+            <p className="sidebar-favorites__empty">자주 쓰는 도구를 추가해보세요.</p>
+          )}
+        </section>
         {navItems.map((item) => {
           const label = labels[item.id] || item.defaultLabel;
           return (
