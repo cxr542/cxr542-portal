@@ -921,6 +921,7 @@ function App() {
         onOpenNavLabels={() => setNavLabelsOpen(true)}
         onOpenNavOrder={() => setNavOrderOpen(true)}
         favoriteIds={favoriteIds}
+        onToggleFavorite={handleFavoriteToggle}
       />
       <main className={`content${moduleHasEmbed(activeModule) ? ' content--embed' : ''}`}>
         <header className="content-header">

@@ -9,6 +9,7 @@
 - Base surface: `#f3f5fb`; elevated surfaces: white and soft slate gradients.
 - Primary text: `#0f172a`; secondary text: `#475569`; supporting text: `#64748b`.
 - Status accents: blue `#2563eb` (active), violet `#7c3aed` (experiments), amber `#d97706` (paused), slate `#475569` (ideas).
+- Favorite accent: yellow `#facc15`, reserved for selected favorite actions in the dark portal menu.
 - Sidebar: deep navy `#0f1324` with pale indigo text.
 - Typography: the browser system sans-serif stack defined in `src/index.css`; headings use tight letter spacing and high weight.
 

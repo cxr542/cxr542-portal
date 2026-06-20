@@ -153,6 +153,60 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.sidebar-all-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.1rem 0.1rem 0.35rem;
+}
+
+.sidebar-menu-item {
+  display: flex;
+  align-items: stretch;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.sidebar-menu-item .nav-btn {
+  min-width: 0;
+  flex: 1;
+}
+
+.sidebar-favorite-toggle {
+  flex: 0 0 2.5rem;
+  width: 2.5rem;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgba(186, 230, 253, 0.42);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.3);
+  color: #cbd5e1;
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sidebar-favorite-toggle:hover,
+.sidebar-favorite-toggle:focus-visible {
+  border-color: #facc15;
+  color: #fde68a;
+}
+
+.sidebar-favorite-toggle.is-favorite {
+  border-color: rgba(250, 204, 21, 0.7);
+  background: rgba(250, 204, 21, 0.14);
+  color: #facc15;
+}
+
+.sidebar-favorite-toggle:focus-visible {
+  outline: 3px solid #7dd3fc;
+  outline-offset: 2px;
+}
+
 .sidebar-favorites__title {
   padding: 0 0.55rem;
   color: #bae6fd;

@@ -15,6 +15,7 @@ export default function PortalSidebar({
   fontScale,
   onFontScaleChange,
   favoriteIds,
+  onToggleFavorite,
 }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -36,6 +37,38 @@ export default function PortalSidebar({
   const workspaceUrl = getWorkspaceUrl();
   const favoritesById = new Map(navItems.map((item) => [item.id, item]));
   const favoriteItems = favoriteIds.map((id) => favoritesById.get(id)).filter(Boolean);
+  const renderProjectMenuItem = (item) => {
+    const label = labels[item.id] || item.defaultLabel;
+    const isFavorite = favoriteIds.includes(item.id);
+
+    return (
+      <div key={item.id} className="sidebar-menu-item">
+        <button
+          type="button"
+          className={`nav-btn nav-btn--module${activeModule === item.id ? ' active' : ''}`}
+          onClick={() => onModuleChange(item.id)}
+          {...navTooltipProps(item)}
+        >
+          <span className="nav-btn__icon" aria-hidden="true">{item.icon}</span>
+          <span className="nav-btn__label">{label}</span>
+        </button>
+        <button
+          type="button"
+          className={`sidebar-favorite-toggle${isFavorite ? ' is-favorite' : ''}`}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onToggleFavorite(item.id);
+          }}
+          aria-label={`${label} ${isFavorite ? '자주 쓰는 도구에서 제거' : '자주 쓰는 도구에 추가'}`}
+          aria-pressed={isFavorite}
+          title={isFavorite ? '자주 쓰는 도구에서 제거' : '자주 쓰는 도구에 추가'}
+        >
+          {isFavorite ? '★' : '☆'}
+        </button>
+      </div>
+    );
+  };
 
   return (
     <aside className="sidebar" id="portal-sidebar" aria-label="포털 메뉴">
@@ -56,42 +89,24 @@ export default function PortalSidebar({
         <section className="sidebar-favorites" aria-labelledby="sidebar-favorites-title">
           <span id="sidebar-favorites-title" className="sidebar-favorites__title">자주 쓰는 도구</span>
           {favoriteItems.length > 0 ? (
-            favoriteItems.map((item) => {
-              const label = labels[item.id] || item.defaultLabel;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={`nav-btn nav-btn--favorite${activeModule === item.id ? ' active' : ''}`}
-                  onClick={() => onModuleChange(item.id)}
-                  {...navTooltipProps(item)}
-                >
-                  <span className="nav-btn__icon" aria-hidden="true">{item.icon}</span>
-                  <span className="nav-btn__label">{label}</span>
-                </button>
-              );
-            })
+            favoriteItems.map(renderProjectMenuItem)
           ) : (
             <p className="sidebar-favorites__empty">자주 쓰는 도구를 추가해보세요.</p>
           )}
         </section>
-        {navItems.map((item) => {
-          const label = labels[item.id] || item.defaultLabel;
-          return (
-            <button
-              key={item.id}
-              type="button"
-              className={`nav-btn${activeModule === item.id ? ' active' : ''}`}
-              onClick={() => onModuleChange(item.id)}
-              {...navTooltipProps(item)}
-            >
-              <span className="nav-btn__icon" aria-hidden="true">
-                {item.icon}
-              </span>
-              <span className="nav-btn__label">{label}</span>
-            </button>
-          );
-        })}
+        <button
+          type="button"
+          className={`nav-btn${activeModule === 'home' ? ' active' : ''}`}
+          onClick={() => onModuleChange('home')}
+          {...navTooltipProps(navItems.find((item) => item.id === 'home') || navItems[0])}
+        >
+          <span className="nav-btn__icon" aria-hidden="true">🧭</span>
+          <span className="nav-btn__label">{labels.home || '포털 홈'}</span>
+        </button>
+        <section className="sidebar-all-tools" aria-labelledby="sidebar-all-tools-title">
+          <span id="sidebar-all-tools-title" className="sidebar-favorites__title">전체 도구</span>
+          {navItems.filter((item) => item.id !== 'home').map(renderProjectMenuItem)}
+        </section>
       </nav>
 
       <div className="sidebar__bottom">
