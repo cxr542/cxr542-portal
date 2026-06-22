@@ -109,6 +109,25 @@
         <div class="content project-content marathon-content" id="app-content">
           <section class="screen is-active" id="screen-dashboard" aria-label="기록 조회">
             <p class="keep-motto" id="keep-motto" hidden></p>
+            <section class="capture-composer" aria-labelledby="capture-composer-title">
+              <div class="capture-composer__head">
+                <div>
+                  <p class="section-title">러닝 기록</p>
+                  <h2 id="capture-composer-title">캡처로 기록 만들기</h2>
+                </div>
+                <p>이미지와 메모를 바탕으로 수정 가능한 초안을 만듭니다.</p>
+              </div>
+              <label class="capture-upload" for="run-capture-file">
+                <span class="capture-upload__title">러닝 앱 캡처 올리기</span>
+                <span class="capture-upload__hint">PNG, JPG 등 원본은 이 브라우저에 보관됩니다.</span>
+                <input type="file" id="run-capture-file" accept="image/*" />
+              </label>
+              <img class="capture-preview" id="run-capture-preview" alt="선택한 러닝 기록 캡처 미리보기" hidden />
+              <label class="capture-memo-label" for="run-capture-memo">추가 메모</label>
+              <textarea class="capture-memo" id="run-capture-memo" placeholder="예: 뉴발 엘리트 v4 / 습도 높아서 20k 못 채움 / 크루런"></textarea>
+              <p class="capture-error" id="run-capture-error" hidden></p>
+              <button type="button" class="btn-primary" id="btn-create-run">기록 만들기</button>
+            </section>
             <div class="stats-grid" id="stats-grid"></div>
             <p class="section-title">전체 기록</p>
             <div class="chips" id="year-chips"></div>
@@ -174,6 +193,38 @@
               <button type="submit" class="btn-primary" id="btn-save">기록 저장</button>
             </form>
           </section>
+
+          <section class="screen" id="screen-run-draft" aria-label="러닝 기록 초안">
+            <div class="back-row"><button type="button" id="btn-back-run-draft">← 기록 조회</button></div>
+            <form class="form run-draft-form" id="run-draft-form">
+              <div class="run-draft-intro">
+                <p class="section-title">러닝 기록 초안</p>
+                <h2>확인하고 저장하기</h2>
+                <p>이미지 인식 없이도 필요한 값을 직접 보완할 수 있습니다.</p>
+              </div>
+              <img class="capture-preview capture-preview--draft" id="run-draft-image" alt="저장할 러닝 기록 캡처" hidden />
+              <label>날짜<input type="date" id="run-date" required /></label>
+              <label>유형<select id="run-type"><option value="daily">데일리</option><option value="long">LSD·장거리</option><option value="crew">크루</option><option value="race">레이스</option><option value="treadmill">트레드밀</option></select></label>
+              <div class="run-draft-grid">
+                <label>거리 (km)<input type="number" min="0" step="0.01" inputmode="decimal" id="run-distance" placeholder="예: 16" /></label>
+                <label>시간<input type="text" id="run-duration" placeholder="예: 1:36:00" /></label>
+                <label>평균 페이스<input type="text" id="run-pace" placeholder="예: 6:00" /></label>
+                <label>평균 심박<input type="number" min="0" inputmode="numeric" id="run-heart-rate" placeholder="예: 148" /></label>
+                <label>케이던스<input type="number" min="0" inputmode="numeric" id="run-cadence" placeholder="예: 172" /></label>
+                <label>러닝화<input type="text" id="run-shoe" placeholder="예: 뉴발 엘리트 v4" /></label>
+              </div>
+              <label>날씨<input type="text" id="run-weather" placeholder="예: 습도 높음" /></label>
+              <label>컨디션<input type="text" id="run-condition" placeholder="예: 무리하지 않고 마무리" /></label>
+              <label>메모<textarea id="run-memo" placeholder="러닝에서 느낀 점을 남겨보세요."></textarea></label>
+              <div class="draft-section">
+                <div class="draft-section__head"><span>SNS 문구</span><button type="button" class="btn-link" id="btn-run-regenerate">다시 만들기</button></div>
+                <textarea id="run-sns-text" aria-label="SNS 문구"></textarea>
+              </div>
+              <label>해시태그<input type="text" id="run-hashtags" placeholder="#러닝 #오런완 #러닝기록" /></label>
+              <p class="form-error" id="run-draft-error" hidden></p>
+              <div class="run-draft-actions"><button type="button" class="btn-secondary" id="btn-copy-draft">SNS 문구 복사</button><button type="submit" class="btn-primary" id="btn-save-run">기록 저장</button></div>
+            </form>
+          </section>
         </div>
       </div>
     </div>
@@ -205,6 +256,7 @@
     <script src="/marathon-log/js/keep-seed.js?v=portal2"></script>
     <script src="/marathon-log/js/events.js?v=portal2"></script>
     <script src="/marathon-log/js/weather.js?v=portal2"></script>
+    <script src="/marathon-log/js/run-log.js?v=portal2"></script>
     <script src="/marathon-log/js/db.js?v=portal2"></script>
     <script src="/marathon-log/js/app.js?v=portal2"></script>
   </body>

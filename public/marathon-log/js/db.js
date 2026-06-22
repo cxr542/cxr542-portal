@@ -154,6 +154,9 @@
   }
 
   function normalizeRace(raw) {
+    if (raw && raw.recordKind === "run" && global.MarathonRunLog) {
+      return global.MarathonRunLog.normalizeRunLog(raw);
+    }
     var now = new Date().toISOString();
     var status = raw.status || "finished";
     return {

@@ -31,6 +31,8 @@
     weatherManualEdit: false,
     weatherTimer: null,
     weatherFetchToken: 0,
+    runDraft: null,
+    runCaptureData: "",
   };
 
   function $(id) {
@@ -59,6 +61,7 @@
   }
 
   function displayTime(r) {
+    if (isRunLog(r)) return r.duration || "—";
     var st = r.status || "finished";
     if (st === "dns") return "DNS";
     if (st === "dnf") return r.chipTime ? "DNF " + r.chipTime : "DNF";
@@ -68,7 +71,12 @@
   }
 
   function isFinishedRace(r) {
+    if (isRunLog(r)) return false;
     return (r.status || "finished") === "finished" && MarathonTime.isValidChipTime(r.chipTime);
+  }
+
+  function isRunLog(r) {
+    return r && r.recordKind === "run";
   }
 
   function matchesDistFilter(r, dist) {
@@ -110,6 +118,7 @@
     var sub = {
       dashboard: "PB · 대회 기록 대시보드",
       input: state.editId ? "기록 수정" : "새 기록 입력",
+      "run-draft": "러닝 기록 초안",
       detail: "대회 상세",
     };
     $("header-sub").textContent = sub[id] || "";
@@ -152,6 +161,7 @@
     }
     list.innerHTML = items
       .map(function (r) {
+        if (isRunLog(r)) return renderRunCard(r);
         return (
           '<li class="race-card" data-id="' +
           escapeHtml(r.id) +
@@ -187,7 +197,17 @@
       .join("");
     list.querySelectorAll(".race-card").forEach(function (card) {
       card.addEventListener("click", function () {
+        if (card.classList.contains("run-card")) return;
         openDetail(card.getAttribute("data-id"));
+      });
+    });
+    list.querySelectorAll(".btn-copy-run").forEach(function (btn) {
+      btn.addEventListener("click", function (event) {
+        event.stopPropagation();
+        var run = state.races.find(function (item) {
+          return item.id === btn.getAttribute("data-copy-id");
+        });
+        if (run) copySnsText(run.snsText, btn);
       });
     });
     if (window.ProjectShell && window.ProjectShell.bindInlineTitles) {
@@ -202,6 +222,31 @@
         });
       });
     }
+  }
+
+  function renderRunCard(run) {
+    var stats = [
+      run.distanceKm ? run.distanceKm + "km" : "거리 입력 필요",
+      run.duration || "시간 입력 필요",
+      run.avgPace ? run.avgPace + "/km" : "페이스 입력 필요",
+    ];
+    return (
+      '<li class="race-card run-card" data-run-id="' +
+      escapeHtml(run.id) +
+      '">' +
+      '<div class="race-card__top"><div><h3 class="race-card__name">' +
+      escapeHtml(MarathonRunLog.runTypeLabel(run.type)) +
+      '</h3><p class="race-card__meta">' +
+      escapeHtml(run.date) +
+      " · " +
+      escapeHtml(stats.join(" · ")) +
+      '</p></div><button type="button" class="btn-copy-run" data-copy-id="' +
+      escapeHtml(run.id) +
+      '">SNS 복사</button></div>' +
+      (run.shoe ? '<p class="run-card__shoe">' + escapeHtml(run.shoe) + "</p>" : "") +
+      (run.memo ? '<p class="race-card__note">' + escapeHtml(run.memo) + "</p>" : "") +
+      "</li>"
+    );
   }
 
   function renderYearChips() {
@@ -528,6 +573,149 @@
       });
   }
 
+  function showRunDraftError(message) {
+    var error = $("run-draft-error");
+    error.hidden = !message;
+    error.textContent = message || "";
+  }
+
+  function setRunCaptureError(message) {
+    var error = $("run-capture-error");
+    error.hidden = !message;
+    error.textContent = message || "";
+  }
+
+  function readRunDraft() {
+    var prior = state.runDraft || {};
+    return {
+      id: prior.id,
+      createdAt: prior.createdAt,
+      imageData: prior.imageData || state.runCaptureData,
+      date: $("run-date").value,
+      type: $("run-type").value,
+      tags: prior.tags || [],
+      distanceKm: $("run-distance").value.trim(),
+      duration: $("run-duration").value.trim(),
+      avgPace: $("run-pace").value.trim(),
+      avgHeartRate: $("run-heart-rate").value.trim(),
+      cadence: $("run-cadence").value.trim(),
+      shoe: $("run-shoe").value.trim(),
+      weather: $("run-weather").value.trim(),
+      condition: $("run-condition").value.trim(),
+      memo: $("run-memo").value.trim(),
+      snsText: $("run-sns-text").value.trim(),
+      hashtags: $("run-hashtags").value.trim(),
+    };
+  }
+
+  function populateRunDraft(draft) {
+    state.runDraft = draft;
+    $("run-date").value = draft.date;
+    $("run-type").value = draft.type;
+    $("run-distance").value = draft.distanceKm;
+    $("run-duration").value = draft.duration;
+    $("run-pace").value = draft.avgPace;
+    $("run-heart-rate").value = draft.avgHeartRate;
+    $("run-cadence").value = draft.cadence;
+    $("run-shoe").value = draft.shoe;
+    $("run-weather").value = draft.weather;
+    $("run-condition").value = draft.condition;
+    $("run-memo").value = draft.memo;
+    $("run-sns-text").value = draft.snsText;
+    $("run-hashtags").value = draft.hashtags;
+    var image = $("run-draft-image");
+    image.hidden = !draft.imageData;
+    image.src = draft.imageData || "";
+    showRunDraftError("");
+  }
+
+  function createRunDraft() {
+    var memo = $("run-capture-memo").value.trim();
+    if (!state.runCaptureData && !memo) {
+      setRunCaptureError("캡처 이미지 또는 메모를 입력하세요.");
+      return;
+    }
+    setRunCaptureError("");
+    populateRunDraft(
+      MarathonRunLog.createRunDraft({
+        date: new Date().toISOString().slice(0, 10),
+        memo: memo,
+        imageData: state.runCaptureData,
+      })
+    );
+    showScreen("run-draft");
+  }
+
+  function regenerateRunSns() {
+    var draft = MarathonRunLog.normalizeRunLog(readRunDraft());
+    $("run-hashtags").value = MarathonRunLog.generateHashtags(draft);
+    $("run-sns-text").value = MarathonRunLog.generateSnsText(draft);
+  }
+
+  function saveRunDraft(event) {
+    event.preventDefault();
+    var input = readRunDraft();
+    if (!input.date) {
+      showRunDraftError("날짜를 입력하세요.");
+      return;
+    }
+    var run = MarathonRunLog.normalizeRunLog(input);
+    MarathonDb.putRace(run)
+      .then(function () {
+        return refreshRaces();
+      })
+      .then(function () {
+        state.runDraft = null;
+        state.runCaptureData = "";
+        $("run-capture-file").value = "";
+        $("run-capture-preview").hidden = true;
+        $("run-capture-preview").src = "";
+        $("run-capture-memo").value = "";
+        showScreen("dashboard");
+        if (window.ProjectShell) {
+          ProjectShell.notifyTaskDone({
+            module: "마라톤 기록장",
+            action: "러닝 기록 저장 완료",
+            title: run.distanceKm ? run.distanceKm + "km 러닝" : run.date,
+          });
+        }
+      })
+      .catch(function () {
+        showRunDraftError("저장에 실패했습니다.");
+      });
+  }
+
+  function copySnsText(value, button) {
+    var done = function () {
+      if (!button) return;
+      var original = button.textContent;
+      button.textContent = "복사됨";
+      setTimeout(function () {
+        button.textContent = original;
+      }, 1600);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(value).then(done).catch(function () {
+        fallbackCopy(value, done);
+      });
+      return;
+    }
+    fallbackCopy(value, done);
+  }
+
+  function fallbackCopy(value, done) {
+    var area = document.createElement("textarea");
+    area.value = value;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.opacity = "0";
+    document.body.appendChild(area);
+    area.select();
+    document.execCommand("copy");
+    document.body.removeChild(area);
+    done();
+  }
+
   function confirmDelete(id) {
     var r = state.races.find(function (x) {
       return x.id === id;
@@ -546,7 +734,7 @@
 
   function findPb(distance) {
     var candidates = state.races.filter(function (r) {
-      return r.distance === distance && isFinishedRace(r);
+      return !isRunLog(r) && r.distance === distance && isFinishedRace(r);
     });
     if (!candidates.length) return null;
     candidates.sort(function (a, b) {
@@ -581,7 +769,7 @@
     var tenkPb = findPb("10k");
     var year = String(new Date().getFullYear());
     var yearRaces = state.races.filter(function (r) {
-      return r.date && r.date.slice(0, 4) === year;
+      return !isRunLog(r) && r.date && r.date.slice(0, 4) === year;
     });
     var counts = { full: 0, half: 0, "10k": 0, "5k": 0 };
     yearRaces.forEach(function (r) {
@@ -683,6 +871,38 @@
   }
 
   function bindEvents() {
+    $("run-capture-file").addEventListener("change", function (event) {
+      var file = event.target.files && event.target.files[0];
+      if (!file) return;
+      if (!file.type || !file.type.startsWith("image/")) {
+        setRunCaptureError("이미지 파일만 올릴 수 있습니다.");
+        event.target.value = "";
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function () {
+        state.runCaptureData = String(reader.result || "");
+        var preview = $("run-capture-preview");
+        preview.src = state.runCaptureData;
+        preview.hidden = false;
+        setRunCaptureError("");
+      };
+      reader.onerror = function () {
+        setRunCaptureError("이미지를 읽지 못했습니다. 다시 시도하세요.");
+      };
+      reader.readAsDataURL(file);
+    });
+
+    $("btn-create-run").addEventListener("click", createRunDraft);
+    $("btn-back-run-draft").addEventListener("click", function () {
+      showScreen("dashboard");
+    });
+    $("btn-run-regenerate").addEventListener("click", regenerateRunSns);
+    $("btn-copy-draft").addEventListener("click", function () {
+      copySnsText($("run-sns-text").value, $("btn-copy-draft"));
+    });
+    $("run-draft-form").addEventListener("submit", saveRunDraft);
+
     $("dist-chips").addEventListener("click", function (e) {
       var btn = e.target.closest(".chip");
       if (!btn) return;
