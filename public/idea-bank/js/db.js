@@ -11,6 +11,42 @@
   var storageMode = "indexeddb";
   var storageReady = null;
 
+  function text(value) {
+    return typeof value === "string" ? value.trim() : "";
+  }
+
+  function titleFromBody(body) {
+    var firstLine = text(body).split(/\r?\n/).find(function (line) { return line.trim(); }) || "";
+    firstLine = firstLine.trim();
+    return firstLine.length > 30 ? firstLine.slice(0, 29) + "…" : firstLine;
+  }
+
+  function normalizeIdea(raw) {
+    var source = raw && typeof raw === "object" ? raw : {};
+    var now = new Date().toISOString();
+    var body = text(source.body || source.content || source.rawText);
+    var title = text(source.title || source.name) || titleFromBody(body) || "제목 없음";
+    return Object.assign({}, source, {
+      id: text(source.id) || slugFromTitle(title, {}),
+      title: title,
+      body: body,
+      content: body,
+      rawText: body,
+      summary: text(source.summary) || title,
+      tags: Array.isArray(source.tags) ? source.tags.filter(function (tag) { return text(tag); }) : [],
+      status: text(source.status) || "inbox",
+      source: text(source.source) || "quick-capture",
+      links: text(source.links),
+      memo: text(source.memo),
+      targetCategory: text(source.targetCategory) || "study",
+      hubProjectId: text(source.hubProjectId) || text(source.id),
+      pinned: !!source.pinned,
+      images: Array.isArray(source.images) ? source.images : [],
+      createdAt: text(source.createdAt) || now,
+      updatedAt: text(source.updatedAt) || text(source.createdAt) || now,
+    });
+  }
+
   function probeIndexedDB() {
     return new Promise(function (resolve) {
       if (!global.indexedDB) {
@@ -235,14 +271,14 @@
   function listIdeas() {
     return initStorage().then(function (mode) {
       if (mode === "localstorage") {
-        return lsRead();
+        return lsRead().map(normalizeIdea);
       }
       if (mode === "none") {
         return Promise.reject(new Error("storage-unavailable"));
       }
       return runTx("readonly", function (store) {
         return idbRequest(store.getAll()).then(function (rows) {
-          return rows || [];
+          return (rows || []).map(normalizeIdea);
         });
       });
     });
@@ -251,7 +287,7 @@
   function getIdea(id) {
     return initStorage().then(function (mode) {
       if (mode === "localstorage") {
-        return lsRead().find(function (idea) {
+        return lsRead().map(normalizeIdea).find(function (idea) {
           return idea.id === id;
         });
       }
@@ -259,12 +295,15 @@
         return Promise.reject(new Error("storage-unavailable"));
       }
       return runTx("readonly", function (store) {
-        return idbRequest(store.get(id));
+        return idbRequest(store.get(id)).then(function (idea) {
+          return idea ? normalizeIdea(idea) : null;
+        });
       });
     });
   }
 
   function putIdea(idea) {
+    idea = normalizeIdea(idea);
     return initStorage().then(function (mode) {
       if (mode === "localstorage") {
         var list = lsRead();
@@ -349,21 +388,11 @@
       return Promise.all(
         ideas.map(function (raw) {
           var now = new Date().toISOString();
-          return putIdea({
-            id: raw.id || slugFromTitle(raw.title || "idea", {}),
-            title: raw.title || "제목 없음",
-            body: raw.body || "",
-            targetCategory: raw.targetCategory || "study",
-            hubProjectId: raw.hubProjectId || raw.id,
-            status: raw.status || "active",
-            promotedAt: raw.promotedAt || null,
-            promoteProgress: raw.promoteProgress || null,
-            pinned: !!raw.pinned,
-            tags: Array.isArray(raw.tags) ? raw.tags : [],
-            images: Array.isArray(raw.images) ? raw.images : [],
+          return putIdea(normalizeIdea(Object.assign({}, raw, {
+            id: raw.id || slugFromTitle(raw.title || raw.body || "idea", {}),
             createdAt: raw.createdAt || now,
             updatedAt: raw.updatedAt || now,
-          });
+          })));
         })
       );
     });
@@ -379,5 +408,7 @@
     exportPayload: exportPayload,
     importPayload: importPayload,
     getStorageMode: getStorageMode,
+    normalizeIdea: normalizeIdea,
+    titleFromBody: titleFromBody,
   };
 })(window);

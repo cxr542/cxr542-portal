@@ -92,12 +92,17 @@
           </button>
           <a class="btn btn--hub" href="/" title="cxr542 포털 홈">← 포털</a>
           <input type="search" id="search" placeholder="🔍 아이디어 검색…" autocomplete="off" />
-          <button type="button" class="btn" id="btn-export">JSON보내기</button>
-          <label class="btn">
-            JSON 가져오기
-            <input type="file" id="import-file" accept="application/json,.json" hidden />
-          </label>
-          <button type="button" class="btn btn--primary" id="btn-new">✨ 새 아이디어</button>
+          <button type="button" class="btn btn--primary" id="btn-new">새 아이디어</button>
+          <details class="toolbar-more">
+            <summary>더보기</summary>
+            <div class="toolbar-more__panel">
+              <button type="button" class="btn" id="btn-export">JSON 보내기</button>
+              <label class="btn">
+                JSON 가져오기
+                <input type="file" id="import-file" accept="application/json,.json" hidden />
+              </label>
+            </div>
+          </details>
         </div>
         <nav class="cat-filter" id="cat-filter"></nav>
         <div class="content project-content" id="content"></div>

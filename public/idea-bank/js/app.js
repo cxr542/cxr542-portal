@@ -2,6 +2,7 @@
   "use strict";
 
   var CAT_LABEL = { work: "업무 도우미", study: "공부·실험", hobby: "러닝·취미" };
+  var STATUS_LABEL = { inbox: "inbox", reviewing: "reviewing", planning: "planning", building: "building", launched: "launched", paused: "paused", active: "노트 중", promoted: "승격 완료" };
   var SIDEBAR_COLLAPSED_KEY = "idea-bank-sidebar-collapsed";
   var BACKUP_REMINDER_KEY = "idea-bank-last-export-at";
   var BACKUP_NUDGE_DAYS = 14;
@@ -85,6 +86,73 @@
   function previewBody(body) {
     var t = (body || "").replace(/\s+/g, " ").trim();
     return t.length > 120 ? t.slice(0, 120) + "…" : t;
+  }
+
+  function formatIdeaDate(idea) {
+    var value = idea.updatedAt || idea.createdAt;
+    var date = new Date(value);
+    return value && !isNaN(date.getTime()) ? date.toLocaleDateString("ko-KR") : "날짜 없음";
+  }
+
+  function titleFromBody(body) {
+    var firstLine = String(body || "").split(/\r?\n/).find(function (line) { return line.trim(); }) || "";
+    firstLine = firstLine.trim();
+    return firstLine.length > 30 ? firstLine.slice(0, 29) + "…" : firstLine;
+  }
+
+  function quickCaptureHtml() {
+    return '<section class="quick-capture" aria-labelledby="quick-capture-title"><div class="quick-capture__head"><div><p class="quick-capture__eyebrow">바로 저장</p><h2 id="quick-capture-title">빠른 아이디어 입력</h2></div><p>정리는 나중에 해도 됩니다.</p></div><label class="sr-only" for="quick-body">아이디어 내용</label><textarea id="quick-body" class="quick-capture__body" placeholder="떠오른 아이디어를 바로 적어두세요&#10;복사한 문구를 붙여넣고 저장해도 좋아요"></textarea><div class="quick-capture__actions"><button type="button" class="btn" id="btn-quick-paste">붙여넣기</button><button type="button" class="btn btn--primary quick-capture__save" id="btn-quick-save">저장</button></div><p class="quick-capture__notice" id="quick-capture-notice" role="status" aria-live="polite"></p></section>';
+  }
+
+  function setQuickNotice(message, isError) {
+    var notice = $("quick-capture-notice");
+    if (!notice) return;
+    notice.textContent = message;
+    notice.classList.toggle("is-error", !!isError);
+  }
+
+  function saveQuickCapture() {
+    var input = $("quick-body");
+    var body = input ? input.value.trim() : "";
+    if (!body) {
+      setQuickNotice("아이디어 내용을 입력해 주세요.", true);
+      if (input) input.focus();
+      return;
+    }
+    IdeaBankDb.listIdeas().then(function (ideas) {
+      var ids = {};
+      ideas.forEach(function (idea) { ids[idea.id] = true; });
+      var now = new Date().toISOString();
+      var title = titleFromBody(body);
+      return IdeaBankDb.putIdea({ id: IdeaBankDb.slugFromTitle(title, ids), title: title, body: body, status: "inbox", source: "quick-capture", tags: [], links: "", memo: "", pinned: false, targetCategory: "study", createdAt: now, updatedAt: now });
+    }).then(function () {
+      if (input) input.value = "";
+      state.search = "";
+      state.filter = "all";
+      state.statusFilter = "all";
+      render();
+      setTimeout(function () { setQuickNotice("저장했어요. 나중에 정리하면 돼요."); }, 0);
+    }).catch(function () { setQuickNotice("저장하지 못했습니다. 브라우저 저장소를 확인해 주세요.", true); });
+  }
+
+  function pasteQuickCapture() {
+    var input = $("quick-body");
+    if (!input || !navigator.clipboard || !navigator.clipboard.readText) {
+      setQuickNotice("붙여넣기가 안 되면 입력창을 길게 눌러 직접 붙여넣어 주세요", true);
+      return;
+    }
+    navigator.clipboard.readText().then(function (value) {
+      input.value = value;
+      input.focus();
+      setQuickNotice("클립보드 내용을 입력창에 붙여넣었어요.");
+    }).catch(function () { setQuickNotice("붙여넣기가 안 되면 입력창을 길게 눌러 직접 붙여넣어 주세요", true); });
+  }
+
+  function bindQuickCapture() {
+    var save = $("btn-quick-save");
+    var paste = $("btn-quick-paste");
+    if (save) save.onclick = saveQuickCapture;
+    if (paste) paste.onclick = pasteQuickCapture;
   }
 
   function ideaStatus(idea) {
@@ -245,8 +313,7 @@
     var statusCounts = countIdeasByStatus(ideas);
     var filtered = filterIdeas(ideas);
     filtered.sort(function (a, b) {
-      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
-      return (b.updatedAt || "").localeCompare(a.updatedAt || "");
+      return (b.updatedAt || b.createdAt || "").localeCompare(a.updatedAt || a.createdAt || "");
     });
     if (!filtered.length) {
       var emptyMsg =
@@ -264,10 +331,11 @@
         emptyMsg +=
           '<p class="list-meta">✨ <strong>새 아이디어</strong>로 첫 메모를 남겨 보세요.</p>';
       }
-      $("content").innerHTML = emptyMsg;
+      $("content").innerHTML = state.view === "list" ? quickCaptureHtml() + emptyMsg : emptyMsg;
+      if (state.view === "list") bindQuickCapture();
       return;
     }
-    var listHtml = listMetaHtml(filtered.length, ideas);
+    var listHtml = (state.view === "list" ? quickCaptureHtml() : "") + listMetaHtml(filtered.length, ideas);
     if (
       state.view === "list" &&
       filtered.length < ideas.length &&
@@ -291,10 +359,13 @@
             escapeHtml(previewBody(idea.body)) +
             "</p>" +
             '<div class="pill-row">' +
+            '<span class="pill pill--status">' +
+            escapeHtml(STATUS_LABEL[idea.status] || idea.status || "inbox") +
+            "</span>" +
+            '<span class="pill pill--date">' +
+            escapeHtml(formatIdeaDate(idea)) +
+            "</span>" +
             (idea.pinned ? '<span class="pill pill--pin">고정</span>' : "") +
-            (idea.status === "promoted"
-              ? '<span class="pill pill--promoted">승격 완료</span>'
-              : "") +
             '<span class="pill pill--' +
             escapeHtml(idea.targetCategory || "study") +
             '">' +
@@ -302,19 +373,14 @@
               CAT_LABEL[idea.targetCategory] || idea.targetCategory || "기타"
             ) +
             "</span>" +
-            (ideaStatus(idea) !== "promoted"
-              ? '<span class="pill pill--progress">' +
-                promote().progressDoneCount(
-                  promote().normalizeProgress(idea.promoteProgress)
-                ) +
-                "/" +
-                promote().PROMOTE_STEPS.length +
-                "</span>"
+            (Array.isArray(idea.tags)
+              ? idea.tags.map(function (tag) { return '<span class="pill pill--tag">#' + escapeHtml(tag) + "</span>"; }).join("")
               : "") +
             "</div></div></article>"
           );
         })
         .join("");
+    if (state.view === "list") bindQuickCapture();
     $("content").querySelectorAll(".idea-card").forEach(function (card) {
       card.onclick = function () {
         state.editId = card.getAttribute("data-id");
@@ -374,6 +440,14 @@
     return html;
   }
 
+  function statusOptionsHtml(selected) {
+    return Object.keys(STATUS_LABEL)
+      .map(function (status) {
+        return '<option value="' + escapeHtml(status) + '"' + (selected === status ? " selected" : "") + ">" + escapeHtml(STATUS_LABEL[status]) + "</option>";
+      })
+      .join("");
+  }
+
   function renderSketchForm() {
     var d = state.draft;
     if (!d) {
@@ -390,6 +464,10 @@
       '<input class="field-input" id="f-title" type="text" value="' +
       escapeHtml(d.title || "") +
       '" />' +
+      '<label class="field-label">상태</label>' +
+      '<select class="field-input" id="f-status">' + statusOptionsHtml(d.status || "inbox") + "</select>" +
+      '<label class="field-label">태그</label>' +
+      '<input class="field-input" id="f-tags" type="text" value="' + escapeHtml((d.tags || []).join(", ")) + '" placeholder="예: product, running" />' +
       '<label class="field-label">허브 프로젝트 ID (폴더·catalog id)</label>' +
       '<input class="field-input field-input--mono" id="f-hub-id" type="text" value="' +
       escapeHtml(d.hubProjectId || d.id || "") +
@@ -403,6 +481,10 @@
       '<textarea class="sketch-body" id="f-body">' +
       escapeHtml(d.body || "") +
       "</textarea>" +
+      '<label class="field-label">링크</label>' +
+      '<input class="field-input" id="f-links" type="url" value="' + escapeHtml(d.links || "") + '" placeholder="https://" />' +
+      '<label class="field-label">메모</label>' +
+      '<textarea class="sketch-body sketch-body--compact" id="f-memo">' + escapeHtml(d.memo || "") + "</textarea>" +
       '<label class="field-label"><input type="checkbox" id="f-pinned"' +
       (d.pinned ? " checked" : "") +
       " /> 고정</label>" +
@@ -552,10 +634,20 @@
     var t = $("f-title");
     var b = $("f-body");
     var p = $("f-pinned");
+    var status = $("f-status");
+    var tags = $("f-tags");
+    var links = $("f-links");
+    var memo = $("f-memo");
     var hubId = $("f-hub-id");
     if (t) state.draft.title = t.value;
     if (b) state.draft.body = b.value;
     if (p) state.draft.pinned = p.checked;
+    if (status) state.draft.status = status.value;
+    if (tags) {
+      state.draft.tags = tags.value.split(",").map(function (tag) { return tag.trim(); }).filter(Boolean);
+    }
+    if (links) state.draft.links = links.value.trim();
+    if (memo) state.draft.memo = memo.value.trim();
     if (hubId) {
       state.draft.hubProjectId = hubId.value.trim() || state.draft.id;
     }
@@ -573,22 +665,22 @@
 
   function saveSketch() {
     syncDraftFromForm();
-    if (!state.draft.title.trim()) {
-      window.alert("제목을 입력하세요.");
+    if (!state.draft.body.trim()) {
+      window.alert("아이디어 내용을 입력하세요.");
       return;
     }
     var now = new Date().toISOString();
     var save = function (id) {
       var idea = Object.assign({}, state.draft, {
         id: id,
-        title: state.draft.title.trim(),
+        title: state.draft.title.trim() || titleFromBody(state.draft.body),
         body: state.draft.body || "",
         updatedAt: now,
         images: state.images.slice(),
       });
       if (state.isNew) {
         idea.createdAt = now;
-        if (!idea.status) idea.status = "active";
+        if (!idea.status) idea.status = "inbox";
       }
       if (!idea.promoteProgress) {
         idea.promoteProgress = promote().defaultProgress();
@@ -630,7 +722,7 @@
         body: "",
         targetCategory: "study",
         pinned: false,
-        status: "active",
+        status: "inbox",
         hubProjectId: "",
         promoteProgress: promote().defaultProgress(),
         tags: [],
@@ -657,7 +749,7 @@
           {
             promoteProgress: promote().defaultProgress(),
             hubProjectId: idea.id,
-            status: "active",
+            status: "inbox",
           },
           idea
         );
@@ -759,7 +851,7 @@
           body: "",
           targetCategory: "study",
           pinned: false,
-          status: "active",
+          status: "inbox",
           hubProjectId: newId,
           promoteProgress: promote().defaultProgress(),
           tags: [],
