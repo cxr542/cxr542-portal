@@ -16,7 +16,9 @@
     />
     <link rel="stylesheet" href="/shared/css/project-shell.css?v=portal2" />
     <link rel="stylesheet" href="/how-many-points/css/app.css?v=portal2" />
-  </head>
+  <link rel="stylesheet" href="/shared/cloud.css" />
+  <link rel="stylesheet" href="/shared/css/workspace-embed.css"><script src="/shared/js/workspace-embed.js" defer></script>
+</head>
   <body class="project-app theme-how-many-points">
     <p class="app-banner">
       <span class="app-banner__brand">
@@ -24,7 +26,7 @@
         <span class="app-banner__title" id="app-banner-title">너는몇점?</span>
       </span>
       <span class="app-banner__tagline" id="app-banner-tagline">영화·시리즈·책·웹툰 — 나만의 평점 아카이브</span>
-      <span class="app-banner__meta">🔒 이 포털 도메인에 저장 · JSON·왓챠 CSV 백업</span>
+      <span class="app-banner__meta">🔒 이 Supabase 계정에 저장 · JSON·왓챠 CSV 백업</span>
     </p>
     <div class="project-nav-backdrop" id="project-nav-backdrop" hidden aria-hidden="true"></div>
     <div class="app-shell project-shell" id="app-shell">
@@ -109,18 +111,11 @@
         <div class="content project-content" id="content"></div>
       </div>
     </div>
-    <script>
-      (function () {
-        try {
-          if (localStorage.getItem("how-many-points-sidebar-collapsed") === "1") {
-            document.documentElement.classList.add("project-sidebar-collapsed-boot");
-          }
-        } catch (e) {}
-      })();
-    </script>
-    <script src="/shared/js/project-shell.js?v=portal2"></script>
-    <script src="/how-many-points/js/db.js?v=portal2"></script>
-    <script src="/how-many-points/js/import-watcha.js?v=portal2"></script>
-    <script src="/how-many-points/js/app.js?v=portal2"></script>
+
+    <script type="application/portal-script" data-cloud-src="/shared/js/project-shell.js?v=portal2"></script>
+    <script type="application/portal-script" data-cloud-src="/how-many-points/js/db.js?v=portal2"></script>
+    <script type="application/portal-script" data-cloud-src="/how-many-points/js/import-watcha.js?v=portal2"></script>
+    <script type="application/portal-script" data-cloud-src="/how-many-points/js/app.js?v=portal2"></script>
+  <script type="module" src="/shared/cloud.js"></script>
   </body>
 </html>

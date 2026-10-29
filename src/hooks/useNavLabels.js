@@ -3,7 +3,7 @@ import { DEFAULT_NAV_LABELS, NAV_LABELS_STORAGE_KEY } from '../constants/portalN
 
 function readLabels() {
   try {
-    const raw = localStorage.getItem(NAV_LABELS_STORAGE_KEY);
+    const raw = globalThis.PortalStorage.getItem(NAV_LABELS_STORAGE_KEY);
     if (!raw) return { ...DEFAULT_NAV_LABELS };
     const parsed = JSON.parse(raw);
     if (parsed['who-are-you'] === '너는누구?') {
@@ -20,7 +20,7 @@ export function useNavLabels() {
 
   const persist = useCallback((next) => {
     setLabels(next);
-    localStorage.setItem(NAV_LABELS_STORAGE_KEY, JSON.stringify(next));
+    globalThis.PortalStorage.setItem(NAV_LABELS_STORAGE_KEY, JSON.stringify(next));
   }, []);
 
   const updateLabel = useCallback(

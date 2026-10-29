@@ -72,7 +72,7 @@
 
   function load() {
     try {
-      var raw = JSON.parse(localStorage.getItem(LS_KEY) || "null");
+      var raw = JSON.parse(globalThis.PortalStorage.getItem(LS_KEY) || "null");
       return normalize(raw);
     } catch (e) {
       return Object.assign({}, DEFAULT_SETTINGS);
@@ -82,7 +82,7 @@
   function save(settings) {
     var next = normalize(settings);
     try {
-      localStorage.setItem(LS_KEY, JSON.stringify(next));
+      globalThis.PortalStorage.setItem(LS_KEY, JSON.stringify(next));
     } catch (e) {}
     return next;
   }

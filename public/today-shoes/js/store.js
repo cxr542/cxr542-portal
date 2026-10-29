@@ -43,7 +43,7 @@
 
   function load() {
     try {
-      var raw = JSON.parse(localStorage.getItem(LS_KEY) || "[]");
+      var raw = JSON.parse(globalThis.PortalStorage.getItem(LS_KEY) || "[]");
       if (!Array.isArray(raw)) return [];
       return raw
         .map(normalize)
@@ -58,9 +58,9 @@
 
   function save(shoes) {
     try {
-      localStorage.setItem(LS_KEY, JSON.stringify(shoes));
+      globalThis.PortalStorage.setItem(LS_KEY, JSON.stringify(shoes));
     } catch (e) {
-      alert("저장 공간이 부족할 수 있습니다. 사진 수를 줄이거나 JSON으로 백업 후 일부를 삭제해 주세요.");
+      alert("저장 요청을 처리하지 못했습니다. 계정·저장의 저장 상태를 확인해 주세요.");
     }
     return shoes;
   }
@@ -103,7 +103,7 @@
 
   function importPortalLegacy() {
     try {
-      var raw = JSON.parse(localStorage.getItem(PORTAL_LEGACY_KEY) || "[]");
+      var raw = JSON.parse(globalThis.PortalStorage.getItem(PORTAL_LEGACY_KEY) || "[]");
       if (!Array.isArray(raw) || !raw.length) return 0;
       var existing = load();
       var ids = {};
@@ -140,39 +140,11 @@
     }
   }
 
-  function seedDemoIfEmpty() {
-    if (load().length) return false;
-    var svg =
-      "data:image/svg+xml," +
-      encodeURIComponent(
-        '<svg xmlns="http://www.w3.org/2000/svg" width="480" height="360"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fb923c"/><stop offset="1" stop-color="#ea580c"/></linearGradient></defs><rect fill="url(#g)" width="100%" height="100%"/><text x="50%" y="46%" fill="#fff" font-size="28" font-weight="bold" text-anchor="middle">Nike</text><text x="50%" y="58%" fill="#ffedd5" font-size="18" text-anchor="middle">Pegasus 40</text></svg>'
-      );
-    add({
-      id: "seed-pegasus-40",
-      imageUri: svg,
-      imageUris: { front: svg },
-      nickname: "나이키 페가수스 40",
-      brand: "Nike",
-      model: "Pegasus 40",
-      traits: "React 폼 · 줌 에어 쿠션 · 데일리~템포런에 무난한 범용 로드화",
-      recommendation: formatRecommendation({
-        displayName: "나이키 페가수스 40",
-        brand: "Nike",
-        model: "Pegasus 40",
-        traits: "React 폼 · 줌 에어 쿠션 · 데일리~템포런에 무난한 범용 로드화",
-        bestFor: "데일리 조깅 · LSD · 가벼운 템포런",
-        caution: "아치 지지가 필요하면 구조화된 안정화 모델도 비교해 보세요.",
-      }),
-      createdAt: Date.now() - 86400000,
-      source: "album",
-      geminiAnalyzed: true,
-    });
-    return true;
-  }
+  function seedDemoIfEmpty() { return false; }
 
   function loadApiKey() {
     try {
-      return (localStorage.getItem(API_KEY_LS) || "").trim();
+      return (globalThis.PortalStorage.getItem(API_KEY_LS) || "").trim();
     } catch (e) {
       return "";
     }
@@ -180,7 +152,7 @@
 
   function saveApiKey(key) {
     try {
-      localStorage.setItem(API_KEY_LS, (key || "").trim());
+      globalThis.PortalStorage.setItem(API_KEY_LS, (key || "").trim());
     } catch (e) {}
   }
 

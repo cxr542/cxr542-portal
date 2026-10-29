@@ -1,20 +1,8 @@
 import { useEffect, useState } from 'react';
 import './App.css';
-import EnvironmentBadge from './components/EnvironmentBadge';
-import NavLabelsModal from './components/NavLabelsModal';
-import NavOrderModal from './components/NavOrderModal';
-import PortalSidebar from './components/PortalSidebar';
 import ReleaseNotesPanel from './components/ReleaseNotesPanel';
-import {
-  PORTAL_NAV_ITEMS,
-  RELEASE_NOTES_MODULE_ID,
-  SIDEBAR_COLLAPSED_KEY,
-  isRoutableModuleId,
-} from './constants/portalNav';
-import { RELEASE_NOTES_LABEL, latestReleaseVersion } from './constants/releaseNotes';
-import { useNavLabels } from './hooks/useNavLabels';
-import { useNavOrder } from './hooks/useNavOrder';
-import { getWorkspaceUrl } from './constants/workspaceUrl';
+import { RELEASE_NOTES_MODULE_ID } from './constants/releaseNotes';
+
 import {
   fetchWikiAdminConfig,
   isWikiLocalDevServerAvailable,
@@ -35,305 +23,16 @@ import {
   GEMINI_TUNER_REPO_URL,
 } from './utils/geminiTunerDev';
 import { VISION_FONT_APP_URL } from './utils/visionFontDev';
-import { readFavoriteIds, toggleFavoriteId, writeFavoriteIds } from './utils/favorites';
 
+import Workspace from './components/Workspace';
+import ToolFrame from './components/ToolFrame';
+import { PORTAL_NAV_ITEMS } from './constants/portalNav';
+const findNavItem = id => PORTAL_NAV_ITEMS.find(item => item.id === id);
 const IDEA_BANK_APP_URL = '/idea-bank/index.html';
 const PROMPT_COLLECTION_APP_URL = '/prompt-collection/index.html';
 const HOW_MANY_POINTS_APP_URL = '/how-many-points/index.html';
 const WHO_ARE_YOU_APP_URL = '/who-are-you/index.html';
 const MARATHON_LOG_APP_URL = '/marathon-log/index.html';
-
-const PROJECT_BOARD_SECTIONS = [
-  {
-    key: 'active',
-    title: 'Active Projects',
-    description: '현재 진행 중인 개인 프로젝트를 바로 엽니다.',
-    ids: ['who-are-you', 'vision-font', 'today-shoes', 'ai-synapse-wiki'],
-  },
-  {
-    key: 'experiments',
-    title: 'Experiments',
-    description: '실험 중인 도구와 후보 프로젝트를 모아둡니다.',
-    ids: ['marathon', 'idea-bank', 'prompt-collection', 'gemini-tuner'],
-  },
-  {
-    key: 'paused',
-    title: 'Paused',
-    description: '잠시 멈춘 프로젝트는 유지 여부를 따로 검토합니다.',
-    ids: ['how-many-points'],
-  },
-  {
-    key: 'ideas',
-    title: 'Ideas',
-    description: '아직 구현 전인 개인 프로젝트 후보를 정리합니다.',
-    ids: [],
-  },
-];
-
-const IDEAS_PLACEHOLDER_CARD = {
-  id: 'ideas-placeholder',
-  icon: '💭',
-  defaultLabel: 'Ideas',
-  boardStatus: 'Ideas',
-  boardDescription: '아직 구현 전인 개인 프로젝트 후보를 모아둘 예정입니다.',
-  boardNextAction: '신규 아이디어 입력 방식을 정합니다.',
-  boardSection: 'ideas',
-  isPlaceholder: true,
-};
-
-const PORTAL_FONT_SCALE_KEY = 'cxr542-portal-font-scale';
-const FONT_SCALE_OPTIONS = new Set(['small', 'normal', 'large']);
-const FONT_SCALE_VALUES = {
-  small: '93.75%',
-  normal: '100%',
-  large: '112.5%',
-};
-const FAVORITABLE_PROJECT_IDS = PORTAL_NAV_ITEMS
-  .filter((item) => item.id !== 'home')
-  .map((item) => item.id);
-
-function readFontScale() {
-  try {
-    const saved = localStorage.getItem(PORTAL_FONT_SCALE_KEY);
-    return FONT_SCALE_OPTIONS.has(saved) ? saved : 'normal';
-  } catch {
-    return 'normal';
-  }
-}
-
-function readSidebarCollapsed() {
-  try {
-    return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1';
-  } catch {
-    return false;
-  }
-}
-
-function findNavItem(id) {
-  return PORTAL_NAV_ITEMS.find((item) => item.id === id);
-}
-
-function moduleHasEmbed(id) {
-  return Boolean(findNavItem(id)?.embedPath);
-}
-
-function getProjectBoardItems(navItems) {
-  const itemsById = new Map(navItems.filter((item) => item.id !== 'home').map((item) => [item.id, item]));
-  return PROJECT_BOARD_SECTIONS.map((section) => ({
-    ...section,
-    items: section.ids
-      .map((id) => itemsById.get(id))
-      .filter(Boolean),
-  }));
-}
-
-function readModuleFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  const fromQuery = params.get('m');
-  if (fromQuery && isRoutableModuleId(fromQuery) && fromQuery !== 'home') return fromQuery;
-  const fromHash = window.location.hash.replace(/^#\/?/, '');
-  if (fromHash && isRoutableModuleId(fromHash) && fromHash !== 'home') return fromHash;
-  return 'home';
-}
-
-function HomeModule({ onOpenModule, labels, navItems, favoriteIds, onToggleFavorite }) {
-  const boardSections = getProjectBoardItems(navItems);
-  const favoritesById = new Map(navItems.map((item) => [item.id, item]));
-  const favoriteItems = favoriteIds.map((id) => favoritesById.get(id)).filter(Boolean);
-  const totalCards = boardSections.reduce((sum, section) => sum + section.items.length, 0) + 1;
-  const activeCount = boardSections.find((section) => section.key === 'active')?.items.length || 0;
-  const experimentCount = boardSections.find((section) => section.key === 'experiments')?.items.length || 0;
-  const pausedCount = boardSections.find((section) => section.key === 'paused')?.items.length || 0;
-  const ideaCount = 1;
-
-  return (
-    <section className="home-module" aria-labelledby="portal-home-title">
-      <div className="home-hero">
-        <div className="home-hero__copy">
-          <span className="home-eyebrow">Personal project portal</span>
-          <h2 id="portal-home-title">cxr542-ai-portal</h2>
-          <p>
-            개인 프로젝트를 상태별로 분류해 한 화면에서 정리합니다.
-            자주 쓰는 모듈은 왼쪽 메뉴에서 순서와 이름을 바꿀 수 있습니다.
-          </p>
-        </div>
-        <dl className="home-metrics" aria-label="포털 구성 요약">
-          <div>
-            <dt>{totalCards}</dt>
-            <dd>프로젝트 카드</dd>
-          </div>
-          <div>
-            <dt>{activeCount}</dt>
-            <dd>Active Projects</dd>
-          </div>
-          <div>
-            <dt>{experimentCount}</dt>
-            <dd>Experiments</dd>
-          </div>
-          <div>
-            <dt>{pausedCount + ideaCount}</dt>
-            <dd>Paused + Ideas</dd>
-          </div>
-        </dl>
-      </div>
-
-      <section className="favorite-tools" aria-labelledby="favorite-tools-title">
-        <div className="favorite-tools__head">
-          <div>
-            <div className="home-eyebrow home-eyebrow--section">오늘 바로 쓰기</div>
-            <h3 id="favorite-tools-title">자주 쓰는 도구</h3>
-          </div>
-        </div>
-        {favoriteItems.length > 0 ? (
-          <div className="favorite-tools__list">
-            {favoriteItems.map((item) => {
-              const isFavorite = favoriteIds.includes(item.id);
-              const label = labels[item.id] || item.defaultLabel;
-              return (
-                <article key={item.id} className="favorite-tool">
-                  <button
-                    type="button"
-                    className="favorite-tool__open"
-                    onClick={() => onOpenModule(item.id)}
-                  >
-                    <span className="favorite-tool__icon" aria-hidden="true">{item.icon}</span>
-                    <span>
-                      <strong>{label}</strong>
-                      <small>{item.boardStatus || 'Project'}</small>
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    className="favorite-toggle"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      onToggleFavorite(item.id);
-                    }}
-                    aria-label={`${label} 자주 쓰는 도구에서 제거`}
-                    aria-pressed={isFavorite}
-                    title="자주 쓰는 도구에서 제거"
-                  >
-                    ★
-                  </button>
-                </article>
-              );
-            })}
-          </div>
-        ) : (
-          <p className="favorite-tools__empty">자주 쓰는 도구를 추가해보세요.</p>
-        )}
-      </section>
-
-      {boardSections.map((section) => (
-        <section
-          key={section.key}
-          className={`board-section board-section--${section.key}`}
-          aria-labelledby={`board-${section.key}`}
-        >
-          <div className="board-section__head">
-            <div>
-              <div className="home-eyebrow home-eyebrow--section">{section.title}</div>
-              <h3 id={`board-${section.key}`}>{section.title}</h3>
-              <p>{section.description}</p>
-            </div>
-            <span className={`board-badge board-badge--${section.key}`}>{section.title}</span>
-          </div>
-
-          <div className={`board-grid board-grid--${section.key}`}>
-            {section.items.length > 0 ? (
-              section.items.map((item) => {
-                const isFavorite = favoriteIds.includes(item.id);
-                const label = labels[item.id] || item.defaultLabel;
-                return (
-                <article key={item.id} className={`project-card project-card--${item.id}`}>
-                  <div className="project-card__top">
-                    <div className="project-card__icon" aria-hidden="true">
-                      {item.icon}
-                    </div>
-                    <div className="project-card__meta">
-                      <span className="project-card__status">{item.boardStatus || 'Active'}</span>
-                      <h4>{label}</h4>
-                      <p>{item.boardDescription}</p>
-                    </div>
-                    <button
-                      type="button"
-                      className={`favorite-toggle${isFavorite ? ' is-favorite' : ''}`}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        onToggleFavorite(item.id);
-                      }}
-                      aria-label={`${label} ${isFavorite ? '자주 쓰는 도구에서 제거' : '자주 쓰는 도구에 추가'}`}
-                      aria-pressed={isFavorite}
-                      title={isFavorite ? '자주 쓰는 도구에서 제거' : '자주 쓰는 도구에 추가'}
-                    >
-                      {isFavorite ? '★' : '☆'}
-                    </button>
-                  </div>
-                  <div className="project-card__bottom">
-                    <div className="project-card__next">
-                      <span>Next</span>
-                      <strong>{item.boardNextAction}</strong>
-                    </div>
-                    <div className="project-card__actions">
-                      <button type="button" className="project-card__open" onClick={() => onOpenModule(item.id)}>
-                        {item.homeCta || '열기 →'}
-                      </button>
-                      {item.externalUrl ? (
-                        <a
-                          href={item.externalUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="project-card__external"
-                        >
-                          {item.externalLabel || '외부 링크'}
-                        </a>
-                      ) : null}
-                    </div>
-                  </div>
-                </article>
-                );
-              })
-            ) : (
-              <article className="project-card project-card--placeholder">
-                <div className="project-card__top">
-                  <div className="project-card__icon" aria-hidden="true">
-                    {IDEAS_PLACEHOLDER_CARD.icon}
-                  </div>
-                  <div className="project-card__meta">
-                    <span className="project-card__status">{IDEAS_PLACEHOLDER_CARD.boardStatus}</span>
-                    <h4>{IDEAS_PLACEHOLDER_CARD.defaultLabel}</h4>
-                    <p>{IDEAS_PLACEHOLDER_CARD.boardDescription}</p>
-                  </div>
-                  <button
-                    type="button"
-                    className="favorite-toggle favorite-toggle--unavailable"
-                    disabled
-                    aria-label="자주 쓰는 도구에 추가"
-                    aria-pressed="false"
-                    title="프로젝트를 추가하면 즐겨찾기에 넣을 수 있습니다"
-                  >
-                    ☆
-                  </button>
-                </div>
-                <div className="project-card__bottom">
-                  <div className="project-card__next">
-                    <span>Next</span>
-                    <strong>{IDEAS_PLACEHOLDER_CARD.boardNextAction}</strong>
-                  </div>
-                  <div className="project-card__actions">
-                    <button type="button" className="project-card__open project-card__open--disabled" disabled>
-                      준비 중
-                    </button>
-                  </div>
-                </div>
-              </article>
-            )}
-          </div>
-        </section>
-      ))}
-    </section>
-  );
-}
 
 function VisionFontModule({ onGoHome }) {
   return (
@@ -357,7 +56,7 @@ function VisionFontModule({ onGoHome }) {
           </a>
         </div>
       </div>
-      <iframe
+      <ToolFrame
         className="module-embed__frame"
         src={VISION_FONT_APP_URL}
         title="vision-font"
@@ -389,7 +88,7 @@ function TodayShoesModule({ onGoHome }) {
           </a>
         </div>
       </div>
-      <iframe
+      <ToolFrame
         className="module-embed__frame"
         src={TODAY_SHOES_APP_URL}
         title="today-shoes"
@@ -610,7 +309,7 @@ function AiSynapseWikiModule({ onGoHome }) {
           {adminApi.error ? <p className="wiki-api-setup__err">마지막 확인: {adminApi.error}</p> : null}
         </div>
       ) : null}
-      <iframe
+      <ToolFrame
         className="module-embed__frame"
         src={wikiFrameSrc}
         title="AI-Synapse Wiki"
@@ -632,7 +331,7 @@ function GeminiTunerModule({ onGoHome }) {
           <a href={GEMINI_TUNER_REPO_URL} target="_blank" rel="noopener noreferrer">
             Chrome 확장
           </a>
-          이고, 데모 설정은 <strong>이 포털 도메인</strong> localStorage에 저장됩니다.
+          이고, 데모 설정은 <strong>로그인한 계정의 Supabase</strong>에 저장됩니다.
         </p>
         <div className="module-link-bar__actions">
           <button type="button" className="btn-ghost" onClick={onGoHome}>
@@ -661,7 +360,7 @@ function GeminiTunerModule({ onGoHome }) {
           </a>
         </div>
       </div>
-      <iframe
+      <ToolFrame
         className="module-embed__frame"
         src={GEMINI_TUNER_APP_URL}
         title="GeminiTuner"
@@ -676,7 +375,7 @@ function MarathonLogModule({ onGoHome }) {
     <section className="module-embed">
       <div className="module-embed__bar module-link-bar">
         <p className="hint module-link-bar__hint" style={{ margin: 0 }}>
-          포털 홈과 연결 · 대회 기록·PB·통계는 <strong>이 포털 도메인</strong>에 저장됩니다.
+          포털 홈과 연결 · 대회 기록·PB·통계는 <strong>로그인한 계정의 Supabase</strong>에 저장됩니다.
           예전{' '}
           <a href="https://cxr542.github.io/cxr542-ai/projects/marathon-log/" target="_blank" rel="noopener noreferrer">
             GitHub Pages
@@ -692,7 +391,7 @@ function MarathonLogModule({ onGoHome }) {
           </a>
         </div>
       </div>
-      <iframe
+      <ToolFrame
         className="module-embed__frame"
         src={MARATHON_LOG_APP_URL}
         title="마라톤 기록장"
@@ -707,7 +406,7 @@ function IdeaBankModule({ onGoHome }) {
     <section className="module-embed">
       <div className="module-embed__bar module-link-bar">
         <p className="hint module-link-bar__hint" style={{ margin: 0 }}>
-          포털 홈과 연결 · 아이디어·JSON은 <strong>이 포털 도메인</strong>에 저장됩니다.
+          포털 홈과 연결 · 아이디어·JSON은 <strong>로그인한 계정의 Supabase</strong>에 저장됩니다.
           예전 <a href="https://cxr542.github.io/cxr542-ai/projects/idea-bank/" target="_blank" rel="noopener noreferrer">GitHub Pages</a> 데이터는 앱 안 <strong>JSON 가져오기</strong>로 1회 이전하세요.
         </p>
         <div className="module-link-bar__actions">
@@ -719,7 +418,7 @@ function IdeaBankModule({ onGoHome }) {
           </a>
         </div>
       </div>
-      <iframe
+      <ToolFrame
         className="module-embed__frame"
         src={IDEA_BANK_APP_URL}
         title="idea-bank 아이디어 노트"
@@ -735,7 +434,7 @@ function PromptCollectionModule({ onGoHome }) {
       <div className="module-embed__bar module-link-bar">
         <p className="hint module-link-bar__hint" style={{ margin: 0 }}>
           Google Keep에 두던 프롬프트를 <strong>제목·본문</strong>으로 정리합니다.
-          데이터는 <strong>이 포털 도메인</strong> 브라우저 저장소에만 있으며, JSON 보내기로 백업하세요.
+          데이터는 <strong>로그인한 계정의 Supabase</strong>에 저장되며, JSON 보내기로 백업할 수 있습니다.
         </p>
         <div className="module-link-bar__actions">
           <button type="button" className="btn-ghost" onClick={onGoHome}>
@@ -751,7 +450,7 @@ function PromptCollectionModule({ onGoHome }) {
           </a>
         </div>
       </div>
-      <iframe
+      <ToolFrame
         className="module-embed__frame"
         src={PROMPT_COLLECTION_APP_URL}
         title="프롬프트 모음"
@@ -783,7 +482,7 @@ function HowManyPointsModule({ onGoHome }) {
           </a>
         </div>
       </div>
-      <iframe
+      <ToolFrame
         className="module-embed__frame"
         src={HOW_MANY_POINTS_APP_URL}
         title="너는몇점?"
@@ -815,7 +514,7 @@ function WhoAreYouModule({ onGoHome }) {
           </a>
         </div>
       </div>
-      <iframe
+      <ToolFrame
         className="module-embed__frame"
         src={WHO_ARE_YOU_APP_URL}
         title="나는누구?"
@@ -825,147 +524,13 @@ function WhoAreYouModule({ onGoHome }) {
   );
 }
 
-function ModuleContent({ active, onOpenModule, onGoHome, labels, navItems, favoriteIds, onToggleFavorite }) {
-  if (active === RELEASE_NOTES_MODULE_ID) return <ReleaseNotesPanel onGoHome={onGoHome} />;
-  if (active === 'vision-font') return <VisionFontModule onGoHome={onGoHome} />;
-  if (active === 'today-shoes') return <TodayShoesModule onGoHome={onGoHome} />;
-  if (active === 'marathon') return <MarathonLogModule onGoHome={onGoHome} />;
-  if (active === 'idea-bank') return <IdeaBankModule onGoHome={onGoHome} />;
-  if (active === 'prompt-collection') return <PromptCollectionModule onGoHome={onGoHome} />;
-  if (active === 'how-many-points') return <HowManyPointsModule onGoHome={onGoHome} />;
-  if (active === 'who-are-you') return <WhoAreYouModule onGoHome={onGoHome} />;
-  if (active === 'ai-synapse-wiki') return <AiSynapseWikiModule onGoHome={onGoHome} />;
-  if (active === 'gemini-tuner') return <GeminiTunerModule onGoHome={onGoHome} />;
-  return (
-    <HomeModule
-      onOpenModule={onOpenModule}
-      labels={labels}
-      navItems={navItems}
-      favoriteIds={favoriteIds}
-      onToggleFavorite={onToggleFavorite}
-    />
-  );
-}
-
 function App() {
-  const [activeModule, setActiveModule] = useState(readModuleFromUrl);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(readSidebarCollapsed);
-  const [fontScale, setFontScale] = useState(readFontScale);
-  const [navLabelsOpen, setNavLabelsOpen] = useState(false);
-  const [navOrderOpen, setNavOrderOpen] = useState(false);
-  const { labels, updateLabels, resetLabels, defaults } = useNavLabels();
-  const { navItems, order, setOrder, resetOrder } = useNavOrder();
-  const [favoriteIds, setFavoriteIds] = useState(() => readFavoriteIds(FAVORITABLE_PROJECT_IDS));
-  const [favoriteNotice, setFavoriteNotice] = useState('');
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, sidebarCollapsed ? '1' : '0');
-    } catch {
-      /* ignore */
-    }
-  }, [sidebarCollapsed]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(PORTAL_FONT_SCALE_KEY, fontScale);
-    } catch {
-      /* ignore */
-    }
-    document.documentElement.style.fontSize =
-      FONT_SCALE_VALUES[fontScale] || FONT_SCALE_VALUES.normal;
-  }, [fontScale]);
-
-  useEffect(() => {
-    const url = new URL(window.location.href);
-    if (activeModule === 'home') {
-      url.searchParams.delete('m');
-      window.history.replaceState(null, '', `${url.pathname}${url.search}`);
-      return;
-    }
-    url.searchParams.set('m', activeModule);
-    window.history.replaceState(null, '', `${url.pathname}?${url.searchParams.toString()}`);
-  }, [activeModule]);
-
-  useEffect(() => {
-    if (!favoriteNotice) return undefined;
-    const timeoutId = window.setTimeout(() => setFavoriteNotice(''), 2400);
-    return () => window.clearTimeout(timeoutId);
-  }, [favoriteNotice]);
-
-  const handleFavoriteToggle = (id) => {
-    const nextIds = toggleFavoriteId(favoriteIds, id, FAVORITABLE_PROJECT_IDS);
-    writeFavoriteIds(nextIds, FAVORITABLE_PROJECT_IDS);
-    setFavoriteIds(nextIds);
-    setFavoriteNotice(nextIds.includes(id) ? '자주 쓰는 도구에 추가했어요.' : '자주 쓰는 도구에서 제거했어요.');
+  const renderModule = (active, onGoHome) => {
+    if (active === RELEASE_NOTES_MODULE_ID) return <ReleaseNotesPanel onGoHome={onGoHome} />;
+    const components = {'vision-font':VisionFontModule,'today-shoes':TodayShoesModule,marathon:MarathonLogModule,'idea-bank':IdeaBankModule,'prompt-collection':PromptCollectionModule,'how-many-points':HowManyPointsModule,'who-are-you':WhoAreYouModule,'ai-synapse-wiki':AiSynapseWikiModule,'gemini-tuner':GeminiTunerModule};
+    const Module = components[active];
+    return Module ? <Module onGoHome={onGoHome}/> : null;
   };
-
-  const goHome = () => setActiveModule('home');
-  const activeTitle =
-    activeModule === RELEASE_NOTES_MODULE_ID
-      ? RELEASE_NOTES_LABEL
-      : labels[activeModule] || findNavItem(activeModule)?.defaultLabel;
-  const workspaceUrl = getWorkspaceUrl();
-
-  return (
-    <div className={`portal-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}`}>
-      <PortalSidebar
-        activeModule={activeModule}
-        onModuleChange={setActiveModule}
-        navItems={navItems}
-        labels={labels}
-        collapsed={sidebarCollapsed}
-        onCollapsedChange={setSidebarCollapsed}
-        fontScale={fontScale}
-        onFontScaleChange={setFontScale}
-        onOpenNavLabels={() => setNavLabelsOpen(true)}
-        onOpenNavOrder={() => setNavOrderOpen(true)}
-        favoriteIds={favoriteIds}
-        onToggleFavorite={handleFavoriteToggle}
-      />
-      <main className={`content${moduleHasEmbed(activeModule) ? ' content--embed' : ''}`}>
-        <header className="content-header">
-          <div className="content-header__start">
-            <a className="btn-workspace" href={workspaceUrl} title="cxr542 Workspace 랜딩">
-              ← Workspace
-            </a>
-            <h2>{activeTitle}</h2>
-          </div>
-          <div className="content-header__meta">
-            <EnvironmentBadge className="portal-env-badge--header" compact />
-            <span className="content-header__version">v{latestReleaseVersion()}</span>
-          </div>
-        </header>
-        <ModuleContent
-          active={activeModule}
-          onOpenModule={setActiveModule}
-          onGoHome={goHome}
-          labels={labels}
-          navItems={navItems}
-          favoriteIds={favoriteIds}
-          onToggleFavorite={handleFavoriteToggle}
-        />
-      </main>
-      {favoriteNotice ? <p className="portal-toast" role="status" aria-live="polite">{favoriteNotice}</p> : null}
-      <NavLabelsModal
-        isOpen={navLabelsOpen}
-        onClose={() => setNavLabelsOpen(false)}
-        labels={labels}
-        defaults={defaults}
-        onSave={updateLabels}
-        onReset={resetLabels}
-      />
-      <NavOrderModal
-        isOpen={navOrderOpen}
-        onClose={() => setNavOrderOpen(false)}
-        order={order}
-        labels={labels}
-        defaults={defaults}
-        onSave={setOrder}
-        onReset={resetOrder}
-      />
-    </div>
-  );
+  return <Workspace renderModule={renderModule}/>;
 }
-
 export default App;

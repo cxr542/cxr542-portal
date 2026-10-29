@@ -17,7 +17,7 @@ function normalizeFavoriteIds(ids, validIds) {
 
 export function readFavoriteIds(validIds) {
   try {
-    const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
+    const raw = globalThis.PortalStorage.getItem(FAVORITES_STORAGE_KEY);
     if (raw === null) return normalizeFavoriteIds(DEFAULT_FAVORITE_IDS, validIds);
     return normalizeFavoriteIds(JSON.parse(raw), validIds);
   } catch {
@@ -34,5 +34,5 @@ export function toggleFavoriteId(currentIds, id, validIds) {
 
 export function writeFavoriteIds(ids, validIds) {
   const favorites = normalizeFavoriteIds(ids, validIds);
-  localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
+  globalThis.PortalStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
 }

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { readList, writeList } from '../src/utils/storage';
 
 const memoryStore = {};
-global.localStorage = {
+global.PortalStorage = {
   getItem(key) {
     return key in memoryStore ? memoryStore[key] : null;
   },
@@ -16,7 +16,7 @@ global.localStorage = {
 
 describe('storage helpers', () => {
   beforeEach(() => {
-    localStorage.clear();
+    globalThis.PortalStorage.clear();
   });
 
   it('writes and reads list data', () => {
@@ -25,7 +25,7 @@ describe('storage helpers', () => {
   });
 
   it('returns empty list for malformed storage value', () => {
-    localStorage.setItem('broken', '{not-json');
+    globalThis.PortalStorage.setItem('broken', '{not-json');
     expect(readList('broken')).toEqual([]);
   });
 });

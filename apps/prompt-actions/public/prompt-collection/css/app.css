@@ -1,0 +1,283 @@
+/* prompt-collection — 콘텐츠 (셸: ../shared/css/project-shell.css) */
+
+body.project-app.theme-prompt-collection {
+  margin: 0;
+  min-height: 100dvh;
+  background: #050508;
+  color: #f0f0f5;
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  font-size: 14px;
+}
+
+:root {
+  --bg: #050508;
+  --border: rgba(255, 255, 255, 0.1);
+  --text: #f0f0f5;
+  --muted: #9a9aa8;
+  --green: #10b981;
+  --accent: #a78bfa;
+  --accent-rgb: 167, 139, 250;
+  --font-display: "Sora", "IBM Plex Sans", system-ui, sans-serif;
+}
+
+.project-app .nav-item__icon {
+  flex-shrink: 0;
+  width: 1.35rem;
+  font-size: 1.05rem;
+  line-height: 1;
+  text-align: center;
+}
+
+.project-app .nav-item__label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-app .nav-item__badge {
+  flex-shrink: 0;
+  min-width: 1.25rem;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+}
+
+.project-app a.nav-item--hub {
+  color: var(--green);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+.project-app .toolbar input {
+  flex: 1;
+  min-width: 8rem;
+  max-width: 18rem;
+}
+
+.project-app .toolbar .btn--primary {
+  color: #050508;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.list-meta {
+  font-size: 0.8125rem;
+  color: var(--muted);
+  margin: 0 0 0.75rem;
+  line-height: 1.55;
+}
+
+.list-meta--context {
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+  background: rgba(var(--accent-rgb), 0.08);
+  border: 1px solid rgba(var(--accent-rgb), 0.22);
+}
+
+.list-meta--context strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.list-meta__dim {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.prompt-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  margin-bottom: 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.28);
+  cursor: pointer;
+}
+
+.prompt-card:hover {
+  border-color: rgba(var(--accent-rgb), 0.4);
+}
+
+.prompt-card__body {
+  flex: 1;
+  min-width: 12rem;
+}
+
+.prompt-card__title {
+  font-weight: 600;
+  margin: 0 0 0.35rem;
+}
+
+.prompt-card__preview {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--muted);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  font-family: ui-monospace, "IBM Plex Mono", monospace;
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.pill {
+  padding: 0.15rem 0.5rem;
+  font-size: 0.6875rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+
+.pill--pin {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.btn-copy-inline {
+  padding: 0.2rem 0.55rem;
+  font: inherit;
+  font-size: 0.6875rem;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-copy-inline:hover {
+  color: var(--text);
+  border-color: rgba(var(--accent-rgb), 0.5);
+}
+
+.sketch-form {
+  max-width: 42rem;
+}
+
+.sketch-form h2 {
+  margin: 0 0 1rem;
+  font-family: var(--font-display);
+}
+
+.field-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.field-input {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  margin-bottom: 1rem;
+  font: inherit;
+  font-size: 0.9375rem;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.sketch-body {
+  width: 100%;
+  min-height: 14rem;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  font: ui-monospace, "IBM Plex Mono", monospace;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.empty {
+  color: var(--muted);
+  padding: 2rem 0;
+  line-height: 1.7;
+}
+
+.empty strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+:root {
+  --panel: rgba(255,255,255,.04);
+  --danger: #fca5a5;
+  --success: #6ee7b7;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  color-scheme: dark;
+}
+.central-controls { padding: var(--space-4); border-bottom: 1px solid var(--border); background: var(--panel); }
+.account-row, .filter-row { display: flex; flex-wrap: wrap; align-items: end; gap: var(--space-3); }
+.account-row label, .filter-row label { display: grid; gap: var(--space-1); color: var(--muted); font-size: .8125rem; }
+.account-row input, .filter-row input { box-sizing: border-box; max-width: 100%; min-height: 44px; border: 1px solid var(--border); border-radius: var(--space-2); background: var(--bg); color: var(--text); font: inherit; font-size: 1rem; padding: var(--space-2); }
+.account-row span { max-width: 36rem; line-height: 1.6; overflow-wrap: anywhere; }
+#save-status { color: var(--success); line-height: 1.7; word-break: keep-all; overflow-wrap: anywhere; }
+#save-status.is-error { color: var(--danger); }
+.project-app .btn, .project-app .btn-copy-inline { min-height: 44px; }
+.project-app .btn:disabled, input:disabled { opacity: .5; cursor: not-allowed; }
+.prompt-open { appearance: none; text-align: left; font: inherit; font-weight: 600; border: 0; background: transparent; color: var(--text); padding: var(--space-2) 0; min-height: 44px; cursor: pointer; overflow-wrap: anywhere; }
+.prompt-card { cursor: default; }
+.prompt-card__body { min-width: 0; }
+.prompt-card__preview { overflow-wrap: anywhere; }
+.pill { overflow-wrap: anywhere; max-width: 100%; }
+.field-input, .sketch-body { box-sizing: border-box; font-size: 1rem; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#migration-dialog { box-sizing: border-box; width: min(44rem, calc(100% - 32px)); max-height: calc(100dvh - 48px); padding: var(--space-6); border: 1px solid var(--border); border-radius: var(--space-3); background: var(--bg); color: var(--text); overflow: auto; line-height: 1.7; }
+#migration-dialog::backdrop { background: rgba(0,0,0,.7); }
+#migration-dialog p, #migration-dialog button { word-break: keep-all; overflow-wrap: anywhere; }
+.backup-check { display: flex; gap: var(--space-2); align-items: center; margin: var(--space-4) 0; }
+.backup-check input, .migration-row input { min-width: 20px; min-height: 20px; }
+.migration-row { display: flex; gap: var(--space-3); padding: var(--space-3) 0; border-top: 1px solid var(--border); align-items: start; }
+.migration-row span { min-width: 0; overflow-wrap: anywhere; word-break: keep-all; }
+@media (max-width: 600px) {
+  .account-row label, .filter-row label { width: 100%; }
+  .account-row input, .filter-row input { width: 100%; }
+  .central-controls { padding: var(--space-3); }
+  #migration-dialog { padding: var(--space-4); }
+}
+.central-controls .btn, .form-actions .btn, #migration-dialog > .btn {
+  padding: var(--space-2) var(--space-3); font: inherit; font-size: .875rem;
+  color: var(--text); background: var(--panel); border: 1px solid var(--border);
+  border-radius: var(--space-2); cursor: pointer;
+}
+.form-actions .btn--primary { color: var(--bg); background: var(--accent); }
+.central-controls .btn:hover, .form-actions .btn:hover, #migration-dialog > .btn:hover { background: rgba(var(--accent-rgb),.14); }
+.form-actions .btn--primary:hover { color: var(--text); }
+#editor-status { margin-top: var(--space-4); line-height: 1.7; word-break: keep-all; overflow-wrap: anywhere; }
+#editor-status.is-error { color: var(--danger); }
+.form-actions .btn--danger { color: var(--danger); }
+.backup-check { min-height: 44px; }
+.sketch-form .field-label:has(input[type="checkbox"]) { min-height: 44px; display: flex; align-items: center; gap: var(--space-2); }
+form.account-row > span { flex-basis: 100%; min-height: 1.6em; }
+@media (max-width: 600px) { form.account-row > span { min-height: 3.2em; } }
+@media (max-width: 600px) {
+  .project-app .app-banner { min-height: calc(4 * var(--space-6)); }
+  #save-status { min-height: 3.4em; }
+}

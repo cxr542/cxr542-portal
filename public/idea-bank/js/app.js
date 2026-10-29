@@ -101,7 +101,7 @@
   }
 
   function quickCaptureHtml() {
-    return '<section class="quick-capture" aria-labelledby="quick-capture-title"><div class="quick-capture__head"><div><p class="quick-capture__eyebrow">바로 저장</p><h2 id="quick-capture-title">빠른 아이디어 입력</h2></div><p>정리는 나중에 해도 됩니다.</p></div><label class="sr-only" for="quick-body">아이디어 내용</label><textarea id="quick-body" class="quick-capture__body" placeholder="떠오른 아이디어를 바로 적어두세요&#10;복사한 문구를 붙여넣고 저장해도 좋아요"></textarea><div class="quick-capture__actions"><button type="button" class="btn" id="btn-quick-paste">붙여넣기</button><button type="button" class="btn btn--primary quick-capture__save" id="btn-quick-save">저장</button></div><p class="quick-capture__notice" id="quick-capture-notice" role="status" aria-live="polite"></p></section>';
+    return '<section class="quick-capture" aria-label="빠른 아이디어 입력"><div class="quick-capture__surface"><label class="sr-only" for="quick-body">빠른 아이디어 입력</label><textarea id="quick-body" class="quick-capture__body" placeholder="떠오른 아이디어를 바로 적어두세요&#10;복사한 문구를 붙여넣고 저장해도 좋아요"></textarea><div class="quick-capture__actions"><button type="button" class="quick-capture__paste" id="btn-quick-paste">붙여넣기</button><button type="button" class="quick-capture__save" id="btn-quick-save" aria-label="아이디어 저장">저장</button></div></div><p class="quick-capture__notice" id="quick-capture-notice" role="status" aria-live="polite"></p></section>';
   }
 
   function setQuickNotice(message, isError) {
@@ -132,7 +132,7 @@
       state.statusFilter = "all";
       render();
       setTimeout(function () { setQuickNotice("저장했어요. 나중에 정리하면 돼요."); }, 0);
-    }).catch(function () { setQuickNotice("저장하지 못했습니다. 브라우저 저장소를 확인해 주세요.", true); });
+    }).catch(function () { setQuickNotice("저장하지 못했습니다. Supabase 로그인과 연결을 확인해 주세요.", true); });
   }
 
   function pasteQuickCapture() {
@@ -331,11 +331,12 @@
         emptyMsg +=
           '<p class="list-meta">✨ <strong>새 아이디어</strong>로 첫 메모를 남겨 보세요.</p>';
       }
-      $("content").innerHTML = state.view === "list" ? quickCaptureHtml() + emptyMsg : emptyMsg;
+      $("content").innerHTML = state.view === "list" ? '<section class="idea-feed idea-feed--empty"><p class="idea-feed__label">최근 아이디어</p>' + emptyMsg + "</section>" + quickCaptureHtml() : emptyMsg;
       if (state.view === "list") bindQuickCapture();
       return;
     }
-    var listHtml = (state.view === "list" ? quickCaptureHtml() : "") + listMetaHtml(filtered.length, ideas);
+    var listHtml = state.view === "list" ? '<section class="idea-feed"><p class="idea-feed__label">최근 아이디어</p>' : "";
+    listHtml += listMetaHtml(filtered.length, ideas);
     if (
       state.view === "list" &&
       filtered.length < ideas.length &&
@@ -344,54 +345,57 @@
       listHtml +=
         '<p class="list-meta">🚀 승격된 아이디어는 위 「🚀 승격됨」 칩을 눌러 보세요.</p>';
     }
-    $("content").innerHTML =
-      listHtml +
-      filtered
+    var messageHtml = filtered
         .map(function (idea) {
           return (
-            '<article class="idea-card" data-id="' +
+            '<article class="idea-message" data-id="' +
             escapeHtml(idea.id) +
-            '"><div class="idea-card__body">' +
-            '<p class="idea-card__title">' +
+            '" role="button" tabindex="0"><div class="idea-message__body">' +
+            '<p class="idea-message__title">' +
             escapeHtml(idea.title) +
             "</p>" +
-            '<p class="idea-card__preview">' +
+            '<p class="idea-message__preview">' +
             escapeHtml(previewBody(idea.body)) +
             "</p>" +
-            '<div class="pill-row">' +
-            '<span class="pill pill--status">' +
+            '<div class="idea-message__meta">' +
+            '<span class="idea-message__status">' +
             escapeHtml(STATUS_LABEL[idea.status] || idea.status || "inbox") +
             "</span>" +
-            '<span class="pill pill--date">' +
+            '<span class="idea-message__date">' +
             escapeHtml(formatIdeaDate(idea)) +
             "</span>" +
-            (idea.pinned ? '<span class="pill pill--pin">고정</span>' : "") +
-            '<span class="pill pill--' +
-            escapeHtml(idea.targetCategory || "study") +
-            '">' +
-            escapeHtml(
-              CAT_LABEL[idea.targetCategory] || idea.targetCategory || "기타"
-            ) +
-            "</span>" +
+            (idea.pinned ? '<span class="idea-message__pin">고정</span>' : "") +
             (Array.isArray(idea.tags)
-              ? idea.tags.map(function (tag) { return '<span class="pill pill--tag">#' + escapeHtml(tag) + "</span>"; }).join("")
+              ? idea.tags.map(function (tag) { return '<span class="idea-message__tag">#' + escapeHtml(tag) + "</span>"; }).join("")
               : "") +
             "</div></div></article>"
           );
         })
         .join("");
+    if (state.view === "list") {
+      $("content").innerHTML = listHtml + messageHtml + "</section>" + quickCaptureHtml();
+    } else {
+      $("content").innerHTML = listHtml + messageHtml;
+    }
     if (state.view === "list") bindQuickCapture();
-    $("content").querySelectorAll(".idea-card").forEach(function (card) {
-      card.onclick = function () {
+    $("content").querySelectorAll(".idea-message").forEach(function (card) {
+      var openIdea = function () {
         state.editId = card.getAttribute("data-id");
         state.isNew = false;
         state.draft = null;
         state.view = "sketch";
         render();
       };
+      card.onclick = openIdea;
+      card.onkeydown = function (event) {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openIdea();
+        }
+      };
     });
     if (window.ProjectShell && window.ProjectShell.bindInlineTitles) {
-      ProjectShell.bindInlineTitles($("content"), ".idea-card__title", function (id, title) {
+      ProjectShell.bindInlineTitles($("content"), ".idea-message__title", function (id, title) {
         return IdeaBankDb.getIdea(id).then(function (idea) {
           if (!idea) return;
           idea.title = title.trim() || idea.title;
@@ -862,7 +866,7 @@
       })
       .catch(function (err) {
         console.error(err);
-        window.alert("새 아이디어를 열 수 없습니다. 브라우저 저장소를 확인해 주세요.");
+        window.alert("새 아이디어를 열 수 없습니다. Supabase 로그인과 연결을 확인해 주세요.");
       });
   }
 
@@ -915,7 +919,7 @@
 
   function recordExportBackup() {
     try {
-      localStorage.setItem(BACKUP_REMINDER_KEY, new Date().toISOString());
+      globalThis.PortalStorage.setItem(BACKUP_REMINDER_KEY, new Date().toISOString());
     } catch (e) {}
     updateStorageBanner();
   }
@@ -931,7 +935,7 @@
   function backupNudgeText() {
     if (!isProdHost()) return "";
     try {
-      var raw = localStorage.getItem(BACKUP_REMINDER_KEY);
+      var raw = globalThis.PortalStorage.getItem(BACKUP_REMINDER_KEY);
       if (!raw) {
         return " · 💾 JSON 백업 권장";
       }
@@ -943,39 +947,16 @@
     return "";
   }
 
-  function updateStorageBanner(mode) {
-    if (mode === undefined && window.IdeaBankDb) {
-      IdeaBankDb.getStorageMode().then(updateStorageBanner);
-      return;
-    }
-    var meta = document.querySelector(".app-banner__meta");
-    if (!meta) return;
-    var storeLabel =
-      mode === "indexeddb"
-        ? "IndexedDB"
-        : mode === "localstorage"
-          ? "localStorage"
-          : mode
-            ? "저장 불가"
-            : "내 브라우저에만";
-    if (!mode) {
-      meta.textContent = "🔒 내 브라우저에만 · 🎯 준비되면 허브로";
-      return;
-    }
-    meta.textContent =
-      "🔒 " +
-      storeLabel +
-      " · 내 브라우저에만" +
-      (mode === "localstorage" ? " (IndexedDB 제한 → localStorage)" : "") +
-      " · 🎯 준비되면 허브로" +
-      backupNudgeText();
+  function updateStorageBanner() {
+    var meta = document.querySelector(".app-banner__meta, .app-banner .storage-hint");
+    if (meta) meta.textContent = "Supabase · 계정별 저장 · JSON 백업 가능";
   }
 
   function showInitError(err) {
     console.error(err);
     var msg = (err && err.message) || String(err);
     var hint =
-      "데이터를 저장할 수 없습니다. 브라우저에서 이 사이트의 저장소(쿠키·사이트 데이터)를 허용해 주세요.";
+      "데이터를 저장할 수 없습니다. Supabase 로그인과 네트워크 연결을 확인해 주세요.";
     if (location.protocol === "file:") {
       hint =
         "HTML 파일을 직접 연 경우 저장소가 막힙니다. GitHub Pages URL 또는 npm run preview로 열어 주세요.";

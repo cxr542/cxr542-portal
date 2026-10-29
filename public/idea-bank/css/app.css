@@ -668,3 +668,198 @@ body.project-app.theme-idea-bank {
   color: var(--cat-ideas);
   font-weight: 600;
 }
+
+.project-app .project-content {
+  width: min(100%, 58rem);
+  margin: 0 auto;
+  padding: 1.5rem 1rem 10rem;
+}
+
+.idea-feed {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.idea-feed__label {
+  margin: 0 0 0.25rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.idea-message {
+  display: block;
+  padding: 1rem;
+  color: inherit;
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom-color: var(--border);
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.idea-message:first-of-type {
+  border-top-color: var(--border);
+}
+
+.idea-message:hover,
+.idea-message:focus-visible {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(251, 191, 36, 0.35);
+  outline: none;
+}
+
+.idea-message__title {
+  margin: 0 0 0.4rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.idea-message__preview {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.idea-message__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.5rem;
+  margin-top: 0.7rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.idea-message__status,
+.idea-message__tag,
+.idea-message__pin {
+  padding: 0.15rem 0.42rem;
+  color: var(--cat-ideas);
+  border: 1px solid rgba(251, 191, 36, 0.32);
+  border-radius: 999px;
+}
+
+.idea-message__tag {
+  color: var(--cat-study);
+  border-color: rgba(167, 139, 250, 0.32);
+}
+
+.idea-message__pin {
+  color: var(--green);
+  border-color: rgba(16, 185, 129, 0.32);
+}
+
+.quick-capture {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin: 1rem 0 0;
+  padding: 0.75rem 0 0;
+  background: linear-gradient(to bottom, transparent, var(--bg) 1rem);
+}
+
+.quick-capture__surface {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: end;
+  padding: 0.55rem;
+  background: #111116;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+}
+
+.quick-capture__body {
+  min-height: 44px;
+  max-height: 9rem;
+  padding: 0.65rem;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  resize: none;
+}
+
+.quick-capture__body:focus {
+  outline: none;
+}
+
+.quick-capture__actions {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.quick-capture__paste,
+.quick-capture__save {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 0.75rem;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.quick-capture__paste {
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.quick-capture__save {
+  color: #050508;
+  background: var(--cat-ideas);
+  border: 1px solid var(--cat-ideas);
+  border-radius: 8px;
+}
+
+.quick-capture__save:active,
+.quick-capture__paste:active {
+  transform: scale(0.98);
+}
+
+.quick-capture__notice {
+  margin: 0.4rem 0 0;
+  padding: 0 0.3rem;
+}
+
+@media (max-width: 760px) {
+  .project-app .project-content {
+    padding: 1rem 0.75rem 9.5rem;
+  }
+
+  .quick-capture {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 5;
+    margin: 0;
+    padding: 0.75rem max(0.75rem, env(safe-area-inset-left)) calc(0.75rem + env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-right));
+    background: linear-gradient(to bottom, transparent, var(--bg) 1rem);
+  }
+
+  .quick-capture__surface {
+    max-width: 42rem;
+    margin: 0 auto;
+  }
+
+  .quick-capture__paste {
+    font-size: 0;
+  }
+
+  .quick-capture__paste::after {
+    content: "붙여넣기";
+    font-size: 0.75rem;
+  }
+}

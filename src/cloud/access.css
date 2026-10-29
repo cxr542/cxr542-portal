@@ -1,0 +1,17 @@
+.portal-cloud-gate { position: fixed; inset: 0; z-index: 100000; overflow: auto; display: grid; place-items: center; padding: 16px; background: #f3f5fb; color: #0f172a; font: 16px/1.6 system-ui, sans-serif; box-sizing: border-box; }
+.portal-cloud-panel { width: min(100%, 400px); box-sizing: border-box; padding: 24px; border: 1px solid #cbd5e1; border-radius: 16px; background: white; box-shadow: 0 8px 24px #0f172a10; word-break: keep-all; }
+.portal-cloud-panel h1 { font-size: 24px; margin: 0 0 16px; letter-spacing: -.03em; }
+.portal-cloud-panel p { color: #475569; }
+.portal-cloud-panel label { display: block; margin: 16px 0; }
+.portal-cloud-panel input { display: block; width: 100%; min-height: 44px; box-sizing: border-box; margin-top: 4px; padding: 8px 12px; font: inherit; border: 1px solid #64748b; border-radius: 8px; background: white; color: #0f172a; }
+.portal-cloud-panel button, .portal-cloud-toolbar button { min-height: 44px; padding: 8px 12px; font: inherit; border: 1px solid #cbd5e1; border-radius: 8px; background: white; color: #0f172a; cursor: pointer; }
+.portal-cloud-panel button[type=submit] { background: #2563eb; border-color: #2563eb; color: white; width: 100%; }
+.portal-cloud-panel button:disabled { opacity: .6; cursor: wait; }
+.portal-cloud-panel :focus-visible, .portal-cloud-toolbar button:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+.portal-cloud-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.portal-cloud-toolbar { position: fixed; bottom: 8px; right: 8px; left: 8px; margin: auto; width: fit-content; max-width: calc(100% - 16px); box-sizing: border-box; z-index: 99999; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 16px; background: white; color: #0f172a; box-shadow: 0 8px 24px #0f172a10; font: 12px/1.5 system-ui, sans-serif; }
+.portal-cloud-toolbar details { max-width: 100%; }
+.portal-cloud-toolbar summary { cursor: pointer; padding: 8px; }
+.portal-cloud-toolbar [role=alert] { color: #0f172a; max-width: 48ch; overflow-wrap: anywhere; }
+.portal-cloud-gate { margin: 0; width: 100%; height: 100%; max-width: none; max-height: none; border: 0; }
+@media (max-width: 760px) { .portal-cloud-toolbar { bottom: 80px; } }

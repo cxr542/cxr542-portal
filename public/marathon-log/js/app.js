@@ -1023,29 +1023,14 @@
     });
   }
 
-  function updateStorageBanner(mode) {
-    var hint = document.querySelector(".app-banner .storage-hint");
-    if (!hint) return;
-    var storeLabel =
-      mode === "indexeddb"
-        ? "IndexedDB"
-        : mode === "localstorage"
-          ? "localStorage"
-          : "저장 불가";
-    hint.textContent =
-      "🔒 " +
-      storeLabel +
-      " · 내 브라우저에만" +
-      (mode === "localstorage"
-        ? " (IndexedDB 제한 → localStorage)"
-        : "") +
-      " · JSON 백업 권장" +
-      backupNudgeText();
+  function updateStorageBanner() {
+    var meta = document.querySelector(".app-banner__meta, .app-banner .storage-hint");
+    if (meta) meta.textContent = "Supabase · 계정별 저장 · JSON 백업 가능";
   }
 
   function recordExportBackup() {
     try {
-      localStorage.setItem(BACKUP_REMINDER_KEY, new Date().toISOString());
+      globalThis.PortalStorage.setItem(BACKUP_REMINDER_KEY, new Date().toISOString());
     } catch (e) {}
     MarathonDb.getStorageMode().then(updateStorageBanner);
   }
@@ -1061,7 +1046,7 @@
   function backupNudgeText() {
     if (!isProdHost()) return "";
     try {
-      var raw = localStorage.getItem(BACKUP_REMINDER_KEY);
+      var raw = globalThis.PortalStorage.getItem(BACKUP_REMINDER_KEY);
       if (!raw) {
         return " · 💾 JSON 백업 권장";
       }

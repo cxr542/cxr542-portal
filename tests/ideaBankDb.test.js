@@ -20,6 +20,13 @@ function loadIdeaBankDb() {
       },
     },
   }
+  const rows = new Map()
+  context.PortalCloud = {
+    list: () => [...rows.values()],
+    read: (_namespace, id) => rows.get(id) || null,
+    write: async (_namespace, id, value) => { if (value === null) rows.delete(id); else rows.set(id, value); return value },
+    clear: async () => rows.clear(),
+  }
   context.window = context
   vm.runInNewContext(
     fs.readFileSync(new URL('../public/idea-bank/js/db.js', import.meta.url), 'utf8'),

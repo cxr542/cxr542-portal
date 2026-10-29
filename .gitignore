@@ -26,3 +26,11 @@ dist-ssr
 
 # Wiki sync clone (npm run wiki:sync)
 .cache/
+
+# Local credentials, temporary reviews and agent artifacts
+.env*
+!.env.prompts.example
+.omo/
+.codegraph
+docs/prompts/recovery/
+supabase/.temp/

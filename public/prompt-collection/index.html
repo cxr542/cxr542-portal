@@ -16,7 +16,9 @@
     />
     <link rel="stylesheet" href="/shared/css/project-shell.css?v=portal2" />
     <link rel="stylesheet" href="/prompt-collection/css/app.css?v=portal2" />
-  </head>
+  <link rel="stylesheet" href="/shared/cloud.css" />
+  <link rel="stylesheet" href="/shared/css/workspace-embed.css"><script src="/shared/js/workspace-embed.js" defer></script>
+</head>
   <body class="project-app theme-prompt-collection">
     <p class="app-banner">
       <span class="app-banner__brand">
@@ -24,7 +26,7 @@
         <span class="app-banner__title" id="app-banner-title">프롬프트 모음</span>
       </span>
       <span class="app-banner__tagline" id="app-banner-tagline">Keep에 두던 프롬프트를 제목·본문으로 정리</span>
-      <span class="app-banner__meta">🔒 이 포털 도메인에 저장 · JSON 백업 가능</span>
+      <span class="app-banner__meta">🔒 이 Supabase 계정에 저장 · JSON 백업 가능</span>
     </p>
     <div
       class="project-nav-backdrop"
@@ -102,17 +104,10 @@
         <div class="content project-content" id="content"></div>
       </div>
     </div>
-    <script>
-      (function () {
-        try {
-          if (localStorage.getItem("prompt-collection-sidebar-collapsed") === "1") {
-            document.documentElement.classList.add("project-sidebar-collapsed-boot");
-          }
-        } catch (e) {}
-      })();
-    </script>
-    <script src="/shared/js/project-shell.js?v=portal2"></script>
-    <script src="/prompt-collection/js/db.js?v=portal2"></script>
-    <script src="/prompt-collection/js/app.js?v=portal2"></script>
+
+    <script type="application/portal-script" data-cloud-src="/shared/js/project-shell.js?v=portal2"></script>
+    <script type="application/portal-script" data-cloud-src="/prompt-collection/js/db.js?v=portal2"></script>
+    <script type="application/portal-script" data-cloud-src="/prompt-collection/js/app.js?v=portal2"></script>
+  <script type="module" src="/shared/cloud.js"></script>
   </body>
 </html>

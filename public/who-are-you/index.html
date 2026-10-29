@@ -13,7 +13,9 @@
     />
     <link rel="stylesheet" href="/shared/css/project-shell.css?v=portal4" />
     <link rel="stylesheet" href="/who-are-you/css/app.css?v=portal4" />
-  </head>
+  <link rel="stylesheet" href="/shared/cloud.css" />
+  <link rel="stylesheet" href="/shared/css/workspace-embed.css"><script src="/shared/js/workspace-embed.js" defer></script>
+</head>
   <body class="project-app theme-who-are-you">
     <p class="app-banner">
       <span class="app-banner__brand">
@@ -98,17 +100,10 @@
         <div class="content project-content" id="content"></div>
       </div>
     </div>
-    <script>
-      (function () {
-        try {
-          if (localStorage.getItem("who-are-you-sidebar-collapsed") === "1") {
-            document.documentElement.classList.add("project-sidebar-collapsed-boot");
-          }
-        } catch (e) {}
-      })();
-    </script>
-    <script src="/shared/js/project-shell.js?v=portal4"></script>
-    <script src="/who-are-you/js/db.js?v=portal4"></script>
-    <script src="/who-are-you/js/app.js?v=portal4"></script>
+
+    <script type="application/portal-script" data-cloud-src="/shared/js/project-shell.js?v=portal4"></script>
+    <script type="application/portal-script" data-cloud-src="/who-are-you/js/db.js?v=portal4"></script>
+    <script type="application/portal-script" data-cloud-src="/who-are-you/js/app.js?v=portal4"></script>
+  <script type="module" src="/shared/cloud.js"></script>
   </body>
 </html>

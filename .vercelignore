@@ -1,0 +1,11 @@
+.omo
+node_modules
+docs/qa
+workspace-qa.html
+*.log
+
+.cache/
+.env*
+apps/
+integrations/
+tests/

@@ -34,7 +34,7 @@
 
   function load() {
     try {
-      var raw = JSON.parse(localStorage.getItem(LS_KEY) || "null");
+      var raw = JSON.parse(globalThis.PortalStorage.getItem(LS_KEY) || "null");
       if (!raw || typeof raw !== "object") return JSON.parse(JSON.stringify(DEFAULT));
       var merged = Object.assign(JSON.parse(JSON.stringify(DEFAULT)), raw, {
         sessions: Array.isArray(raw.sessions) ? raw.sessions : DEFAULT.sessions,
@@ -49,7 +49,7 @@
 
   function save(data) {
     try {
-      localStorage.setItem(LS_KEY, JSON.stringify(data));
+      globalThis.PortalStorage.setItem(LS_KEY, JSON.stringify(data));
     } catch (e) {
       /* ignore */
     }

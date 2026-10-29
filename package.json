@@ -5,16 +5,20 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/version-cloud.mjs",
     "lint": "eslint .",
     "test": "vitest run",
     "preview": "vite preview",
     "wiki:check": "node scripts/check-wiki-api.mjs",
-    "wiki:sync": "node scripts/sync-ai-synapse-wiki.mjs"
+    "wiki:sync": "node scripts/sync-ai-synapse-wiki.mjs",
+    "build:prompt-actions": "node scripts/build-prompts.mjs",
+    "package:prompt-actions": "npm run build:prompt-actions && node scripts/build-prompts-pilot.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "2.118.0",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react-dom": "^19.2.6",
+    "@modelcontextprotocol/sdk": "1.32.2"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -24,8 +28,14 @@
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
+    "fake-indexeddb": "6.2.6",
     "globals": "^17.6.0",
     "vite": "^8.0.12",
-    "vitest": "^2.1.9"
+    "vitest": "4.1.12",
+    "@electric-sql/pglite": "0.5.12",
+    "lightningcss": "1.33.0"
+  },
+  "overrides": {
+    "zod": "4.6.7"
   }
 }

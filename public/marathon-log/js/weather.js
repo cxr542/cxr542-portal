@@ -21,7 +21,7 @@
 
   function getKmaApiKey() {
     try {
-      return localStorage.getItem(STORAGE_KEY) || "";
+      return globalThis.PortalStorage.getItem(STORAGE_KEY) || "";
     } catch (e) {
       return "";
     }
@@ -29,8 +29,8 @@
 
   function setKmaApiKey(key) {
     try {
-      if (key) localStorage.setItem(STORAGE_KEY, key);
-      else localStorage.removeItem(STORAGE_KEY);
+      if (key) globalThis.PortalStorage.setItem(STORAGE_KEY, key);
+      else globalThis.PortalStorage.removeItem(STORAGE_KEY);
     } catch (e) {
       /* ignore */
     }

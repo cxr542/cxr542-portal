@@ -194,7 +194,7 @@
         '<button type="button" class="btn btn--primary" id="empty-open-import">왓챠 평점 가져오기</button>' +
         '<button type="button" class="btn" id="empty-open-new">직접 평가 추가</button>' +
         "</div>" +
-        '<p class="empty__note">운영·로컬·모바일은 저장소가 분리됩니다. 한 번 가져온 뒤 JSON보내기로 백업해두면 다른 기기에도 옮길 수 있어요.</p>' +
+        '<p class="empty__note">평가 기록은 로그인한 Supabase 계정에 저장됩니다. 같은 계정으로 다른 기기에서도 이어서 사용할 수 있고, JSON으로 백업할 수도 있어요.</p>' +
         "</div>";
       $("empty-open-import").onclick = function () {
         state.view = "import";
