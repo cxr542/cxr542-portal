@@ -1,6 +1,6 @@
 const TMS_ORIGIN = 'https://okestro-edu-team-tms.vercel.app';
 
-export const WORKSPACE_LAUNCHER_ORIGIN = 'https://cxr542-launcher.vercel.app';
+export const WORKSPACE_LAUNCHER_ORIGIN = 'https://cxr542-launcher-brown.vercel.app';
 
 export const WORKSPACE_LAUNCHER_DEV_ORIGIN =
   import.meta.env.VITE_LAUNCHER_ORIGIN || 'http://localhost:4321';
