@@ -1,15 +1,16 @@
 name: Deploy Production
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
+
+env:
+  VERCEL_CLI_VERSION: 65.2.0
 
 jobs:
   deploy_production:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    # environment: production  — 승인 UI 없을 때 배포가 멈춤. 필요 시 Settings → Environments에서 production 생성 후 주석 해제
+    environment: production
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -17,7 +18,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - name: Install dependencies
@@ -36,9 +37,9 @@ jobs:
           VERCEL_ORG_ID: team_Vp0kQleFtc5U7n4UQi8U7Ky9
           VERCEL_PROJECT_ID: prj_99WcsURX5Ws8FvWSTDp6uriQK6UQ
         run: |
-          npx vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
-          npx vercel build --prod --token="$VERCEL_TOKEN"
-          DEPLOY_OUTPUT="$(npx vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN")"
+          npx --yes vercel@"$VERCEL_CLI_VERSION" pull --yes --environment=production --token="$VERCEL_TOKEN"
+          npx --yes vercel@"$VERCEL_CLI_VERSION" build --prod --token="$VERCEL_TOKEN"
+          DEPLOY_OUTPUT="$(npx --yes vercel@"$VERCEL_CLI_VERSION" deploy --prebuilt --prod --token="$VERCEL_TOKEN")"
           echo "$DEPLOY_OUTPUT"
           DEPLOY_URL="$(echo "$DEPLOY_OUTPUT" | grep -Eo 'https://[^ ]+\.vercel\.app' | head -n 1)"
           if [ -z "$DEPLOY_URL" ]; then

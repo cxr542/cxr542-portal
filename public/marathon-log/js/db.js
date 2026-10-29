@@ -1,141 +1,8 @@
 (function (global) {
   "use strict";
 
-  var DB_NAME = "marathon-log";
-  var DB_VERSION = 1;
-  var STORE = "races";
-  var SEED_VERSION = 3;
-  var SEED_VERSION_KEY = "marathon-log-seed-version";
-  var LS_RACES_KEY = "marathon-log-races";
-
   var SEED_RACES = global.MarathonKeepSeed || [];
-  var storageMode = "indexeddb";
-  var storageReady = null;
-
-  function probeIndexedDB() {
-    return new Promise(function (resolve) {
-      if (!global.indexedDB) {
-        resolve(false);
-        return;
-      }
-      var name = "__marathon_log_probe_" + Date.now();
-      var req;
-      try {
-        req = indexedDB.open(name, 1);
-      } catch (e) {
-        resolve(false);
-        return;
-      }
-      req.onerror = function () {
-        resolve(false);
-      };
-      req.onupgradeneeded = function (e) {
-        e.target.result.createObjectStore("t");
-      };
-      req.onsuccess = function (e) {
-        var db = e.target.result;
-        db.close();
-        try {
-          indexedDB.deleteDatabase(name);
-        } catch (err) {
-          /* ignore */
-        }
-        resolve(true);
-      };
-    });
-  }
-
-  function initStorage() {
-    if (storageReady) return storageReady;
-    storageReady = probeIndexedDB().then(function (ok) {
-      if (ok) {
-        storageMode = "indexeddb";
-        return "indexeddb";
-      }
-      try {
-        localStorage.setItem("__marathon_log_probe__", "1");
-        localStorage.removeItem("__marathon_log_probe__");
-        storageMode = "localstorage";
-        return "localstorage";
-      } catch (e) {
-        storageMode = "none";
-        return "none";
-      }
-    });
-    return storageReady;
-  }
-
-  function openDb() {
-    return initStorage().then(function (mode) {
-      if (mode !== "indexeddb") {
-        return Promise.reject(new Error("indexeddb-unavailable"));
-      }
-      return new Promise(function (resolve, reject) {
-        var req = indexedDB.open(DB_NAME, DB_VERSION);
-        req.onerror = function () {
-          reject(req.error || new Error("idb-open"));
-        };
-        req.onupgradeneeded = function (e) {
-          var db = e.target.result;
-          if (!db.objectStoreNames.contains(STORE)) {
-            var store = db.createObjectStore(STORE, { keyPath: "id" });
-            store.createIndex("date", "date", { unique: false });
-            store.createIndex("distance", "distance", { unique: false });
-          }
-        };
-        req.onsuccess = function () {
-          resolve(req.result);
-        };
-      });
-    });
-  }
-
-  function txStore(mode) {
-    return openDb().then(function (db) {
-      return db.transaction(STORE, mode).objectStore(STORE);
-    });
-  }
-
-  function reqToPromise(req) {
-    return new Promise(function (resolve, reject) {
-      req.onsuccess = function () {
-        resolve(req.result);
-      };
-      req.onerror = function () {
-        reject(req.error);
-      };
-    });
-  }
-
-  function lsRead() {
-    try {
-      var raw = localStorage.getItem(LS_RACES_KEY);
-      var list = raw ? JSON.parse(raw) : [];
-      return Array.isArray(list) ? list : [];
-    } catch (e) {
-      return [];
-    }
-  }
-
-  function lsWrite(list) {
-    localStorage.setItem(LS_RACES_KEY, JSON.stringify(list));
-  }
-
-  function getSeedVersion() {
-    try {
-      return parseInt(localStorage.getItem(SEED_VERSION_KEY) || "0", 10);
-    } catch (e) {
-      return 0;
-    }
-  }
-
-  function setSeedVersion(v) {
-    try {
-      localStorage.setItem(SEED_VERSION_KEY, String(v));
-    } catch (e) {
-      /* ignore */
-    }
-  }
+  var storageMode = "supabase";
 
   function newId() {
     if (typeof crypto !== "undefined" && crypto.randomUUID) {
@@ -175,88 +42,24 @@
   }
 
   function listRaces() {
-    return initStorage().then(function (mode) {
-      if (mode === "localstorage") {
-        return lsRead();
-      }
-      if (mode === "none") {
-        return Promise.reject(new Error("storage-unavailable"));
-      }
-      return txStore("readonly").then(function (store) {
-        return reqToPromise(store.getAll());
-      });
-    });
+    return Promise.resolve(global.PortalCloud.list("marathon-log"));
   }
 
   function getRace(id) {
-    return initStorage().then(function (mode) {
-      if (mode === "localstorage") {
-        return lsRead().find(function (r) {
-          return r.id === id;
-        });
-      }
-      if (mode === "none") {
-        return Promise.reject(new Error("storage-unavailable"));
-      }
-      return txStore("readonly").then(function (store) {
-        return reqToPromise(store.get(id));
-      });
-    });
+    return Promise.resolve(global.PortalCloud.read("marathon-log", id));
   }
 
   function putRace(race) {
-    return initStorage().then(function (mode) {
-      if (mode === "localstorage") {
-        var list = lsRead();
-        var i = list.findIndex(function (r) {
-          return r.id === race.id;
-        });
-        if (i >= 0) list[i] = race;
-        else list.push(race);
-        lsWrite(list);
-        return;
-      }
-      if (mode === "none") {
-        return Promise.reject(new Error("storage-unavailable"));
-      }
-      return txStore("readwrite").then(function (store) {
-        return reqToPromise(store.put(race));
-      });
-    });
+
+    return global.PortalCloud.write("marathon-log", race.id, race);
   }
 
   function deleteRace(id) {
-    return initStorage().then(function (mode) {
-      if (mode === "localstorage") {
-        lsWrite(
-          lsRead().filter(function (r) {
-            return r.id !== id;
-          })
-        );
-        return;
-      }
-      if (mode === "none") {
-        return Promise.reject(new Error("storage-unavailable"));
-      }
-      return txStore("readwrite").then(function (store) {
-        return reqToPromise(store.delete(id));
-      });
-    });
+    return global.PortalCloud.write("marathon-log", id, null);
   }
 
   function clearAll() {
-    return initStorage().then(function (mode) {
-      if (mode === "localstorage") {
-        lsWrite([]);
-        return;
-      }
-      if (mode === "none") {
-        return Promise.reject(new Error("storage-unavailable"));
-      }
-      return txStore("readwrite").then(function (store) {
-        return reqToPromise(store.clear());
-      });
-    });
+    return global.PortalCloud.clear("marathon-log");
   }
 
   function seedAll() {
@@ -275,26 +78,7 @@
     });
   }
 
-  function seedIfEmpty() {
-    return listRaces().then(function (items) {
-      var ver = getSeedVersion();
-      var needsKeepSeed = ver < SEED_VERSION && SEED_RACES.length;
-      if (!items.length) {
-        if (!SEED_RACES.length) return items;
-        return seedAll().then(function () {
-          setSeedVersion(SEED_VERSION);
-          return listRaces();
-        });
-      }
-      if (needsKeepSeed) {
-        return seedAll().then(function () {
-          setSeedVersion(SEED_VERSION);
-          return listRaces();
-        });
-      }
-      return items;
-    });
-  }
+  function seedIfEmpty() { return listRaces(); }
 
   function exportPayload(races) {
     return {
@@ -328,16 +112,11 @@
       return Promise.reject(new Error("no-seed"));
     }
     return seedAll().then(function () {
-      setSeedVersion(SEED_VERSION);
       return listRaces();
     });
   }
 
-  function getStorageMode() {
-    return initStorage().then(function () {
-      return storageMode;
-    });
-  }
+  function getStorageMode() { return Promise.resolve("supabase"); }
 
   global.MarathonDb = {
     listRaces: listRaces,

@@ -13,7 +13,9 @@
     />
     <link rel="stylesheet" href="/shared/css/project-shell.css?v=portal2" />
     <link rel="stylesheet" href="/today-shoes/css/app.css?v=portal2" />
-  </head>
+  <link rel="stylesheet" href="/shared/cloud.css" />
+  <link rel="stylesheet" href="/shared/css/workspace-embed.css"><script src="/shared/js/workspace-embed.js" defer></script>
+</head>
   <body class="project-app theme-today-shoes">
     <p class="app-banner">
       <span class="app-banner__brand">
@@ -21,7 +23,7 @@
         <span class="app-banner__title" id="app-banner-title">오늘뭐신지</span>
       </span>
       <span class="app-banner__tagline" id="app-banner-tagline">러닝화 사진 신발장 · 웹 데모</span>
-      <span class="app-banner__meta">🔒 이 포털 도메인에 저장 · JSON 백업</span>
+      <span class="app-banner__meta">🔒 이 Supabase 계정에 저장 · JSON 백업</span>
     </p>
     <div class="project-nav-backdrop" id="project-nav-backdrop" hidden aria-hidden="true"></div>
     <div class="app-shell project-shell" id="app-shell">
@@ -150,7 +152,7 @@
                 <li>정면 사진이 가장 중요합니다. 밝은 곳에서 신발 전체가 보이게 촬영하세요.</li>
                 <li>API 키 없이도 기본 분석 문구로 저장할 수 있습니다.</li>
                 <li>키가 있으면 Gemini 2.0 Flash로 브랜드·특징·용도를 추정합니다.</li>
-                <li>외부 GitHub Pages Expo 앱과 저장소는 공유되지 않습니다 (origin별 localStorage).</li>
+                <li>외부 GitHub Pages Expo 앱과 저장소는 공유되지 않습니다 (별도 서비스 저장소).</li>
               </ul>
             </div>
           </section>
@@ -183,18 +185,11 @@
       <button type="button" class="project-mobile-tab" data-view="links"><span class="project-mobile-tab__icon" aria-hidden="true">🔗</span>링크</button>
     </nav>
 
-    <script>
-      (function () {
-        try {
-          if (localStorage.getItem("today-shoes-sidebar-collapsed") === "1") {
-            document.documentElement.classList.add("project-sidebar-collapsed-boot");
-          }
-        } catch (e) {}
-      })();
-    </script>
-    <script src="/shared/js/project-shell.js?v=portal2"></script>
-    <script src="/today-shoes/js/store.js?v=portal2"></script>
-    <script src="/today-shoes/js/analysis.js?v=portal2"></script>
-    <script src="/today-shoes/js/app.js?v=portal2"></script>
+
+    <script type="application/portal-script" data-cloud-src="/shared/js/project-shell.js?v=portal2"></script>
+    <script type="application/portal-script" data-cloud-src="/today-shoes/js/store.js?v=portal2"></script>
+    <script type="application/portal-script" data-cloud-src="/today-shoes/js/analysis.js?v=portal2"></script>
+    <script type="application/portal-script" data-cloud-src="/today-shoes/js/app.js?v=portal2"></script>
+  <script type="module" src="/shared/cloud.js"></script>
   </body>
 </html>

@@ -16,7 +16,9 @@
     />
     <link rel="stylesheet" href="/shared/css/project-shell.css?v=portal2" />
     <link rel="stylesheet" href="/vision-font/css/app.css?v=portal2" />
-  </head>
+  <link rel="stylesheet" href="/shared/cloud.css" />
+  <link rel="stylesheet" href="/shared/css/workspace-embed.css"><script src="/shared/js/workspace-embed.js" defer></script>
+</head>
   <body class="project-app theme-vision-font">
     <p class="app-banner">
       <span class="app-banner__brand">
@@ -205,17 +207,10 @@
       </button>
     </nav>
 
-    <script>
-      (function () {
-        try {
-          if (localStorage.getItem("vision-font-sidebar-collapsed") === "1") {
-            document.documentElement.classList.add("project-sidebar-collapsed-boot");
-          }
-        } catch (e) {}
-      })();
-    </script>
-    <script src="/shared/js/project-shell.js?v=portal2"></script>
-    <script src="/vision-font/js/settings.js?v=portal2"></script>
-    <script src="/vision-font/js/app.js?v=portal2"></script>
+
+    <script type="application/portal-script" data-cloud-src="/shared/js/project-shell.js?v=portal2"></script>
+    <script type="application/portal-script" data-cloud-src="/vision-font/js/settings.js?v=portal2"></script>
+    <script type="application/portal-script" data-cloud-src="/vision-font/js/app.js?v=portal2"></script>
+  <script type="module" src="/shared/cloud.js"></script>
   </body>
 </html>

@@ -7,7 +7,7 @@ export const PORTAL_ENV_CONFIG = {
     id: 'development',
     label: '개발',
     shortLabel: 'DEV',
-    title: '로컬 개발 서버 · 이 origin의 브라우저 저장소',
+    title: '로컬 개발 서버 · Supabase 계정별 저장',
     className: 'portal-env-badge--dev',
   },
   preview: {

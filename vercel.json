@@ -1,14 +1,68 @@
 {
   "rewrites": [
-    { "source": "/idea-bank", "destination": "/idea-bank/index.html" },
-    { "source": "/prompt-collection", "destination": "/prompt-collection/index.html" },
-    { "source": "/how-many-points", "destination": "/how-many-points/index.html" },
-    { "source": "/who-are-you", "destination": "/who-are-you/index.html" },
-    { "source": "/marathon-log", "destination": "/marathon-log/index.html" },
-    { "source": "/vision-font", "destination": "/vision-font/index.html" },
-    { "source": "/today-shoes", "destination": "/today-shoes/index.html" },
-    { "source": "/ai-synapse-wiki", "destination": "/ai-synapse-wiki/index.html" },
-    { "source": "/gemini-tuner", "destination": "/gemini-tuner/index.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/.well-known/oauth-protected-resource/api/prompt-mcp",
+      "destination": "/api/prompt-mcp?metadata=1"
+    },
+    {
+      "source": "/api/prompt-mcp",
+      "destination": "/api/prompt-mcp"
+    },
+    {
+      "source": "/api/prompt-oauth/:action",
+      "destination": "/api/prompt-oauth/[action]?action=:action"
+    },
+    {
+      "source": "/api/prompt-auth/:action",
+      "destination": "/api/prompt-auth/[action]?action=:action"
+    },
+    {
+      "source": "/api/prompts",
+      "destination": "/api/prompts/index"
+    },
+    {
+      "source": "/api/prompts/:id",
+      "destination": "/api/prompts/[id]?id=:id"
+    },
+    {
+      "source": "/idea-bank",
+      "destination": "/idea-bank/index.html"
+    },
+    {
+      "source": "/prompt-collection",
+      "destination": "/prompt-collection/index.html"
+    },
+    {
+      "source": "/how-many-points",
+      "destination": "/how-many-points/index.html"
+    },
+    {
+      "source": "/who-are-you",
+      "destination": "/who-are-you/index.html"
+    },
+    {
+      "source": "/marathon-log",
+      "destination": "/marathon-log/index.html"
+    },
+    {
+      "source": "/vision-font",
+      "destination": "/vision-font/index.html"
+    },
+    {
+      "source": "/today-shoes",
+      "destination": "/today-shoes/index.html"
+    },
+    {
+      "source": "/ai-synapse-wiki",
+      "destination": "/ai-synapse-wiki/index.html"
+    },
+    {
+      "source": "/gemini-tuner",
+      "destination": "/gemini-tuner/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ]
 }

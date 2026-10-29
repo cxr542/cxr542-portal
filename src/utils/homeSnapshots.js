@@ -10,7 +10,7 @@ const RATINGS_LS_KEY = 'how-many-points-ratings';
 
 function readWhoAreYouSummary() {
   try {
-    const raw = localStorage.getItem('who-are-you-summary');
+    const raw = globalThis.PortalStorage.getItem('who-are-you-summary');
     const s = raw ? JSON.parse(raw) : null;
     if (!s) return null;
     const n = (s.employments || 0) + (s.documents || 0);
@@ -22,7 +22,7 @@ function readWhoAreYouSummary() {
 
 function readIdeaCount() {
   try {
-    const raw = localStorage.getItem(IDEA_LS_KEY);
+    const raw = globalThis.PortalStorage.getItem(IDEA_LS_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
     return Array.isArray(parsed) ? parsed.length : 0;
   } catch {
@@ -32,7 +32,7 @@ function readIdeaCount() {
 
 function readPromptCount() {
   try {
-    const raw = localStorage.getItem(PROMPT_LS_KEY);
+    const raw = globalThis.PortalStorage.getItem(PROMPT_LS_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
     return Array.isArray(parsed) ? parsed.length : 0;
   } catch {
@@ -42,7 +42,7 @@ function readPromptCount() {
 
 function readRatingsCount() {
   try {
-    const raw = localStorage.getItem(RATINGS_LS_KEY);
+    const raw = globalThis.PortalStorage.getItem(RATINGS_LS_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
     return Array.isArray(parsed) ? parsed.length : 0;
   } catch {
@@ -52,7 +52,7 @@ function readRatingsCount() {
 
 function readTodayShoesCount() {
   try {
-    const raw = localStorage.getItem(TODAY_SHOES_LS_KEY);
+    const raw = globalThis.PortalStorage.getItem(TODAY_SHOES_LS_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
     return Array.isArray(parsed) ? parsed.length : 0;
   } catch {
@@ -62,7 +62,7 @@ function readTodayShoesCount() {
 
 function readLatestShoeNickname() {
   try {
-    const raw = localStorage.getItem(TODAY_SHOES_LS_KEY);
+    const raw = globalThis.PortalStorage.getItem(TODAY_SHOES_LS_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
     if (!Array.isArray(parsed) || !parsed.length) return '';
     const sorted = [...parsed].sort((a, b) => Number(b.createdAt) - Number(a.createdAt));
@@ -102,7 +102,7 @@ export function getHomeSnapshots(now = new Date()) {
         ? `총 ${races.length}건 · PB·대회 기록 조회`
         : '대회 기록·PB·JSON 백업 · 기록장 열기',
     'idea-bank': ideas
-      ? `아이디어 ${ideas}개 · 포털 도메인에 저장`
+      ? `아이디어 ${ideas}개 · Supabase 계정에 저장`
       : '생각을 모아 두세요 · JSON 백업 가능',
     'prompt-collection': prompts
       ? `프롬프트 ${prompts}개 · 검색·복사·JSON 백업`

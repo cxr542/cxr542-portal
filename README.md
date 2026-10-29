@@ -13,6 +13,10 @@
 
 홈 화면은 프로젝트를 `Active Projects`, `Experiments`, `Paused`, `Ideas`로 분류합니다.
 
+## Running Ops
+
+러닝 동호회 운영진 전용 MVP는 [src-running-ops/README.md](src-running-ops/README.md) 에서 확인합니다.
+
 ## Project Card Metadata
 
 각 프로젝트 카드는 상태, 한 줄 설명, 다음 할 일을 표시합니다.
@@ -71,7 +75,7 @@ npm run dev
 - `NOTIFY_EMAIL_TO`: 알림 받을 이메일. 여러 개면 쉼표로 구분
 - `NOTIFY_EMAIL_FROM`: 발신자 주소. 미설정 시 `cxr542 Portal <onboarding@resend.dev>` 사용
 
-브라우저에서 알림 호출을 임시로 끄려면 콘솔에서 `localStorage.setItem('cxr542-task-email-notify', '0')`을 실행하세요. 다시 켜려면 값을 삭제하거나 `1`로 바꾸면 됩니다.
+브라우저에서 알림 호출을 임시로 끄려면 로그인 후 콘솔에서 `PortalStorage.setItem('cxr542-task-email-notify', '0')`을 실행하세요. 다시 켜려면 값을 삭제하거나 `1`로 바꾸면 됩니다.
 
 ## 품질 명령
 
@@ -106,3 +110,55 @@ npm run lint
 - ci/cd smoke test
 
 - CI/CD smoke test commit
+
+## Supabase 저장소
+
+포털과 내장 도구의 사용자 데이터·설정은 Supabase `home` 프로젝트의
+`public.portal_documents`에 계정별로 저장합니다. 프롬프트는 포털·ChatGPT·CLI가 함께 사용하는
+전용 `public.portal_prompts`와 인증된 API를 사용합니다. 단일 아이디·비밀번호 로그인을 사용하며,
+사용자 계정은 Supabase Dashboard → Authentication → Users에서 준비합니다.
+브라우저에는 Supabase Auth 로그인 세션만 유지합니다. Wiki의 임시 관리 PIN과
+외부 왓챠피디아 사이트에서 실행하는 내보내기 스크립트의 인증은 각 서비스의 기존 방식입니다.
+
+- 아이디어, 평점, 대회·훈련 기록, 이력서: 항목별 문서
+- 프롬프트: 전용 테이블/API, 사용자별 RLS와 version 검사. [소스·빌드·연동 안내](docs/prompts/source-finalization.md)
+- 신발 사진(data URL 포함), 시력·GeminiTuner 설정, 즐겨찾기·메뉴 설정: 설정 문서
+- SRC Running Ops: 로그인한 포털 계정의 운영 데이터. 기존 운영진/열람자 화면 게이트는 유지하지만
+  공유 비밀번호만으로 다른 포털 계정의 데이터에 접근할 수는 없습니다.
+- 데이터는 RLS로 소유자에게만 허용합니다. `anon`은 테이블·쓰기 함수에 접근할 수 없습니다.
+- 쓰기는 revision 검사로 오래된 탭의 덮어쓰기를 거부합니다. 같은 origin의 탭·iframe 사이에는
+  변경 알림을 표시합니다. 열린 편집본의 기준은 유지해 충돌을 검사합니다. 다른 탭·기기에서 수정한 내용은 다시 접속하거나 계정·저장의
+  **새로 불러오기**로 갱신합니다.
+- 동기 방식의 기존 화면은 메모리에서 먼저 갱신한 뒤 서버에 저장합니다. 공통 저장 상태에
+  저장 중·실패가 표시되며, 미저장 상태에서 나가면 브라우저가 경고합니다.
+  실패 시 **다시 저장**, 충돌 시 필요한 내용을 복사한 다음 **새로 불러오기**를 사용합니다.
+  네트워크 오류 때 브라우저 저장소로 자동 전환하지 않습니다.
+
+### 기존 데이터 이관
+
+처음 로그인하면 **원본 JSON 백업 → 이 계정으로 가져오기**를 선택합니다.
+현재 origin의 알려진 localStorage 키와 다섯 IndexedDB 데이터베이스를 읽습니다.
+동일 ID는 IndexedDB 값을 우선하며, 이미 클라우드에 있는 ID(삭제된 ID 포함)는 유지합니다.
+도중 실패해도 원본은 삭제하지 않으며, 재시도 시 이미 이관된 항목은 건너뜁니다.
+다른 브라우저·기기의 로컬 기록은 해당 브라우저에서도 로그인한 뒤 **계정·저장 → 브라우저 기록 이관**으로 옮깁니다.
+GitHub Pages 등 다른 origin의 기록은 기존 도구의 JSON 내보내기/가져오기를 이용합니다.
+
+배포 전 데이터는 기존 운영 origin에 남아 있습니다. localhost에서 실행한 이관은 localhost의
+기록만 대상으로 하므로 운영 브라우저 데이터 이관을 대신하지 않습니다.
+
+### 연결 설정
+
+기본 연결은 `home` 프로젝트의 URL과 공개용 publishable key입니다. 키 자체는 비밀이 아니며,
+접근 권한은 로그인 JWT와 RLS가 결정합니다. 다른 프로젝트를 연결할 때는 아래 Vite 환경변수를 설정합니다.
+
+```text
+VITE_SUPABASE_URL=https://PROJECT_REF.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+```
+
+새 프로젝트에는 먼저 [supabase/portal-storage.sql](supabase/portal-storage.sql)을 적용합니다.
+`service_role`이나 secret key를 프런트엔드에 넣지 않습니다.
+`home`에는 이 SQL이 적용되어 있습니다. 기존 articles/collector 테이블은 변경하지 않습니다.
+
+공개 회원가입은 제공하지 않습니다. 단일 소유자의 최초 계정·비밀번호 설정 절차는
+[개인 계정 설정](docs/portal-single-account.md)을 따릅니다.

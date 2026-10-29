@@ -238,7 +238,10 @@
         : "") +
       "</div></div>";
 
-    $("btn-save").onclick = saveEdit;
+    $("btn-save").onclick = function () {
+      if (this.disabled) return; this.disabled = true;
+      Promise.resolve(saveEdit()).catch(function(err){window.alert(err.message);}).finally(function(){var b=$("btn-save");if(b)b.disabled=false;});
+    };
     $("btn-back").onclick = function () {
       state.view = "list";
       render();
@@ -269,10 +272,10 @@
     if (del) {
       del.onclick = function () {
         if (!window.confirm("이 프롬프트를 삭제할까요?")) return;
-        PromptCollectionDb.deletePrompt(state.editId).then(function () {
+        PromptCollectionDb.deletePrompt(state.editId, state.draft.version).then(function () {
           state.view = "list";
           render();
-        });
+        }).catch(function(err){window.alert(err.message);});
       };
     }
   }
@@ -293,6 +296,7 @@
       return;
     }
     var now = new Date().toISOString();
+    if (state.isNew && !state.draft.request_id) state.draft.request_id = crypto.randomUUID();
     var save = function (id) {
       var item = Object.assign({}, state.draft, {
         id: id,
@@ -316,16 +320,16 @@
       });
     };
     if (state.isNew) {
-      PromptCollectionDb.listPrompts().then(function (list) {
+      return PromptCollectionDb.listPrompts().then(function (list) {
         var ids = {};
         list.forEach(function (p) {
           ids[p.id] = true;
         });
-        save(PromptCollectionDb.slugFromTitle(state.draft.title, ids));
+        return save(PromptCollectionDb.slugFromTitle(state.draft.title, ids));
       });
       return;
     }
-    save(state.draft.id);
+    return save(state.draft.id);
   }
 
   function loadEdit() {
@@ -406,10 +410,9 @@
     reader.onload = function () {
       try {
         var data = JSON.parse(reader.result);
-        var replace = window.confirm(
-          "기존 데이터를 모두 지우고 가져올까요?\n취소 = 병합(같은 id는 덮어쓰기)"
-        );
-        PromptCollectionDb.importPayload(data, replace).then(render);
+        if (!Array.isArray(data.prompts)) throw new Error('invalid');
+        if (!window.confirm(data.prompts.length + '건을 가져올까요? 원본 JSON을 보관하세요. 기존 항목은 삭제하거나 덮어쓰지 않습니다.')) return;
+        PromptCollectionDb.importPayload(data, false).then(render).catch(function(err){window.alert(err.message);});
       } catch (err) {
         window.alert("JSON 형식이 올바르지 않습니다.");
       }
@@ -425,6 +428,7 @@
     render();
   }
 
+  window.addEventListener('focus', function(){ if(state.view!=='edit')render(); });
   function bindUi() {
     if (window.ProjectShell) {
       ProjectShell.init({
@@ -472,7 +476,7 @@
 
   function recordExportBackup() {
     try {
-      localStorage.setItem(BACKUP_REMINDER_KEY, new Date().toISOString());
+      globalThis.PortalStorage.setItem(BACKUP_REMINDER_KEY, new Date().toISOString());
     } catch (e) {}
     updateStorageBanner();
   }
@@ -489,7 +493,7 @@
   function backupNudgeText() {
     if (!isProdHost()) return "";
     try {
-      var raw = localStorage.getItem(BACKUP_REMINDER_KEY);
+      var raw = globalThis.PortalStorage.getItem(BACKUP_REMINDER_KEY);
       if (!raw) return " · 💾 JSON 백업 권장";
       var days = (Date.now() - new Date(raw).getTime()) / 86400000;
       if (days >= BACKUP_NUDGE_DAYS) {
@@ -499,39 +503,16 @@
     return "";
   }
 
-  function updateStorageBanner(mode) {
-    if (mode === undefined && window.PromptCollectionDb) {
-      PromptCollectionDb.getStorageMode().then(updateStorageBanner);
-      return;
-    }
-    var meta = document.querySelector(".app-banner__meta");
-    if (!meta) return;
-    var storeLabel =
-      mode === "indexeddb"
-        ? "IndexedDB"
-        : mode === "localstorage"
-          ? "localStorage"
-          : mode
-            ? "저장 불가"
-            : "내 브라우저에만";
-    if (!mode) {
-      meta.textContent = "🔒 내 브라우저에만 · JSON 백업 가능";
-      return;
-    }
-    meta.textContent =
-      "🔒 " +
-      storeLabel +
-      " · 내 브라우저에만" +
-      (mode === "localstorage" ? " (IndexedDB 제한 → localStorage)" : "") +
-      " · JSON 백업 가능" +
-      backupNudgeText();
+  function updateStorageBanner() {
+    var meta = document.querySelector(".app-banner__meta, .app-banner .storage-hint");
+    if (meta) meta.textContent = "Supabase · 계정별 저장 · JSON 백업 가능";
   }
 
   function showInitError(err) {
     console.error(err);
     var msg = (err && err.message) || String(err);
     var hint =
-      "데이터를 저장할 수 없습니다. 브라우저에서 이 사이트의 저장소를 허용해 주세요.";
+      "데이터를 저장할 수 없습니다. Supabase 로그인과 네트워크 연결을 확인해 주세요.";
     if (location.protocol === "file:") {
       hint = "npm run dev 또는 배포 URL로 열어 주세요.";
     }

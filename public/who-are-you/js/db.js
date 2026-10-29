@@ -1,11 +1,7 @@
 (function (global) {
   "use strict";
 
-  var DB_NAME = "who-are-you";
-  var DB_VERSION = 1;
   var EXPORT_VERSION = 1;
-  var LS_BUNDLE = "who-are-you-bundle";
-  var LS_SUMMARY = "who-are-you-summary";
 
   var STORES = [
     "profile",
@@ -16,70 +12,6 @@
     "documents",
   ];
 
-  var dbPromise = null;
-  var storageMode = "indexeddb";
-  var storageReady = null;
-
-  function probeIndexedDB() {
-    return new Promise(function (resolve) {
-      if (!global.indexedDB) {
-        resolve(false);
-        return;
-      }
-      var name = "__way_probe_" + Date.now();
-      var req;
-      try {
-        req = indexedDB.open(name, 1);
-      } catch (e) {
-        resolve(false);
-        return;
-      }
-      req.onerror = function () {
-        resolve(false);
-      };
-      req.onupgradeneeded = function (e) {
-        e.target.result.createObjectStore("t");
-      };
-      req.onsuccess = function (e) {
-        e.target.result.close();
-        try {
-          indexedDB.deleteDatabase(name);
-        } catch (err) {}
-        resolve(true);
-      };
-    });
-  }
-
-  function initStorage() {
-    if (storageReady) return storageReady;
-    storageReady = probeIndexedDB().then(function (ok) {
-      if (ok) {
-        storageMode = "indexeddb";
-        return "indexeddb";
-      }
-      try {
-        localStorage.setItem("__way_probe__", "1");
-        localStorage.removeItem("__way_probe__");
-        storageMode = "localstorage";
-        return "localstorage";
-      } catch (e) {
-        storageMode = "none";
-        return "none";
-      }
-    });
-    return storageReady;
-  }
-
-  function defaultBundle() {
-    return {
-      profile: defaultProfile(),
-      employments: [],
-      projects: [],
-      educations: [],
-      certifications: [],
-      documents: [],
-    };
-  }
 
   function defaultProfile() {
     return {
@@ -95,106 +27,6 @@
       links: [],
       updatedAt: new Date().toISOString(),
     };
-  }
-
-  function lsReadBundle() {
-    try {
-      var raw = localStorage.getItem(LS_BUNDLE);
-      if (!raw) return defaultBundle();
-      var b = JSON.parse(raw);
-      return Object.assign(defaultBundle(), b);
-    } catch (e) {
-      return defaultBundle();
-    }
-  }
-
-  function lsWriteBundle(bundle) {
-    localStorage.setItem(LS_BUNDLE, JSON.stringify(bundle));
-    syncSummary(bundle);
-  }
-
-  function syncSummary(bundle) {
-    try {
-      localStorage.setItem(
-        LS_SUMMARY,
-        JSON.stringify({
-          employments: (bundle.employments || []).length,
-          projects: (bundle.projects || []).length,
-          documents: (bundle.documents || []).length,
-          updatedAt: new Date().toISOString(),
-        })
-      );
-    } catch (e) {}
-  }
-
-  function openDb() {
-    if (dbPromise) return dbPromise;
-    dbPromise = new Promise(function (resolve, reject) {
-      var req = indexedDB.open(DB_NAME, DB_VERSION);
-      req.onerror = function () {
-        dbPromise = null;
-        reject(req.error || new Error("idb-open"));
-      };
-      req.onupgradeneeded = function (e) {
-        var db = e.target.result;
-        STORES.forEach(function (name) {
-          if (!db.objectStoreNames.contains(name)) {
-            db.createObjectStore(name, { keyPath: "id" });
-          }
-        });
-      };
-      req.onsuccess = function () {
-        resolve(req.result);
-      };
-    });
-    return dbPromise;
-  }
-
-  function idbRequest(req) {
-    return new Promise(function (resolve, reject) {
-      req.onsuccess = function () {
-        resolve(req.result);
-      };
-      req.onerror = function () {
-        reject(req.error || new Error("idb"));
-      };
-    });
-  }
-
-  function runTx(storeName, mode, run) {
-    return openDb().then(function (db) {
-      return new Promise(function (resolve, reject) {
-        var tx = db.transaction(storeName, mode);
-        var store = tx.objectStore(storeName);
-        var settled = false;
-        function finish(err, val) {
-          if (settled) return;
-          settled = true;
-          if (err) reject(err);
-          else resolve(val);
-        }
-        try {
-          var out = run(store);
-          if (out && typeof out.then === "function") {
-            out.then(
-              function (v) {
-                finish(null, v);
-              },
-              finish
-            );
-          } else {
-            tx.oncomplete = function () {
-              finish(null, out);
-            };
-          }
-        } catch (err) {
-          finish(err);
-        }
-        tx.onerror = function () {
-          finish(tx.error || new Error("tx"));
-        };
-      });
-    });
   }
 
   function slug(title, existing) {
@@ -215,97 +47,24 @@
   }
 
   function getAllStore(storeName) {
-    return initStorage().then(function (mode) {
-      if (mode === "localstorage") {
-        return lsReadBundle()[storeName] || [];
-      }
-      if (mode === "none") return Promise.reject(new Error("storage-unavailable"));
-      if (storeName === "profile") {
-        return runTx("profile", "readonly", function (store) {
-          return idbRequest(store.get("profile")).then(function (p) {
-            return p || defaultProfile();
-          });
-        });
-      }
-      return runTx(storeName, "readonly", function (store) {
-        return idbRequest(store.getAll());
-      });
-    });
+    if (storeName === "profile") return Promise.resolve(global.PortalCloud.read("who-are-you/profile", "profile") || defaultProfile());
+    return Promise.resolve(global.PortalCloud.list("who-are-you/" + storeName));
   }
 
   function putStoreItem(storeName, item) {
     item.updatedAt = new Date().toISOString();
-    return initStorage().then(function (mode) {
-      if (mode === "localstorage") {
-        var b = lsReadBundle();
-        if (storeName === "profile") {
-          b.profile = item;
-        } else {
-          var list = b[storeName] || [];
-          var i = list.findIndex(function (x) {
-            return x.id === item.id;
-          });
-          if (i >= 0) list[i] = item;
-          else list.push(item);
-          b[storeName] = list;
-        }
-        lsWriteBundle(b);
-        return item;
-      }
-      if (mode === "none") return Promise.reject(new Error("storage-unavailable"));
-      return runTx(storeName, "readwrite", function (store) {
-        return idbRequest(store.put(item)).then(function () {
-          return refreshIdbSummary();
-        });
-      }).then(function () {
-        return item;
-      });
-    });
+    return global.PortalCloud.write("who-are-you/" + storeName, item.id, item);
   }
 
   function deleteStoreItem(storeName, id) {
-    return initStorage().then(function (mode) {
-      if (mode === "localstorage") {
-        var b = lsReadBundle();
-        b[storeName] = (b[storeName] || []).filter(function (x) {
-          return x.id !== id;
-        });
-        lsWriteBundle(b);
-        return;
-      }
-      if (mode === "none") return Promise.reject(new Error("storage-unavailable"));
-      return runTx(storeName, "readwrite", function (store) {
-        return idbRequest(store.delete(id));
-      }).then(refreshIdbSummary);
-    });
-  }
-
-  function refreshIdbSummary() {
-    return loadBundle().then(function (b) {
-      syncSummary(b);
-    });
+    return global.PortalCloud.write("who-are-you/" + storeName, id, null);
   }
 
   function loadBundle() {
-    return initStorage().then(function (mode) {
-      if (mode === "localstorage") return lsReadBundle();
-      if (mode === "none") return Promise.reject(new Error("storage-unavailable"));
-      return Promise.all(
-        STORES.map(function (name) {
-          return getAllStore(name);
-        })
-      ).then(function (parts) {
-        var bundle = {
-          profile: parts[0] || defaultProfile(),
-          employments: parts[1] || [],
-          projects: parts[2] || [],
-          educations: parts[3] || [],
-          certifications: parts[4] || [],
-          documents: parts[5] || [],
-        };
-        syncSummary(bundle);
-        return bundle;
-      });
+    return Promise.all(STORES.map(getAllStore)).then(function (parts) {
+      var bundle = {};
+      STORES.forEach(function (name, i) { bundle[name] = parts[i]; });
+      return bundle;
     });
   }
 
@@ -315,21 +74,7 @@
   }
 
   function clearBundle() {
-    return initStorage().then(function (mode) {
-      if (mode === "localstorage") {
-        lsWriteBundle(defaultBundle());
-        return;
-      }
-      return Promise.all(
-        STORES.map(function (name) {
-          return runTx(name, "readwrite", function (store) {
-            return idbRequest(store.clear());
-          });
-        })
-      ).then(function () {
-        return saveProfile(defaultProfile());
-      });
-    });
+    return Promise.all(STORES.map(function (name) { return global.PortalCloud.clear("who-are-you/" + name); }));
   }
 
   function importBundle(data, replace) {
@@ -368,24 +113,7 @@
     };
   }
 
-  function seedIfEmpty() {
-    return loadBundle().then(function (b) {
-      if (!b.profile.name && !b.employments.length && !b.documents.length) {
-        return fetch("data/default-bundle.json", { cache: "no-store" })
-          .then(function (res) {
-            if (!res.ok) throw new Error("seed-not-found");
-            return res.json();
-          })
-          .then(function (seed) {
-            return importBundle(seed.bundle || seed, true).then(loadBundle);
-          })
-          .catch(function () {
-            return b;
-          });
-      }
-      return b;
-    });
-  }
+  function seedIfEmpty() { return loadBundle(); }
 
   global.WhoAreYouDb = {
     DOCUMENT_CATEGORIES: {
@@ -464,9 +192,7 @@
     seedIfEmpty: seedIfEmpty,
     slug: slug,
     getStorageMode: function () {
-      return initStorage().then(function () {
-        return storageMode;
-      });
+      return Promise.resolve("supabase");
     },
   };
 })(window);

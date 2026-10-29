@@ -16,7 +16,9 @@
     />
     <link rel="stylesheet" href="/shared/css/project-shell.css?v=portal2" />
     <link rel="stylesheet" href="/idea-bank/css/app.css?v=portal2" />
-  </head>
+  <link rel="stylesheet" href="/shared/cloud.css" />
+  <link rel="stylesheet" href="/shared/css/workspace-embed.css"><script src="/shared/js/workspace-embed.js" defer></script>
+</head>
   <body class="project-app theme-idea-bank">
     <p class="app-banner">
       <span class="app-banner__brand">
@@ -24,7 +26,7 @@
         <span class="app-banner__title" id="app-banner-title">idea-bank</span>
       </span>
       <span class="app-banner__tagline" id="app-banner-tagline">서비스 만들기 전, 생각을 모아 두는 아이디어 노트</span>
-      <span class="app-banner__meta">🔒 이 포털 도메인에 저장 · JSON 백업 가능</span>
+      <span class="app-banner__meta">🔒 이 Supabase 계정에 저장 · JSON 백업 가능</span>
     </p>
     <div
       class="project-nav-backdrop"
@@ -92,29 +94,27 @@
           </button>
           <a class="btn btn--hub" href="/" title="cxr542 포털 홈">← 포털</a>
           <input type="search" id="search" placeholder="🔍 아이디어 검색…" autocomplete="off" />
-          <button type="button" class="btn" id="btn-export">JSON보내기</button>
-          <label class="btn">
-            JSON 가져오기
-            <input type="file" id="import-file" accept="application/json,.json" hidden />
-          </label>
-          <button type="button" class="btn btn--primary" id="btn-new">✨ 새 아이디어</button>
+          <button type="button" class="btn btn--primary" id="btn-new">새 아이디어</button>
+          <details class="toolbar-more">
+            <summary>더보기</summary>
+            <div class="toolbar-more__panel">
+              <button type="button" class="btn" id="btn-export">JSON 보내기</button>
+              <label class="btn">
+                JSON 가져오기
+                <input type="file" id="import-file" accept="application/json,.json" hidden />
+              </label>
+            </div>
+          </details>
         </div>
         <nav class="cat-filter" id="cat-filter"></nav>
         <div class="content project-content" id="content"></div>
       </div>
     </div>
-    <script>
-      (function () {
-        try {
-          if (localStorage.getItem("idea-bank-sidebar-collapsed") === "1") {
-            document.documentElement.classList.add("project-sidebar-collapsed-boot");
-          }
-        } catch (e) {}
-      })();
-    </script>
-    <script src="/shared/js/project-shell.js?v=portal2"></script>
-    <script src="/idea-bank/js/db.js?v=portal2"></script>
-    <script src="/idea-bank/js/hub-checklist.js?v=portal2"></script>
-    <script src="/idea-bank/js/app.js?v=portal2"></script>
+
+    <script type="application/portal-script" data-cloud-src="/shared/js/project-shell.js?v=portal2"></script>
+    <script type="application/portal-script" data-cloud-src="/idea-bank/js/db.js?v=portal2"></script>
+    <script type="application/portal-script" data-cloud-src="/idea-bank/js/hub-checklist.js?v=portal2"></script>
+    <script type="application/portal-script" data-cloud-src="/idea-bank/js/app.js?v=portal2"></script>
+  <script type="module" src="/shared/cloud.js"></script>
   </body>
 </html>

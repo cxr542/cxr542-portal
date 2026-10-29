@@ -103,7 +103,7 @@
     var collapsed = false;
     if (collapseEnabled) {
       try {
-        collapsed = localStorage.getItem(storageKey) === "1";
+        collapsed = globalThis.PortalStorage.getItem(storageKey) === "1";
       } catch (e) {}
       applyCollapsed(collapsed);
     }
@@ -119,7 +119,7 @@
       collapsed = shell && shell.classList.contains("is-sidebar-collapsed");
       collapsed = !collapsed;
       try {
-        localStorage.setItem(storageKey, collapsed ? "1" : "0");
+        globalThis.PortalStorage.setItem(storageKey, collapsed ? "1" : "0");
       } catch (e) {}
       applyCollapsed(collapsed);
     }
@@ -159,7 +159,7 @@
 
   function loadBranding(storageKey) {
     try {
-      var data = JSON.parse(localStorage.getItem(storageKey) || "{}");
+      var data = JSON.parse(globalThis.PortalStorage.getItem(storageKey) || "{}");
       if (data.subtitle && !data.tagline) data.tagline = data.subtitle;
       return data;
     } catch (e) {
@@ -169,7 +169,7 @@
 
   function saveBranding(storageKey, data) {
     try {
-      localStorage.setItem(storageKey, JSON.stringify(data));
+      globalThis.PortalStorage.setItem(storageKey, JSON.stringify(data));
     } catch (e) {}
   }
 
@@ -309,7 +309,7 @@
     development: {
       label: "개발",
       shortLabel: "DEV",
-      title: "로컬 개발 서버 · 이 origin의 브라우저 저장소",
+      title: "로컬 개발 서버 · Supabase 계정별 저장",
       className: "portal-env-badge--dev",
     },
     preview: {
@@ -368,7 +368,7 @@
     detail = detail || {};
     var enabled = true;
     try {
-      enabled = localStorage.getItem("cxr542-task-email-notify") !== "0";
+      enabled = globalThis.PortalStorage.getItem("cxr542-task-email-notify") !== "0";
     } catch (e) {}
     if (!enabled || !global.fetch) return Promise.resolve({ ok: false, skipped: "disabled" });
 
@@ -380,12 +380,12 @@
       completedAt: detail.completedAt || new Date().toISOString(),
     };
 
-    return fetch("/api/notify-task-done", {
+    return global.PortalCloud.flush().then(function () { return fetch("/api/notify-task-done", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(payload),
       keepalive: true,
-    })
+    }); })
       .then(function (res) {
         return res.json().catch(function () {
           return { ok: res.ok };

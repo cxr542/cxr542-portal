@@ -1,159 +1,11 @@
 (function (global) {
   "use strict";
 
-  var DB_NAME = "how-many-points";
-  var DB_VERSION = 1;
   var EXPORT_FORMAT_VERSION = 1;
-  var STORE = "ratings";
-  var LS_KEY = "how-many-points-ratings";
-  var dbPromise = null;
-  var storageMode = "indexeddb";
-  var storageReady = null;
 
   var CONTENT_TYPES = ["movie", "series", "book", "webtoon", "other"];
 
-  function probeIndexedDB() {
-    return new Promise(function (resolve) {
-      if (!global.indexedDB) {
-        resolve(false);
-        return;
-      }
-      var name = "__hmp_probe_" + Date.now();
-      var req;
-      try {
-        req = indexedDB.open(name, 1);
-      } catch (e) {
-        resolve(false);
-        return;
-      }
-      req.onerror = function () {
-        resolve(false);
-      };
-      req.onupgradeneeded = function (e) {
-        e.target.result.createObjectStore("t");
-      };
-      req.onsuccess = function (e) {
-        var db = e.target.result;
-        db.close();
-        try {
-          indexedDB.deleteDatabase(name);
-        } catch (err) {}
-        resolve(true);
-      };
-    });
-  }
-
-  function initStorage() {
-    if (storageReady) return storageReady;
-    storageReady = probeIndexedDB().then(function (ok) {
-      if (ok) {
-        storageMode = "indexeddb";
-        return "indexeddb";
-      }
-      try {
-        localStorage.setItem("__hmp_probe__", "1");
-        localStorage.removeItem("__hmp_probe__");
-        storageMode = "localstorage";
-        return "localstorage";
-      } catch (e) {
-        storageMode = "none";
-        return "none";
-      }
-    });
-    return storageReady;
-  }
-
-  function getStorageMode() {
-    return initStorage().then(function () {
-      return storageMode;
-    });
-  }
-
-  function lsRead() {
-    try {
-      var raw = localStorage.getItem(LS_KEY);
-      var list = raw ? JSON.parse(raw) : [];
-      return Array.isArray(list) ? list : [];
-    } catch (e) {
-      return [];
-    }
-  }
-
-  function lsWrite(list) {
-    localStorage.setItem(LS_KEY, JSON.stringify(list));
-  }
-
-  function openDb() {
-    if (dbPromise) return dbPromise;
-    dbPromise = new Promise(function (resolve, reject) {
-      var req = indexedDB.open(DB_NAME, DB_VERSION);
-      req.onerror = function () {
-        dbPromise = null;
-        reject(req.error || new Error("idb-open"));
-      };
-      req.onupgradeneeded = function (e) {
-        var db = e.target.result;
-        if (!db.objectStoreNames.contains(STORE)) {
-          var store = db.createObjectStore(STORE, { keyPath: "id" });
-          store.createIndex("updatedAt", "updatedAt", { unique: false });
-          store.createIndex("contentType", "contentType", { unique: false });
-        }
-      };
-      req.onsuccess = function () {
-        resolve(req.result);
-      };
-    });
-    return dbPromise;
-  }
-
-  function idbRequest(req) {
-    return new Promise(function (resolve, reject) {
-      req.onsuccess = function () {
-        resolve(req.result);
-      };
-      req.onerror = function () {
-        reject(req.error || new Error("IndexedDB request failed"));
-      };
-    });
-  }
-
-  function runTx(mode, run) {
-    return openDb().then(function (db) {
-      return new Promise(function (resolve, reject) {
-        var tx = db.transaction(STORE, mode);
-        var store = tx.objectStore(STORE);
-        var settled = false;
-        function finish(err, value) {
-          if (settled) return;
-          settled = true;
-          if (err) reject(err);
-          else resolve(value);
-        }
-        try {
-          var outcome = run(store);
-          if (outcome && typeof outcome.then === "function") {
-            outcome.then(
-              function (v) {
-                finish(null, v);
-              },
-              function (err) {
-                finish(err);
-              }
-            );
-          } else {
-            tx.oncomplete = function () {
-              finish(null, outcome);
-            };
-          }
-        } catch (err) {
-          finish(err);
-        }
-        tx.onerror = function () {
-          finish(tx.error || new Error("tx failed"));
-        };
-      });
-    });
-  }
+  function getStorageMode() { return Promise.resolve("supabase"); }
 
   function slugFromTitle(title, existingIds) {
     var base = String(title)
@@ -218,78 +70,24 @@
   }
 
   function listRatings() {
-    return initStorage().then(function (mode) {
-      if (mode === "localstorage") return lsRead();
-      if (mode === "none") return Promise.reject(new Error("storage-unavailable"));
-      return runTx("readonly", function (store) {
-        return idbRequest(store.getAll()).then(function (rows) {
-          return rows || [];
-        });
-      });
-    });
+    return Promise.resolve(global.PortalCloud.list("how-many-points"));
   }
 
   function getRating(id) {
-    return initStorage().then(function (mode) {
-      if (mode === "localstorage") {
-        return lsRead().find(function (r) {
-          return r.id === id;
-        });
-      }
-      if (mode === "none") return Promise.reject(new Error("storage-unavailable"));
-      return runTx("readonly", function (store) {
-        return idbRequest(store.get(id));
-      });
-    });
+    return Promise.resolve(global.PortalCloud.read("how-many-points", id));
   }
 
   function putRating(item) {
-    return initStorage().then(function (mode) {
-      if (mode === "localstorage") {
-        var list = lsRead();
-        var i = list.findIndex(function (x) {
-          return x.id === item.id;
-        });
-        if (i >= 0) list[i] = item;
-        else list.push(item);
-        lsWrite(list);
-        return;
-      }
-      if (mode === "none") return Promise.reject(new Error("storage-unavailable"));
-      return runTx("readwrite", function (store) {
-        return idbRequest(store.put(item));
-      });
-    });
+
+    return global.PortalCloud.write("how-many-points", item.id, item);
   }
 
   function deleteRating(id) {
-    return initStorage().then(function (mode) {
-      if (mode === "localstorage") {
-        lsWrite(
-          lsRead().filter(function (r) {
-            return r.id !== id;
-          })
-        );
-        return;
-      }
-      if (mode === "none") return Promise.reject(new Error("storage-unavailable"));
-      return runTx("readwrite", function (store) {
-        return idbRequest(store.delete(id));
-      });
-    });
+    return global.PortalCloud.write("how-many-points", id, null);
   }
 
   function clearAll() {
-    return initStorage().then(function (mode) {
-      if (mode === "localstorage") {
-        lsWrite([]);
-        return;
-      }
-      if (mode === "none") return Promise.reject(new Error("storage-unavailable"));
-      return runTx("readwrite", function (store) {
-        return idbRequest(store.clear());
-      });
-    });
+    return global.PortalCloud.clear("how-many-points");
   }
 
   function buildIdMap(list) {
@@ -347,9 +145,7 @@
     return importItems(ratings, replace);
   }
 
-  function seedIfEmpty() {
-    return listRatings();
-  }
+  function seedIfEmpty() { return listRatings(); }
 
   global.HowManyPointsDb = {
     CONTENT_TYPES: CONTENT_TYPES,

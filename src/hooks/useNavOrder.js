@@ -8,7 +8,7 @@ import {
 
 function readOrder() {
   try {
-    const raw = localStorage.getItem(NAV_ORDER_STORAGE_KEY);
+    const raw = globalThis.PortalStorage.getItem(NAV_ORDER_STORAGE_KEY);
     if (!raw) return normalizeNavOrder(DEFAULT_NAV_ORDER);
     const parsed = JSON.parse(raw);
     return normalizeNavOrder(parsed);
@@ -25,7 +25,7 @@ export function useNavOrder() {
   const persist = useCallback((next) => {
     const normalized = normalizeNavOrder(next);
     setOrder(normalized);
-    localStorage.setItem(NAV_ORDER_STORAGE_KEY, JSON.stringify(normalized));
+    globalThis.PortalStorage.setItem(NAV_ORDER_STORAGE_KEY, JSON.stringify(normalized));
   }, []);
 
   const moveItem = useCallback(

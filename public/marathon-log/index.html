@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="마라톤 기록장 — 대회 기록·PB·통계 (로컬 저장)" />
+    <meta name="description" content="마라톤 기록장 — 대회 기록·PB·통계 (Supabase 계정별 저장)" />
     <title>마라톤 기록</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -13,7 +13,9 @@
     />
     <link rel="stylesheet" href="/shared/css/project-shell.css?v=portal2" />
     <link rel="stylesheet" href="/marathon-log/css/app.css?v=portal2" />
-  </head>
+  <link rel="stylesheet" href="/shared/cloud.css" />
+  <link rel="stylesheet" href="/shared/css/workspace-embed.css"><script src="/shared/js/workspace-embed.js" defer></script>
+</head>
   <body class="project-app project-app--mobile-tabs theme-marathon">
     <p class="app-banner">
       <span class="app-banner__brand">
@@ -21,7 +23,7 @@
         <span class="app-banner__title" id="app-banner-title">마라톤 기록</span>
       </span>
       <span class="app-banner__tagline" id="app-banner-tagline">대회 기록 · PB · 통계</span>
-      <span class="app-banner__meta storage-hint">🔒 이 포털 도메인에 저장 · JSON 백업 가능</span>
+      <span class="app-banner__meta storage-hint">🔒 이 Supabase 계정에 저장 · JSON 백업 가능</span>
     </p>
     <div
       class="project-nav-backdrop"
@@ -56,7 +58,7 @@
           <span class="nav-item__label project-nav-item__label">포털 홈</span>
         </a>
         <p class="sidebar-note project-sidebar-note">
-          📍 로컬 저장 · JSON으로 백업·복원. 상단 소개 문구 옆 ✏️ 또는 더블클릭으로 수정할 수 있습니다.
+          📍 Supabase 계정별 저장 · JSON으로 백업·복원. 상단 소개 문구 옆 ✏️ 또는 더블클릭으로 수정할 수 있습니다.
         </p>
         <button
           type="button"
@@ -242,22 +244,15 @@
 
     <input type="file" id="import-file-hidden" accept="application/json,.json" hidden />
 
-    <script>
-      (function () {
-        try {
-          if (localStorage.getItem("marathon-log-sidebar-collapsed") === "1") {
-            document.documentElement.classList.add("project-sidebar-collapsed-boot");
-          }
-        } catch (e) {}
-      })();
-    </script>
-    <script src="/shared/js/project-shell.js?v=portal2"></script>
-    <script src="/marathon-log/js/time.js?v=portal2"></script>
-    <script src="/marathon-log/js/keep-seed.js?v=portal2"></script>
-    <script src="/marathon-log/js/events.js?v=portal2"></script>
-    <script src="/marathon-log/js/weather.js?v=portal2"></script>
-    <script src="/marathon-log/js/run-log.js?v=portal2"></script>
-    <script src="/marathon-log/js/db.js?v=portal2"></script>
-    <script src="/marathon-log/js/app.js?v=portal2"></script>
+
+    <script type="application/portal-script" data-cloud-src="/shared/js/project-shell.js?v=portal2"></script>
+    <script type="application/portal-script" data-cloud-src="/marathon-log/js/time.js?v=portal2"></script>
+    <script type="application/portal-script" data-cloud-src="/marathon-log/js/keep-seed.js?v=portal2"></script>
+    <script type="application/portal-script" data-cloud-src="/marathon-log/js/events.js?v=portal2"></script>
+    <script type="application/portal-script" data-cloud-src="/marathon-log/js/weather.js?v=portal2"></script>
+    <script type="application/portal-script" data-cloud-src="/marathon-log/js/run-log.js?v=portal2"></script>
+    <script type="application/portal-script" data-cloud-src="/marathon-log/js/db.js?v=portal2"></script>
+    <script type="application/portal-script" data-cloud-src="/marathon-log/js/app.js?v=portal2"></script>
+  <script type="module" src="/shared/cloud.js"></script>
   </body>
 </html>

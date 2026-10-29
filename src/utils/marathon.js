@@ -40,7 +40,7 @@ export function summarizeMonthlyRaces(races, targetDate = new Date()) {
 
 export function readMarathonLogRacesFromStorage() {
   try {
-    const raw = localStorage.getItem(MARATHON_LOG_LS_KEY);
+    const raw = globalThis.PortalStorage.getItem(MARATHON_LOG_LS_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
     return Array.isArray(parsed) ? parsed : [];
   } catch {

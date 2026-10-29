@@ -8,7 +8,7 @@ import {
 } from '../src/utils/favorites';
 
 const memoryStore = {};
-global.localStorage = {
+global.PortalStorage = {
   getItem(key) {
     return key in memoryStore ? memoryStore[key] : null;
   },
@@ -24,7 +24,7 @@ const validIds = ['idea-bank', 'marathon', 'today-shoes', 'prompt-collection'];
 
 describe('favorite storage', () => {
   beforeEach(() => {
-    localStorage.clear();
+    globalThis.PortalStorage.clear();
   });
 
   it('uses the configured defaults when no user setting exists', () => {
@@ -32,7 +32,7 @@ describe('favorite storage', () => {
   });
 
   it('keeps only valid saved project ids and removes duplicates', () => {
-    localStorage.setItem(
+    globalThis.PortalStorage.setItem(
       FAVORITES_STORAGE_KEY,
       JSON.stringify(['idea-bank', 'missing-project', 'home', 'idea-bank', 'today-shoes']),
     );
@@ -44,11 +44,11 @@ describe('favorite storage', () => {
     const added = toggleFavoriteId([], 'idea-bank', validIds);
     expect(added).toEqual(['idea-bank']);
     writeFavoriteIds(added, validIds);
-    expect(JSON.parse(localStorage.getItem(FAVORITES_STORAGE_KEY))).toEqual(['idea-bank']);
+    expect(JSON.parse(globalThis.PortalStorage.getItem(FAVORITES_STORAGE_KEY))).toEqual(['idea-bank']);
 
     const removed = toggleFavoriteId(added, 'idea-bank', validIds);
     writeFavoriteIds(removed, validIds);
     expect(removed).toEqual([]);
-    expect(JSON.parse(localStorage.getItem(FAVORITES_STORAGE_KEY))).toEqual([]);
+    expect(JSON.parse(globalThis.PortalStorage.getItem(FAVORITES_STORAGE_KEY))).toEqual([]);
   });
 });
