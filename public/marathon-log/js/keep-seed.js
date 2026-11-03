@@ -76,10 +76,10 @@
       date: "2026-09-20",
       name: "공주백제마라톤",
       distance: "32k",
-      chipTime: "",
+      chipTime: "2:14:57",
       goal: "",
-      notes: "32K · 예정",
-      status: "planned",
+      notes: "32K 참가 · 더위로 21.12km 지점 조기 마무리 · 공식 인정 기록 2:14:57 · 평균 페이스 6:23/km · 평균 심박 152bpm (32K 전체 완주 아님)",
+      status: "dnf",
     },
     {
       id: "2026-10-17-gyeongju",
