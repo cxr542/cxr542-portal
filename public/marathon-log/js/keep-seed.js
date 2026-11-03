@@ -86,10 +86,10 @@
       date: "2026-10-17",
       name: "경주국제마라톤",
       distance: "full",
-      chipTime: "",
+      chipTime: "5:18:55",
       goal: "6번째 풀",
-      notes: "예정",
-      status: "planned",
+      notes: "공식 완주 기록 · 평균 페이스 7:33/km · 배번호 13546",
+      status: "finished",
     },
     {
       id: "2025-03-30-incheon-half",
