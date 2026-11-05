@@ -1,5 +1,30 @@
 /* 너는몇점? — 왓챠피디아형 평점 그리드 */
 
+.safe-import {
+  box-sizing: border-box;
+  width: min(40rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
+  padding: 1.5rem;
+  border: 1px solid var(--hmp-border);
+  border-radius: 12px;
+  background: var(--embed-surface, #14141c);
+  color: var(--hmp-text);
+  font: inherit;
+  line-height: 1.6;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.safe-import::backdrop { background: rgba(0, 0, 0, 0.65); }
+.safe-import h2 { margin: 0 0 1rem; font-size: 1.25rem; }
+.safe-import-option { display: flex; align-items: center; gap: 0.5rem; min-height: 44px; }
+.safe-import-option[hidden] { display: none; }
+.safe-import-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; }
+.safe-import-actions .btn { min-height: 44px; }
+.safe-import :focus-visible { outline: 2px solid var(--hmp-text); outline-offset: 3px; }
+.safe-import button:disabled { opacity: 0.5; cursor: default; }
+#safe-import-summary { font-variant-numeric: tabular-nums; }
+
 body.project-app.theme-how-many-points {
   margin: 0;
   min-height: 100dvh;

@@ -17,8 +17,18 @@ function loadAdapter(app, globalName, initial = []) {
       return structuredClone(value)
     },
     clear: async namespace => table(namespace).clear(),
+    flush: async () => {},
+    load: async () => {},
+    retry: async () => {},
+    has: (namespace, key) => table(namespace).has(key),
+    snapshot: namespace => [...table(namespace)].map(([key, value]) => ({ key, revision: 1, value: structuredClone(value) })),
+    mergeRatings: async request => {
+      for (const item of request.p_changes) table('how-many-points').set(item.id, structuredClone(item))
+      return { applied: request.p_changes.length }
+    },
   } }
   context.window = context
+  if (app === 'how-many-points') vm.runInNewContext(fs.readFileSync(new URL('../public/how-many-points/js/import-plan.js', import.meta.url), 'utf8'), context)
   vm.runInNewContext(fs.readFileSync(new URL(`../public/${app}/js/db.js`, import.meta.url), 'utf8'), context)
   return context[globalName]
 }
@@ -32,7 +42,7 @@ describe('embedded tools using cloud records', () => {
     const db = loadAdapter(app, globalName)
     await expect(db.getStorageMode()).resolves.toBe('supabase')
     await expect(db.seedIfEmpty()).resolves.toEqual([])
-    await db.importPayload({ [payloadKey]: [{ id: 'record', title: '제목', name: '대회', body: '본문', date: '2026-10-01' }] }, true)
+    await db.importPayload({ [payloadKey]: [{ id: 'record', title: '제목', name: '대회', body: '본문', date: '2026-10-01' }] }, app !== 'how-many-points')
     expect(await db['list' + plural]()).toHaveLength(1)
     expect((await db['get' + singular]('record')).id).toBe('record')
     expect(db.exportPayload(await db['list' + plural]())[payloadKey]).toHaveLength(1)
