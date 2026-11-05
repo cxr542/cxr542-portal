@@ -3,7 +3,8 @@
 
   /** 왓챠피디아 export CSV: ID,URL,Title,Type,Year,Directors,WatchedAt,Rating,Review,Spoiler */
 
-  function parseCsvLine(line) {
+  function parseCsvRecords(line) {
+    var rows = [];
     var out = [];
     var cur = "";
     var inQ = false;
@@ -21,10 +22,18 @@
       } else if (ch === ",") {
         out.push(cur);
         cur = "";
+      } else if (ch === "\n" || ch === "\r") {
+        if (ch === "\r" && line[i + 1] === "\n") i += 1;
+        out.push(cur);
+        if (out.some(function (cell) { return cell.trim(); })) rows.push(out);
+        out = [];
+        cur = "";
       } else cur += ch;
     }
+    if (inQ) throw new Error("CSV 따옴표가 닫히지 않았습니다.");
     out.push(cur);
-    return out;
+    if (out.some(function (cell) { return cell.trim(); })) rows.push(out);
+    return rows;
   }
 
   function mapWatchaType(t) {
@@ -39,12 +48,10 @@
   function parseWatchaCsv(text) {
     text = String(text || "").replace(/^\uFEFF/, "").trim();
     if (!text) return [];
-    var lines = text.split(/\r?\n/).filter(function (l) {
-      return l.trim();
-    });
+    var lines = parseCsvRecords(text);
     if (!lines.length) return [];
 
-    var header = parseCsvLine(lines[0]).map(function (h) {
+    var header = lines[0].map(function (h) {
       return h.trim().toLowerCase();
     });
     var start = 0;
@@ -54,11 +61,15 @@
       header.join(",").indexOf("title") >= 0
     ) {
       start = 1;
+      if (header.indexOf("id") < 0 || header.indexOf("title") < 0 || new Set(header).size !== header.length) {
+        throw new Error("CSV 헤더에는 중복 없는 ID와 Title 열이 필요합니다.");
+      }
     }
 
     var items = [];
     for (var li = start; li < lines.length; li++) {
-      var cols = parseCsvLine(lines[li]);
+      var cols = lines[li];
+      if (start === 1 && cols.length !== header.length) throw new Error("CSV " + (li + 1) + "번째 레코드의 열 수가 다릅니다.");
       if (!cols.length || !cols[2] && !cols[0]) continue;
 
       var row = {};
@@ -67,15 +78,15 @@
           row[key] = cols[i];
         });
         items.push({
-          externalId: row.id || cols[0],
-          sourceUrl: row.url || cols[1],
-          title: row.title || cols[2],
-          contentType: mapWatchaType(row.type || cols[3]),
-          year: row.year || cols[4],
-          directors: row.directors || cols[5],
-          watchedAt: row.watchedat || row.watched_at || cols[6],
-          rating: row.rating || cols[7],
-          review: row.review || cols[8],
+          externalId: row.id,
+          sourceUrl: row.url || "",
+          title: row.title,
+          contentType: mapWatchaType(row.type),
+          year: row.year || "",
+          directors: row.directors || "",
+          watchedAt: row.watchedat || row.watched_at || "",
+          rating: row.rating || "",
+          review: row.review || "",
           source: "watcha",
         });
       } else {
