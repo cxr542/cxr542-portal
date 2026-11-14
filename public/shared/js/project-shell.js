@@ -2,6 +2,7 @@
   "use strict";
 
   var cfg = {};
+  var drawerOpener = null;
 
   function qs(sel, root) {
     return (root || document).querySelector(sel);
@@ -15,7 +16,8 @@
     return global.matchMedia("(max-width: 1024px)").matches;
   }
 
-  function openDrawer() {
+  function openDrawer(opener) {
+    drawerOpener = opener || document.activeElement;
     document.body.classList.add("project-nav-open");
     var backdrop = qs("#" + (cfg.backdropId || "project-nav-backdrop"));
     if (backdrop) {
@@ -81,7 +83,7 @@
       btn.addEventListener("click", function () {
         if (!isDrawerMode()) return;
         if (document.body.classList.contains("project-nav-open")) closeDrawer();
-        else openDrawer();
+        else openDrawer(btn);
       });
     });
     var backdrop = qs("#" + (cfg.backdropId || "project-nav-backdrop"));
@@ -95,6 +97,16 @@
     });
     global.matchMedia("(max-width: 1024px)").addEventListener("change", function () {
       if (!isDrawerMode()) closeDrawer();
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key !== "Escape" || event.defaultPrevented || event.isComposing) return;
+      if (!isDrawerMode() || !document.body.classList.contains("project-nav-open")) return;
+      if (event.target.closest && event.target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"])')) return;
+      event.preventDefault();
+      closeDrawer();
+      if (drawerOpener && drawerOpener.isConnected && !drawerOpener.disabled && drawerOpener.getClientRects().length) {
+        drawerOpener.focus();
+      }
     });
   }
 

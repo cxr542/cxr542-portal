@@ -130,3 +130,54 @@ describe('Supabase storage adapter', () => {
     expect(() => cloud.write('idea-bank', 'private', {})).toThrow('session_ended')
   })
 })
+
+// Exercise the shipped queue/cache implementation against an in-memory RPC boundary.
+describe('CSV storage result boundaries', () => {
+  it('does not resolve a write or expose its value before the RPC succeeds', async () => {
+    const { createSyntheticCloud } = await import('./helpers/howManyPointsHarness.mjs');
+    const app = await createSyntheticCloud();
+    let release;
+    app.controls.beforeWrite = () => new Promise(resolve => { release = resolve; });
+    let completed = false;
+    const write = app.cloud.write('how-many-points', 'one', { id: 'one' }).then(() => { completed = true; });
+    await Promise.resolve();
+    expect(completed).toBe(false);
+    expect(app.cloud.list('how-many-points')).toEqual([]);
+    release();
+    await write;
+    expect(completed).toBe(true);
+    expect(app.cloud.list('how-many-points')).toEqual([{ id: 'one' }]);
+  });
+
+  it('retains successful independent writes when another write fails', async () => {
+    const { createSyntheticCloud } = await import('./helpers/howManyPointsHarness.mjs');
+    const app = await createSyntheticCloud();
+    app.controls.failKeys.add(JSON.stringify(['how-many-points', 'bad']));
+    const outcomes = await Promise.allSettled([
+      app.cloud.write('how-many-points', 'good', { id: 'good' }),
+      app.cloud.write('how-many-points', 'bad', { id: 'bad' }),
+    ]);
+    expect(outcomes.map(value => value.status)).toEqual(['fulfilled', 'rejected']);
+    expect(app.cloud.list('how-many-points')).toEqual([{ id: 'good' }]);
+    await expect(app.cloud.flush()).rejects.toThrow();
+  });
+
+  it('can reject after server persistence without confirming the new cache value', async () => {
+    const { createSyntheticCloud } = await import('./helpers/howManyPointsHarness.mjs');
+    const app = await createSyntheticCloud();
+    app.controls.lostKeys.add(JSON.stringify(['how-many-points', 'lost']));
+    await expect(app.cloud.write('how-many-points', 'lost', { id: 'lost' })).rejects.toThrow('response lost');
+    expect(app.serverRecords().map(row => row.value)).toEqual([{ id: 'lost' }]);
+    expect(app.cloud.list('how-many-points')).toEqual([]);
+  });
+
+  it('can fail a global flush despite a successful CSV namespace write', async () => {
+    const { createSyntheticCloud } = await import('./helpers/howManyPointsHarness.mjs');
+    const app = await createSyntheticCloud();
+    app.controls.failKeys.add(JSON.stringify(['settings', 'theme']));
+    app.cloud.settings.setItem('theme', 'dark');
+    await app.cloud.write('how-many-points', 'one', { id: 'one' });
+    expect(app.cloud.list('how-many-points')).toEqual([{ id: 'one' }]);
+    await expect(app.cloud.flush()).rejects.toThrow();
+  });
+});

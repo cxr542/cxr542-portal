@@ -142,6 +142,10 @@ body.project-app.theme-marathon {
   color: var(--muted);
 }
 
+.capture-preview[hidden] {
+  display: none;
+}
+
 .capture-preview {
   display: block;
   width: 100%;
@@ -825,6 +829,34 @@ body.project-app.theme-marathon {
   margin-top: 0.2rem;
   font-size: 0.75rem;
   color: var(--muted);
+  min-width: 0;
+  line-height: 1.5;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .stat-card {
+    min-width: 0;
+  }
+
+  .stat-card .label {
+    font-size: 0.75rem;
+    letter-spacing: 0;
+  }
+
+  .stat-card .sub {
+    font-size: 0.8125rem;
+  }
+
+  .race-card__name {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .stats-grid {
+    gap: 0.75rem;
+  }
 }
 
 .section-title {
