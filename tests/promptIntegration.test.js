@@ -1,3 +1,8 @@
+import { beforeAll as beforePolicySuite, beforeEach as beforePolicyTest, afterEach as afterPolicyTest, vi as policyVi } from 'vitest';
+beforePolicySuite(() => { policyVi.stubEnv('VERCEL', '1'); policyVi.stubEnv('VERCEL_ENV', 'production'); });
+// Simulated trusted runtime; all upstreams remain synthetic or loopback.
+beforePolicyTest(() => { policyVi.stubEnv('VERCEL', '1'); policyVi.stubEnv('VERCEL_ENV', 'production'); });
+afterPolicyTest(() => policyVi.unstubAllEnvs());
 import { afterAll,beforeAll,describe,expect,it } from 'vitest';
 import { startPromptFixture } from '../scripts/prompts-qa-server.mjs';
 import { preview,upload } from '../apps/prompt-actions/public/prompt-collection/js/migration.js';

@@ -1,3 +1,4 @@
+import { refuseExternalRequest } from '../../shared/preview-policy.mjs';
 /**
  * Wiki /api/admin — GitHub 저장소 쓰기 또는 WIKI_ADMIN_API_URL 프록시
  */
@@ -169,6 +170,7 @@ async function handleGithub(req, res, pathname) {
 
 /** Vercel Node handler */
 export default async function wikiAdminHandler(req, res) {
+  if (refuseExternalRequest(res, process.env)) return;
   const pathname = (req.url || '').split('?')[0];
   if (!pathname.startsWith('/api/admin/')) {
     json(res, 404, { ok: false, error: 'not found' });

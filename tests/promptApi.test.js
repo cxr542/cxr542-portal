@@ -1,3 +1,7 @@
+import { beforeEach as beforePolicyTest, afterEach as afterPolicyTest, vi as policyVi } from 'vitest';
+// Simulated trusted runtime; all upstreams remain synthetic or loopback.
+beforePolicyTest(() => { policyVi.stubEnv('VERCEL', '1'); policyVi.stubEnv('VERCEL_ENV', 'production'); });
+afterPolicyTest(() => policyVi.unstubAllEnvs());
 import { describe, expect, it, vi } from 'vitest';
 import { createPromptsHandler } from '../server/prompts/handler.mjs';
 import { createAuthHandler } from '../server/prompts/auth.mjs';

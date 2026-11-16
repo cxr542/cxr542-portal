@@ -1,5 +1,5 @@
 import { createPromptTransport } from './promptTransport.js'
-import { client } from './client.js'
+import { client, externalConnectionsAllowed } from './client.js'
 import { createPortalStorage } from './storage.js'
 import { accessPanel, migrationPanel, signIn } from './access.js'
 import { collections } from './migration.js'
@@ -142,7 +142,7 @@ async function start() {
   return cloud
 }
 
-export const ready = start().catch(error => {
+export const ready = externalConnectionsAllowed ? start().catch(error => {
   const failure = accessPanel('연결을 확인해 주세요', '클라우드에 연결할 수 없어 포털을 시작하지 못했습니다.')
   failure.status.textContent = error.message
   const retry = document.createElement('button')
@@ -150,4 +150,4 @@ export const ready = start().catch(error => {
   retry.onclick = () => location.reload()
   failure.panel.append(retry)
   throw error
-})
+}) : Promise.resolve(null)

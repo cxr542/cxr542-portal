@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite'
+import { deploymentEnvironment, allowsExternalConnections, refuseExternalRequest } from './shared/preview-policy.mjs'
 import react from '@vitejs/plugin-react'
 import { promptsDevPlugin } from './server/prompts/dev.mjs'
 import portalLogin from './api/portal-login.js'
@@ -8,7 +9,7 @@ import { fileURLToPath } from 'node:url'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
 /** Vercel: VERCEL_ENV = production | preview | development */
-const portalBuildEnv = process.env.VERCEL_ENV || 'development'
+const portalBuildEnv = deploymentEnvironment(process.env)
 
 /** AI-Synapse Wiki `npm run dev` (포털 5173과 분리 → 기본 5174, Windows는 localhost 권장) */
 const wikiDevApiUrl = process.env.WIKI_DEV_API_URL || 'http://localhost:5174'
@@ -72,6 +73,9 @@ function portalLoginPlugin() {
   const middleware = async (req, res, next) => {
     if (req.url?.split('?')[0] !== '/api/portal-login') return next()
     const reply = {
+      get statusCode() { return res.statusCode },
+      set statusCode(code) { res.statusCode = code },
+      end: (body) => res.end(body),
       setHeader: (name, value) => res.setHeader(name, value),
       status(code) { res.statusCode = code; return this },
       json(value) { res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(value)) },
@@ -94,6 +98,7 @@ function portalLoginPlugin() {
 
 function runningOpsAuthPlugin() {
   const middleware = async (req, res, next) => {
+    if (req.url?.split('?')[0] === '/api/running-ops-auth' && refuseExternalRequest(res, process.env)) return
     if (req.method !== 'POST' || req.url !== '/api/running-ops-auth') {
       next()
       return
@@ -141,9 +146,22 @@ function runningOpsAuthPlugin() {
   }
 }
 
+function previewExternalBoundaryPlugin() {
+  const middleware = (req, res, next) => {
+    const pathname = (req.url || '').split('?')[0]
+    if (pathname.startsWith('/api/admin') && refuseExternalRequest(res, process.env)) return
+    next()
+  }
+  return {
+    name: 'preview-external-boundary',
+    configureServer(server) { server.middlewares.use(middleware) },
+    configurePreviewServer(server) { server.middlewares.use(middleware) },
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig(({ command }) => ({
-  plugins: [react(), promptsDevPlugin(), portalLoginPlugin(), runningOpsAuthPlugin(), portalStaticAppsPlugin()],
+  plugins: [previewExternalBoundaryPlugin(), react(), promptsDevPlugin(), portalLoginPlugin(), runningOpsAuthPlugin(), portalStaticAppsPlugin()],
   define: {
     __PORTAL_BUILD_ENV__: JSON.stringify(portalBuildEnv),
   },
@@ -163,12 +181,12 @@ export default defineConfig(({ command }) => ({
           port: Number(process.env.PORTAL_DEV_PORT) || 5173,
           strictPort: false,
           host: 'localhost',
-          proxy: {
+          ...(allowsExternalConnections(process.env) ? { proxy: {
             '/api/admin': {
               target: wikiDevApiUrl,
               changeOrigin: true,
             },
-          },
+          } } : {}),
         }
       : undefined,
 }))

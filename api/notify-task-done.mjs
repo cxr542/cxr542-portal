@@ -1,3 +1,4 @@
+import { refuseExternalRequest } from '../shared/preview-policy.mjs';
 const MAX_FIELD_LENGTH = 600;
 
 function json(res, status, payload) {
@@ -33,6 +34,7 @@ function buildEmailHtml(payload) {
 }
 
 export default async function handler(req, res) {
+  if (refuseExternalRequest(res, process.env)) return;
   if (req.method !== 'POST') {
     res.setHeader('allow', 'POST');
     return json(res, 405, { ok: false, error: 'method_not_allowed' });

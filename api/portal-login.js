@@ -1,3 +1,4 @@
+import { refuseExternalRequest } from '../shared/preview-policy.mjs';
 import { createClient } from '@supabase/supabase-js'
 
 export function createPortalLogin(config, authenticate) {
@@ -32,6 +33,7 @@ export function createPortalLogin(config, authenticate) {
 }
 
 export default function handler(req, res) {
+  if (refuseExternalRequest(res, process.env)) return;
   const client = createClient(
     process.env.SUPABASE_URL || 'https://kkcvglldsoxglfjqnsga.supabase.co',
     process.env.SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_hC-H979C3pDsXpsRM_ntIg_8NnnpQP2',
