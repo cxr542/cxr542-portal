@@ -25,6 +25,7 @@ import {
 import { VISION_FONT_APP_URL } from './utils/visionFontDev';
 
 import Workspace from './components/Workspace';
+import GithubReposPage from './features/github-repos/GithubReposPage';
 import ToolFrame from './components/ToolFrame';
 import { PORTAL_NAV_ITEMS } from './constants/portalNav';
 const findNavItem = id => PORTAL_NAV_ITEMS.find(item => item.id === id);
@@ -527,7 +528,7 @@ function WhoAreYouModule({ onGoHome }) {
 function App() {
   const renderModule = (active, onGoHome) => {
     if (active === RELEASE_NOTES_MODULE_ID) return <ReleaseNotesPanel onGoHome={onGoHome} />;
-    const components = {'vision-font':VisionFontModule,'today-shoes':TodayShoesModule,marathon:MarathonLogModule,'idea-bank':IdeaBankModule,'prompt-collection':PromptCollectionModule,'how-many-points':HowManyPointsModule,'who-are-you':WhoAreYouModule,'ai-synapse-wiki':AiSynapseWikiModule,'gemini-tuner':GeminiTunerModule};
+    const components = {'github-repos':GithubReposPage,'vision-font':VisionFontModule,'today-shoes':TodayShoesModule,marathon:MarathonLogModule,'idea-bank':IdeaBankModule,'prompt-collection':PromptCollectionModule,'how-many-points':HowManyPointsModule,'who-are-you':WhoAreYouModule,'ai-synapse-wiki':AiSynapseWikiModule,'gemini-tuner':GeminiTunerModule};
     const Module = components[active];
     return Module ? <Module onGoHome={onGoHome}/> : null;
   };
