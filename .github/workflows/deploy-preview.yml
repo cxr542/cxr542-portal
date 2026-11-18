@@ -1,15 +1,10 @@
 name: Deploy Preview
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-    branches:
-      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
-  issues: write
-  pull-requests: write
 
 env:
   VERCEL_CLI_VERSION: 65.2.0
@@ -17,7 +12,7 @@ env:
 jobs:
   deploy_preview:
     runs-on: ubuntu-latest
-    if: ${{ github.event.pull_request.head.repo.fork == false }}
+    if: ${{ github.ref_type == 'branch' && github.ref != 'refs/heads/main' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -56,21 +51,9 @@ jobs:
           echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
 
       - name: Add preview URL to summary
+        env:
+          SUMMARY_BRANCH: ${{ github.ref_name }}
         run: |
           echo "## Preview Deployment" >> "$GITHUB_STEP_SUMMARY"
-          echo "- PR: #${{ github.event.pull_request.number }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Branch: $SUMMARY_BRANCH" >> "$GITHUB_STEP_SUMMARY"
           echo "- URL: ${{ steps.vercel_deploy.outputs.preview_url }}" >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Comment preview URL on PR
-        continue-on-error: true
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const url = "${{ steps.vercel_deploy.outputs.preview_url }}";
-            const body = `Preview deployment is ready.\n\n- URL: ${url}`;
-            github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body
-            });

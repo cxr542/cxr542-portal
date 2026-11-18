@@ -1,4 +1,7 @@
 {
+  "git": {
+    "deploymentEnabled": false
+  },
   "rewrites": [
     {
       "source": "/.well-known/oauth-protected-resource/api/prompt-mcp",
