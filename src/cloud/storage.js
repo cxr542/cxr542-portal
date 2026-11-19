@@ -3,6 +3,8 @@ export function createPortalStorage(client, onStatus = () => {}, onWrite = () =>
   const queue = new Map()
   const failures = new Map()
   let active = true
+  let ratingsImportBusy = false
+  let ratingsImportUncertain = false
   const rowKey = (namespace, key) => JSON.stringify([namespace, key])
   const status = () => onStatus({ pending: queue.size, failures: [...failures.values()] })
   const clone = (value) => value == null ? null : structuredClone(value)
@@ -19,6 +21,7 @@ export function createPortalStorage(client, onStatus = () => {}, onWrite = () =>
     if (!active) throw new Error('session_ended')
     rows.clear()
     for (const [key, row] of loaded) rows.set(key, row)
+    ratingsImportUncertain = false
   }
 
   function read(namespace, key) {
@@ -32,6 +35,7 @@ export function createPortalStorage(client, onStatus = () => {}, onWrite = () =>
 
   function write(namespace, key, value) {
     if (!active) throw new Error('session_ended')
+    if (namespace === 'how-many-points' && (ratingsImportBusy || ratingsImportUncertain)) throw new Error('가져오기 처리 중이거나 결과 확인이 필요합니다. 새로 불러온 후 다시 시도하세요.')
     key = String(key)
     const id = rowKey(namespace, key)
     const snapshot = clone(value)
@@ -81,6 +85,35 @@ export function createPortalStorage(client, onStatus = () => {}, onWrite = () =>
   }
   return {
     load, read, list, write, settings,
+    snapshot(namespace) {
+      return [...rows.values()].filter(row => row.namespace === namespace)
+        .map(row => clone({ key: row.key, revision: row.revision, value: row.value }))
+        .sort((a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0)
+    },
+    async mergeRatings(request) {
+      if (!active) throw new Error('session_ended')
+      if (ratingsImportBusy || ratingsImportUncertain) throw new Error('새로 불러온 후 가져오기를 다시 시도하세요.')
+      await this.flush()
+      if (!active || ratingsImportBusy || ratingsImportUncertain) throw new Error('새로 불러온 후 가져오기를 다시 시도하세요.')
+      ratingsImportBusy = true
+      const operation = (async () => {
+        const { data, error } = await client.rpc('portal_merge_ratings', request)
+        if (error) throw error
+        if (!data || data.applied !== request.p_changes.length) throw new Error('가져오기 결과 확인 필요')
+        if (!active) throw new Error('session_ended')
+        for (const item of request.p_changes) {
+          const id = rowKey('how-many-points', item.id)
+          rows.set(id, { namespace: 'how-many-points', key: item.id, value: clone(item), revision: (rows.get(id)?.revision || 0) + 1 })
+        }
+        onWrite({ namespace: 'how-many-points', key: 'import' })
+        return data
+      })()
+      queue.set('ratings-import', operation)
+      status()
+      try { return await operation }
+      catch (error) { ratingsImportUncertain = true; throw error }
+      finally { ratingsImportBusy = false; queue.delete('ratings-import'); status() }
+    },
     has: (namespace, key) => rows.has(rowKey(namespace, String(key))),
     async clear(namespace) {
       await Promise.all(list(namespace).map(item => write(namespace, item.id, null)))
@@ -89,9 +122,9 @@ export function createPortalStorage(client, onStatus = () => {}, onWrite = () =>
       await Promise.all([...queue.values()])
       if (failures.size) throw new Error('저장되지 않은 변경 사항이 있습니다.')
     },
-    async retry() {
-      const pending = [...failures.values()]
-      failures.clear()
+    async retry(namespace, key) {
+      const pending = [...failures.values()].filter(row => namespace === undefined || (row.namespace === namespace && row.key === key))
+      for (const row of pending) failures.delete(rowKey(row.namespace, row.key))
       await Promise.all(pending.map(row => write(row.namespace, row.key, row.value)))
     },
     stop() { active = false; rows.clear(); optimistic.clear(); failures.clear() },
