@@ -1,4 +1,6 @@
+import { refuseExternalRequest } from '../shared/preview-policy.mjs';
 export default function handler(req, res) {
+  if (refuseExternalRequest(res, process.env)) return;
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'method_not_allowed' })
     return

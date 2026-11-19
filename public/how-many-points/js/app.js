@@ -17,6 +17,8 @@
     other: "📦",
   };
   var renderSeq = 0;
+  var csvImportBusy = false;
+  var csvImportUncertain = false;
   var state = {
     view: "library",
     typeFilter: "all",
@@ -174,6 +176,7 @@
   }
 
   function renderLibrary(list) {
+    var totalCount = list.length;
     list = sortList(filterList(list));
     var avg = avgRating(list);
     var meta =
@@ -182,6 +185,21 @@
       "건" +
       (avg ? ' · 평균 <strong class="accent">' + avg + "</strong>점" : "") +
       "</p>";
+
+    if (!list.length && totalCount > 0) {
+      $("content").innerHTML =
+        meta +
+        '<div class="empty" role="status"><h2>조건에 맞는 평가가 없습니다</h2>' +
+        '<p>검색어나 종류 필터를 바꿔보세요. 저장된 평가는 유지됩니다.</p>' +
+        '<button type="button" class="btn" id="clear-library-filters">검색·필터 초기화</button></div>';
+      $("clear-library-filters").onclick = function () {
+        state.search = "";
+        state.typeFilter = "all";
+        $("search").value = "";
+        render();
+      };
+      return;
+    }
 
     if (!list.length) {
       $("content").innerHTML =
@@ -422,38 +440,58 @@
     };
     $("import-csv").onchange = function (e) {
       var f = e.target.files && e.target.files[0];
-      if (!f) return;
+      e.target.value = "";
+      if (!f || csvImportBusy) return;
+      if (csvImportUncertain) {
+        window.alert("이전 CSV 저장 결과가 불명확합니다. 새로 불러와 목록과 원본 파일을 확인한 뒤 다시 시도하세요.");
+        return;
+      }
+      csvImportBusy = true;
       var reader = new FileReader();
-      reader.onload = function () {
+      reader.onload = async function () {
         try {
           var items = HowManyPointsWatchaImport.parseWatchaCsv(reader.result);
           if (!items.length) {
             window.alert("CSV에서 항목을 찾지 못했습니다.");
             return;
           }
-          var merge = !window.confirm(
-            items.length +
-              "건을 가져옵니다.\n\n확인 = 기존 데이터와 병합(같은 왓챠 ID는 덮어쓰기)\n취소 = 전체 교체 후 가져오기"
-          );
-          HowManyPointsDb.importItems(items, !merge).then(function () {
-            state.view = "library";
-            render();
-            if (window.ProjectShell) {
-              ProjectShell.notifyTaskDone({
-                module: "너는몇점?",
-                action: "왓챠 CSV 가져오기 완료",
-                title: items.length + "건 반영",
-              });
+          if (!window.confirm(items.length + "건을 기존 기록을 삭제하지 않고 병합합니다.\n같은 왓챠 ID는 파일 값으로 갱신됩니다. 빈 평점·리뷰도 반영됩니다.\n전체 교체와 일괄 롤백은 지원하지 않습니다.\n\n확인 = 병합\n취소 = 가져오지 않음")) return;
+          var completed = 0;
+          try {
+            for (var index = 0; index < items.length; index += 1) {
+              await HowManyPointsDb.importItems([items[index]], false);
+              completed += 1;
             }
+          } catch (err) {
+            csvImportUncertain = true;
+            console.error("CSV write result uncertain", err);
+            window.alert((completed ? "부분 저장: " + completed + "건의 저장 완료 응답을 확인했습니다. " : "저장 결과 불명: 완료 응답을 확인하지 못했습니다. ") +
+              "실패한 항목은 서버에 반영됐을 수도 있습니다. 이후 항목은 보내지 않았으며 자동 재시도하지 않습니다. 새로 불러와 목록을 확인하세요. 일괄 롤백되지 않습니다.");
+            return;
+          }
+          state.view = "library";
+          Promise.resolve().then(function () {
+            if (window.ProjectShell && typeof ProjectShell.notifyTaskDone === "function") {
+              return ProjectShell.notifyTaskDone({ module: "너는몇점?", action: "왓챠 CSV 가져오기 완료", title: items.length + "건 반영" });
+            }
+          }).catch(function (err) { console.warn("CSV optional notification failed", err); });
+          try {
+            await render(true);
             window.alert(items.length + "건을 반영했습니다.");
-          });
+          } catch (err) {
+            console.error("CSV saved but library refresh failed", err);
+            window.alert("CSV 저장은 완료되었습니다. 화면을 갱신하지 못했으니 새로고침 후 목록을 확인하세요. 다시 가져올 필요는 없습니다.");
+          }
         } catch (err) {
-          console.error(err);
-          window.alert("CSV 처리 중 오류가 났습니다.");
-        }
+          console.error("CSV parsing failed", err);
+          window.alert("CSV 처리 중 오류가 났습니다. 가져오기를 시작하지 않았습니다.");
+        } finally { csvImportBusy = false; }
+      };
+      reader.onerror = function () {
+        csvImportBusy = false;
+        window.alert("CSV 파일을 읽지 못했습니다. 가져오기를 시작하지 않았습니다.");
       };
       reader.readAsText(f, "UTF-8");
-      e.target.value = "";
     };
     $("import-json").onchange = function (e) {
       var f = e.target.files && e.target.files[0];
@@ -477,7 +515,7 @@
   }
 
   function ratingPickerHtml(value) {
-    var html = '<div class="rating-picker" id="rating-picker">';
+    var html = '<div class="rating-picker" id="rating-picker" role="group" aria-labelledby="f-rating-label">';
     for (var half = 1; half <= 10; half++) {
       var v = half / 2;
       html +=
@@ -527,36 +565,36 @@
       (state.isNew ? "✨ 새 평가" : escapeHtml(d.title)) +
       "</h2>" +
       (d.rating ? '<div class="edit-form__stars">' + starsHtml(d.rating) + "</div>" : "") +
-      '<label class="field-label">제목</label>' +
+      '<label class="field-label" for="f-title">제목</label>' +
       '<input class="field-input" id="f-title" type="text" value="' +
       escapeHtml(d.title || "") +
       '" />' +
-      '<label class="field-label">부제·원제 (선택)</label>' +
+      '<label class="field-label" for="f-title-alt">부제·원제 (선택)</label>' +
       '<input class="field-input" id="f-title-alt" type="text" value="' +
       escapeHtml(d.titleAlt || "") +
       '" />' +
-      '<label class="field-label">종류</label>' +
+      '<label class="field-label" for="f-type">종류</label>' +
       '<select class="field-input" id="f-type">' +
       typeOptions +
       "</select>" +
       '<div class="field-row">' +
-      '<div><label class="field-label">연도</label><input class="field-input" id="f-year" type="number" min="1900" max="2100" value="' +
+      '<div><label class="field-label" for="f-year">연도</label><input class="field-input" id="f-year" type="number" min="1900" max="2100" value="' +
       (d.year || "") +
       '" /></div>' +
-      '<div><label class="field-label">본 날짜</label><input class="field-input" id="f-watched" type="date" value="' +
+      '<div><label class="field-label" for="f-watched">본 날짜</label><input class="field-input" id="f-watched" type="date" value="' +
       (d.watchedAt ? String(d.watchedAt).slice(0, 10) : "") +
       '" /></div></div>' +
-      '<label class="field-label">감독·작가 (선택)</label>' +
+      '<label class="field-label" for="f-directors">감독·작가 (선택)</label>' +
       '<input class="field-input" id="f-directors" type="text" value="' +
       escapeHtml(d.directors || "") +
       '" />' +
-      '<label class="field-label">포스터 URL (선택)</label>' +
+      '<label class="field-label" for="f-poster">포스터 URL (선택)</label>' +
       '<input class="field-input" id="f-poster" type="url" placeholder="https://…" value="' +
       escapeHtml(d.posterUrl || "") +
       '" />' +
-      '<label class="field-label">평점 (0.5~5)</label>' +
+      '<span class="field-label" id="f-rating-label">평점 (0.5~5)</span>' +
       ratingPickerHtml(d.rating) +
-      '<label class="field-label">한줄평·리뷰</label>' +
+      '<label class="field-label" for="f-review">한줄평·리뷰</label>' +
       '<textarea class="field-textarea" id="f-review" placeholder="감상을 남겨 보세요">' +
       escapeHtml(d.review || "") +
       "</textarea>" +
@@ -674,7 +712,7 @@
     render();
   }
 
-  function render() {
+  function render(propagateErrors) {
     var seq = ++renderSeq;
     if (window.ProjectShell) {
       ProjectShell.setActiveView(state.view === "edit" ? "sketch" : state.view);
@@ -682,7 +720,7 @@
     var sortEl = $("sort-select");
     if (sortEl && sortEl.value !== state.sort) sortEl.value = state.sort;
 
-    HowManyPointsDb.listRatings()
+    return HowManyPointsDb.listRatings()
       .then(function (list) {
         if (seq !== renderSeq) return;
         updateNavCounts(list);
@@ -703,6 +741,7 @@
         renderLibrary(list);
       })
       .catch(function (err) {
+        if (propagateErrors === true) throw err;
         console.error(err);
         $("content").innerHTML = '<p class="empty">목록을 불러오지 못했습니다.</p>';
       });

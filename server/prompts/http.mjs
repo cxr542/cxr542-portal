@@ -1,10 +1,12 @@
 import { randomUUID } from 'node:crypto';
+import { allowsExternalConnections } from '../../shared/preview-policy.mjs';
 
 export class HttpError extends Error {
   constructor(status, code) { super(code); this.status = status; this.code = code; }
 }
 
 export function config(env = process.env) {
+  if (!allowsExternalConnections(process.env)) throw new HttpError(503, 'external_connections_disabled');
   const url = env.PROMPTS_SUPABASE_URL;
   const key = env.PROMPTS_SUPABASE_PUBLISHABLE_KEY;
   if (env.PROMPTS_ENABLED !== 'true' || !url || !key) throw new HttpError(503, 'not_configured');

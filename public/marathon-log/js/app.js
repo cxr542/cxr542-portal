@@ -19,6 +19,7 @@
   };
   var BACKUP_REMINDER_KEY = "marathon-log-last-export-at";
   var BACKUP_NUDGE_DAYS = 14;
+  var runCaptureVersion = 0;
 
   var state = {
     screen: "dashboard",
@@ -665,6 +666,7 @@
         return refreshRaces();
       })
       .then(function () {
+        runCaptureVersion += 1;
         state.runDraft = null;
         state.runCaptureData = "";
         $("run-capture-file").value = "";
@@ -746,8 +748,7 @@
   function pbSub(race) {
     if (!race) return "기록 없음";
     var y = race.date ? race.date.slice(0, 4) : "";
-    var shortName = race.name.length > 8 ? race.name.slice(0, 8) + "…" : race.name;
-    return (y ? y + " " : "") + shortName;
+    return (y ? y + " " : "") + race.name;
   }
 
   function renderKeepMotto() {
@@ -874,6 +875,12 @@
     $("run-capture-file").addEventListener("change", function (event) {
       var file = event.target.files && event.target.files[0];
       if (!file) return;
+      var version = ++runCaptureVersion;
+      var preview = $("run-capture-preview");
+      preview.hidden = true;
+      preview.src = "";
+      state.runCaptureData = "";
+      setRunCaptureError("");
       if (!file.type || !file.type.startsWith("image/")) {
         setRunCaptureError("이미지 파일만 올릴 수 있습니다.");
         event.target.value = "";
@@ -881,13 +888,23 @@
       }
       var reader = new FileReader();
       reader.onload = function () {
-        state.runCaptureData = String(reader.result || "");
-        var preview = $("run-capture-preview");
-        preview.src = state.runCaptureData;
-        preview.hidden = false;
-        setRunCaptureError("");
+        if (version !== runCaptureVersion) return;
+        var data = String(reader.result || "");
+        var image = new Image();
+        image.src = data;
+        image.decode().then(function () {
+          if (version !== runCaptureVersion) return;
+          state.runCaptureData = data;
+          preview.src = data;
+          preview.hidden = false;
+          setRunCaptureError("");
+        }, function () {
+          if (version !== runCaptureVersion) return;
+          setRunCaptureError("이미지를 표시하지 못했습니다. 다른 이미지를 선택하세요.");
+        });
       };
       reader.onerror = function () {
+        if (version !== runCaptureVersion) return;
         setRunCaptureError("이미지를 읽지 못했습니다. 다시 시도하세요.");
       };
       reader.readAsDataURL(file);
