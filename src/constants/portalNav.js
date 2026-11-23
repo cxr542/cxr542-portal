@@ -7,17 +7,6 @@ export const SIDEBAR_COLLAPSED_KEY = 'cxr542-portal-sidebar-collapsed';
 export const PORTAL_NAV_ITEMS = [
   { id: 'home', icon: '🧭', defaultLabel: '포털 홈', tooltip: '모듈 목록·바로가기 홈' },
   {
-    id: 'github-repos',
-    icon: '🧊',
-    defaultLabel: 'GitHub 레포지토리',
-    tooltip: '3D Glass 관리대장 · 샘플 데이터 시연',
-    homeCta: 'GitHub 레포지토리 열기 →',
-    boardSection: 'experiments',
-    boardStatus: 'Experiment',
-    boardDescription: 'GitHub 레포지토리 관리대장 Phase 1 시안입니다.',
-    boardNextAction: 'GitHub 공식 메타데이터 연동은 Phase 2에서 검토합니다.',
-  },
-  {
     id: 'who-are-you',
     icon: '🪪',
     defaultLabel: '나는누구?',
@@ -139,6 +128,17 @@ export const PORTAL_NAV_ITEMS = [
     boardStatus: 'Experiment',
     boardDescription: 'Gemini 관련 튜닝/실험 도구입니다.',
     boardNextAction: 'GitHub 링크와 사용 목적을 명확히 합니다.',
+  },
+  {
+    id: 'github-repos',
+    icon: '🧊',
+    defaultLabel: 'GitHub 레포지토리',
+    tooltip: '3D Glass 관리대장 · 샘플 데이터 시연',
+    homeCta: 'GitHub 레포지토리 열기 →',
+    boardSection: 'experiments',
+    boardStatus: 'Experiment',
+    boardDescription: 'GitHub 레포지토리 관리대장 Phase 1 시안입니다.',
+    boardNextAction: 'GitHub 공식 메타데이터 연동은 Phase 2에서 검토합니다.',
   },
 ];
 
