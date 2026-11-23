@@ -1,4 +1,5 @@
 export default function handler(req, res) {
+  if (rejectLiveRequest(res)) return
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'method_not_allowed' })
     return
@@ -25,3 +26,4 @@ export default function handler(req, res) {
     issuedAt: new Date().toISOString(),
   })
 }
+import { rejectLiveRequest } from '../server/portalMode.js'

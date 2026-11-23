@@ -3,7 +3,7 @@ import { createOAuthHandler } from '../server/prompts/oauth.mjs';
 const id='11111111-1111-4111-8111-111111111111';
 const authorizationId='OpaqueAuthorizationIdForTest_1234';
 const callback='https://chatgpt.com/aip/g-test/oauth/callback';
-const env={PROMPTS_ENABLED:'true',PROMPTS_SUPABASE_URL:'https://test-project.supabase.co',PROMPTS_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_test',PROMPTS_OAUTH_ENABLED:'true',PROMPTS_OAUTH_CLIENT_ID:id,PROMPTS_PUBLIC_ORIGIN:'https://portal.invalid',PROMPTS_OAUTH_REDIRECT_URIS:callback};
+const env={PORTAL_DATA_MODE:'supabase',PROMPTS_ENABLED:'true',PROMPTS_SUPABASE_URL:'https://test-project.supabase.co',PROMPTS_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_test',PROMPTS_OAUTH_ENABLED:'true',PROMPTS_OAUTH_CLIENT_ID:id,PROMPTS_PUBLIC_ORIGIN:'https://portal.invalid',PROMPTS_OAUTH_REDIRECT_URIS:callback};
 async function call({action='authorize',method='GET',data,query,fetcher=vi.fn(),configuration=env,headers={}}={}){
   const handler=createOAuthHandler({env:configuration,fetcher,logger:{info(){}}});
   const res={headers:{},setHeader(k,v){this.headers[k]=v;},end(raw){this.body=JSON.parse(raw);}};

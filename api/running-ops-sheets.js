@@ -8,6 +8,7 @@ const RESOURCE_MAP = {
 }
 
 export default function handler(req, res) {
+  if (rejectLiveRequest(res)) return
   const { resource } = req.query || {}
   const payload = RESOURCE_MAP[resource]
 
@@ -22,3 +23,4 @@ export default function handler(req, res) {
     rows: payload,
   })
 }
+import { rejectLiveRequest } from '../server/portalMode.js'

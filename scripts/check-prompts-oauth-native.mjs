@@ -10,7 +10,7 @@ const root='.cache/supabase-native';
 const local=JSON.parse(readFileSync(root+'/status.json','utf8'));
 assert.equal(local.API_URL,'http://127.0.0.1:56421','Only dedicated local Supabase is allowed');
 const callback='https://client.invalid/callback';
-const env={NODE_ENV:'test',PROMPTS_LOCAL_TEST:'true',PROMPTS_ENABLED:'true',PROMPTS_SUPABASE_URL:local.API_URL,PROMPTS_SUPABASE_PUBLISHABLE_KEY:local.PUBLISHABLE_KEY,PROMPTS_OAUTH_ENABLED:'true',PROMPTS_PUBLIC_ORIGIN:'https://portal.invalid',PROMPTS_OAUTH_REDIRECT_URIS:callback};
+const env={NODE_ENV:'test',PORTAL_DATA_MODE:'supabase',PROMPTS_LOCAL_TEST:'true',PROMPTS_ENABLED:'true',PROMPTS_SUPABASE_URL:local.API_URL,PROMPTS_SUPABASE_PUBLISHABLE_KEY:local.PUBLISHABLE_KEY,PROMPTS_OAUTH_ENABLED:'true',PROMPTS_PUBLIC_ORIGIN:'https://portal.invalid',PROMPTS_OAUTH_REDIRECT_URIS:callback};
 const deps={env,logger:{info(){}}};
 const oauth=createOAuthHandler(deps),auth=createAuthHandler(deps),prompts=createPromptsHandler(deps);
 const server=createServer((req,res)=>req.url.startsWith('/api/prompt-oauth/')?oauth(req,res):req.url.startsWith('/api/prompt-auth/')?auth(req,res):prompts(req,res));

@@ -1,10 +1,13 @@
 import { randomUUID } from 'node:crypto';
+import { liveDataDenial } from '../portalMode.js';
 
 export class HttpError extends Error {
   constructor(status, code) { super(code); this.status = status; this.code = code; }
 }
 
 export function config(env = process.env) {
+  const denial = liveDataDenial(env);
+  if (denial) throw new HttpError(denial.status, denial.code);
   const url = env.PROMPTS_SUPABASE_URL;
   const key = env.PROMPTS_SUPABASE_PUBLISHABLE_KEY;
   if (env.PROMPTS_ENABLED !== 'true' || !url || !key) throw new HttpError(503, 'not_configured');
@@ -82,6 +85,8 @@ export function endpoint(run, { methods, deps = {} }) {
     res.setHeader('X-Request-Id', requestId);
     let status = 200;
     try {
+      const denial = liveDataDenial(deps.env);
+      if (denial) throw new HttpError(denial.status, denial.code);
       if (!methods.includes(req.method)) { res.setHeader('Allow', methods.join(', ')); throw new HttpError(405, 'method_not_allowed'); }
       const result = await run(req, deps);
       if (result.redirect) {

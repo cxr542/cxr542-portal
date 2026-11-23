@@ -49,7 +49,7 @@ export async function startPromptFixture(port=4188) {
     };
     const pending=queue.then(run);queue=pending.catch(()=>{});return pending;
   };
-  const deps={env:{PROMPTS_ENABLED:'true',PROMPTS_SUPABASE_URL:'https://fixture.supabase.co',PROMPTS_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_fixture'},fetcher,logger:{info(){}}};
+  const deps={env:{PORTAL_DATA_MODE:'supabase',PROMPTS_ENABLED:'true',PROMPTS_SUPABASE_URL:'https://fixture.supabase.co',PROMPTS_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_fixture'},fetcher,logger:{info(){}}};
   const prompts=createPromptsHandler(deps); const auth=createAuthHandler(deps);
   const root=resolve('.cache/prompt-actions-assets/public');
   const server=createServer(async(req,res)=>{

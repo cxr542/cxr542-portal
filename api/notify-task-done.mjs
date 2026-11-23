@@ -33,6 +33,7 @@ function buildEmailHtml(payload) {
 }
 
 export default async function handler(req, res) {
+  if (rejectLiveRequest(res)) return;
   if (req.method !== 'POST') {
     res.setHeader('allow', 'POST');
     return json(res, 405, { ok: false, error: 'method_not_allowed' });
@@ -95,3 +96,4 @@ export default async function handler(req, res) {
 
   return json(res, 200, { ok: true, sent: true, id: data.id || null });
 }
+import { rejectLiveRequest } from '../server/portalMode.js';

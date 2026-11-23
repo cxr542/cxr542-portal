@@ -51,7 +51,7 @@ try {
   assert.equal(claims.client_id, client.client_id);
   const bound = (Array.isArray(claims.aud) ? claims.aud : [claims.aud]).includes(resource) || claims.resource === resource;
   results.push({ name: 'Actual native PKCE code exchange with resource parameter', pass: true, resourceBound: bound, audience: claims.aud, resourceClaimPresent: claims.resource !== undefined, scopeClaimPresent: claims.scope !== undefined });
-  const env = { NODE_ENV: 'test', PROMPTS_LOCAL_TEST: 'true', PROMPTS_ENABLED: 'true', PROMPTS_SUPABASE_URL: local.API_URL, PROMPTS_SUPABASE_PUBLISHABLE_KEY: local.PUBLISHABLE_KEY, PROMPTS_MCP_ENABLED: 'true', PROMPTS_PUBLIC_ORIGIN: 'https://portal.invalid', PROMPTS_OAUTH_CLIENT_ID: client.client_id };
+  const env = { NODE_ENV: 'test', PORTAL_DATA_MODE: 'supabase', PROMPTS_LOCAL_TEST: 'true', PROMPTS_ENABLED: 'true', PROMPTS_SUPABASE_URL: local.API_URL, PROMPTS_SUPABASE_PUBLISHABLE_KEY: local.PUBLISHABLE_KEY, PROMPTS_MCP_ENABLED: 'true', PROMPTS_PUBLIC_ORIGIN: 'https://portal.invalid', PROMPTS_OAUTH_CLIENT_ID: client.client_id };
   server = createServer(createMcpHandler({ env, logger: { info() {} } }));
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   const passwordTokenCheck = await fetch('http://127.0.0.1:' + server.address().port + '/api/prompt-mcp', { method: 'POST', headers: { authorization: 'Bearer ' + login.body.access_token, 'content-type': 'application/json', accept: 'application/json, text/event-stream' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }) });
