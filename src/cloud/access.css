@@ -15,3 +15,4 @@
 .portal-cloud-toolbar [role=alert] { color: #0f172a; max-width: 48ch; overflow-wrap: anywhere; }
 .portal-cloud-gate { margin: 0; width: 100%; height: 100%; max-width: none; max-height: none; border: 0; }
 @media (max-width: 760px) { .portal-cloud-toolbar { bottom: 80px; } }
+.portal-mock-notice{position:relative;margin:0;padding:10px 16px 10px 248px;background:#eef1fb;color:#243451;font:12px/1.6 system-ui,sans-serif;border-bottom:1px solid #cbd5e1}.portal-integrated .portal-mock-notice{padding:8px 12px}html[data-theme=dark] .portal-mock-notice{background:#1c1c23;color:#e5e7ef}@media(max-width:760px){.portal-mock-notice{padding:10px 16px}}

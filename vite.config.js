@@ -1,4 +1,5 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
+import { rejectLiveRequest } from './server/portalMode.js'
 import react from '@vitejs/plugin-react'
 import { promptsDevPlugin } from './server/prompts/dev.mjs'
 import portalLogin from './api/portal-login.js'
@@ -8,7 +9,7 @@ import { fileURLToPath } from 'node:url'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
 /** Vercel: VERCEL_ENV = production | preview | development */
-const portalBuildEnv = process.env.VERCEL_ENV || 'development'
+const portalBuildEnv = process.env.VERCEL_ENV || (process.env.VERCEL ? 'unknown' : 'development')
 
 /** AI-Synapse Wiki `npm run dev` (포털 5173과 분리 → 기본 5174, Windows는 localhost 권장) */
 const wikiDevApiUrl = process.env.WIKI_DEV_API_URL || 'http://localhost:5174'
@@ -73,6 +74,7 @@ function portalLoginPlugin() {
     if (req.url?.split('?')[0] !== '/api/portal-login') return next()
     const reply = {
       setHeader: (name, value) => res.setHeader(name, value),
+      end: value => res.end(value),
       status(code) { res.statusCode = code; return this },
       json(value) { res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(value)) },
     }
@@ -142,10 +144,23 @@ function runningOpsAuthPlugin() {
 }
 
 // https://vite.dev/config/
-export default defineConfig(({ command }) => ({
-  plugins: [react(), promptsDevPlugin(), portalLoginPlugin(), runningOpsAuthPlugin(), portalStaticAppsPlugin()],
+export default defineConfig(({ command, mode }) => {
+  const fileEnv = loadEnv(mode, __dirname, ['PORTAL_DATA_MODE', 'VITE_PORTAL_DATA_MODE'])
+  const dataMode = process.env.PORTAL_DATA_MODE ?? fileEnv.PORTAL_DATA_MODE ?? ''
+  const clientMode = process.env.VITE_PORTAL_DATA_MODE ?? fileEnv.VITE_PORTAL_DATA_MODE
+  const buildMode = clientMode !== undefined && clientMode !== dataMode ? 'invalid' : dataMode
+  process.env.PORTAL_DATA_MODE = buildMode
+  const apiGate = server => {
+    server.middlewares.use((req, res, next) => {
+      if ((req.url?.startsWith('/api/') || req.url?.startsWith('/.well-known/')) && rejectLiveRequest(res, { VERCEL_ENV: portalBuildEnv, PORTAL_DATA_MODE: buildMode })) return
+      next()
+    })
+  }
+  return {
+  plugins: [{ name: 'portal-data-mode', configureServer: apiGate, configurePreviewServer: apiGate }, react(), promptsDevPlugin(), portalLoginPlugin(), runningOpsAuthPlugin(), portalStaticAppsPlugin()],
   define: {
     __PORTAL_BUILD_ENV__: JSON.stringify(portalBuildEnv),
+    'import.meta.env.PORTAL_DATA_MODE': JSON.stringify(buildMode),
   },
   build: {
     rollupOptions: {
@@ -171,4 +186,5 @@ export default defineConfig(({ command }) => ({
           },
         }
       : undefined,
-}))
+}
+})

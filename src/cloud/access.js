@@ -23,6 +23,12 @@ export function accessPanel(title, description) {
   return { gate, panel, status }
 }
 
+export function showInitializationFailure(error) {
+  const failure = accessPanel('포털 초기화를 중단했습니다', '배포 환경과 데이터 모드 설정을 확인해 주세요. 실데이터 연결로 대체하지 않습니다.')
+  failure.status.textContent = error.message
+  throw error
+}
+
 export function signIn(client) {
   const { gate, panel, status } = accessPanel('포털에 로그인', '개인 계정으로 로그인해 모든 기기에서 기록과 설정을 이어서 사용하세요.')
   const form = document.createElement('form')

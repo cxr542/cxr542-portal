@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { rejectLiveRequest } from '../server/portalMode.js'
 
 export function createPortalLogin(config, authenticate) {
   return async (req, res) => {
@@ -32,6 +33,7 @@ export function createPortalLogin(config, authenticate) {
 }
 
 export default function handler(req, res) {
+  if (rejectLiveRequest(res)) return
   const client = createClient(
     process.env.SUPABASE_URL || 'https://kkcvglldsoxglfjqnsga.supabase.co',
     process.env.SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_hC-H979C3pDsXpsRM_ntIg_8NnnpQP2',

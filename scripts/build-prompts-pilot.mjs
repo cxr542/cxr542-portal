@@ -21,6 +21,8 @@ for(const [from,to] of [
  ['public/shared/js/project-shell.js','public/shared/js/project-shell.js'],
  ['public/favicon.svg','public/favicon.svg'],
  ['api/prompt-mcp.mjs','api/prompt-mcp.mjs'], ['api/prompts','api/prompts'],['api/prompt-auth','api/prompt-auth'],['api/prompt-oauth','api/prompt-oauth'],
+ ['server/portalMode.js','server/portalMode.js'],
+ ['server/portalDataMode.js','server/portalDataMode.js'],
  ...['http','handler','validation','auth','oauth','mcp'].map(n=>[`server/prompts/${n}.mjs`,`server/prompts/${n}.mjs`]),
 ]){mkdirSync(dirname(join(root,to)),{recursive:true});cpSync(from,join(root,to),{recursive:true});}
 writeFileSync(join(root,'server/prompts/pilot-only.mjs'),`export function pilotOnly(handler) {

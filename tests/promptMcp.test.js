@@ -6,7 +6,7 @@ import { createMcpHandler } from '../server/prompts/mcp.mjs';
 
 const owner = '11111111-1111-4111-8111-111111111111', prompt = '22222222-2222-4222-8222-222222222222';
 const origin = 'https://pilot.invalid', resource = origin + '/api/prompt-mcp';
-const env = { PROMPTS_ENABLED: 'true', PROMPTS_SUPABASE_URL: 'https://test-project.supabase.co', PROMPTS_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_test', PROMPTS_MCP_ENABLED: 'true', PROMPTS_OAUTH_CLIENT_ID: 'test-client', PROMPTS_PUBLIC_ORIGIN: origin };
+const env = { PORTAL_DATA_MODE: 'supabase', PROMPTS_ENABLED: 'true', PROMPTS_SUPABASE_URL: 'https://test-project.supabase.co', PROMPTS_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_test', PROMPTS_MCP_ENABLED: 'true', PROMPTS_OAUTH_CLIENT_ID: 'test-client', PROMPTS_PUBLIC_ORIGIN: origin };
 const claims = () => ({ sub: owner, iss: env.PROMPTS_SUPABASE_URL + '/auth/v1', aud: ['authenticated', resource], client_id: env.PROMPTS_OAUTH_CLIENT_ID, scope: 'email profile', exp: Math.floor(Date.now() / 1000) + 600 });
 // Synthetic tokens are used only with the explicitly mocked Auth /user verifier below.
 const token = overrides => 'test.' + Buffer.from(JSON.stringify({ ...claims(), ...overrides })).toString('base64url') + '.test-signature';

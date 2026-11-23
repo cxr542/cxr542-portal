@@ -13,7 +13,7 @@ assert.equal(local.API_URL,'http://127.0.0.1:56421','Only the dedicated loopback
 assert.ok(local.PUBLISHABLE_KEY?.startsWith('sb_publishable_'));
 const schema = process.env.PROMPTS_NATIVE_SCHEMA || 'public';
 assert.ok(['public','prompt_preview'].includes(schema));
-const env = {NODE_ENV:'test',PROMPTS_LOCAL_TEST:'true',PROMPTS_ENABLED:'true',PROMPTS_DB_SCHEMA:schema,PROMPTS_SUPABASE_URL:local.API_URL,PROMPTS_SUPABASE_PUBLISHABLE_KEY:local.PUBLISHABLE_KEY};
+const env = {NODE_ENV:'test',PORTAL_DATA_MODE:'supabase',PROMPTS_LOCAL_TEST:'true',PROMPTS_ENABLED:'true',PROMPTS_DB_SCHEMA:schema,PROMPTS_SUPABASE_URL:local.API_URL,PROMPTS_SUPABASE_PUBLISHABLE_KEY:local.PUBLISHABLE_KEY};
 function membership(id,allowed) {
   assert.match(id,/^[0-9a-f-]{36}$/);
   const sql=allowed ? `INSERT INTO prompt_preview_private.test_users VALUES('${id}')` : `DELETE FROM prompt_preview_private.test_users WHERE owner_id='${id}'`;

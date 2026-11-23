@@ -1,4 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
+import { requireLiveDataMode } from '../../server/portalDataMode.js'
+
+requireLiveDataMode(
+  typeof __PORTAL_BUILD_ENV__ === 'undefined' ? 'development' : __PORTAL_BUILD_ENV__,
+  import.meta.env.PORTAL_DATA_MODE,
+)
 
 // Publishable key only. RLS enforces ownership on the server.
 export const client = createClient(
