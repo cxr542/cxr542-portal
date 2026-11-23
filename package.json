@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "preview": "vite preview",
+    "check:mock-bundle": "node scripts/check-mock-bundle.mjs",
     "wiki:check": "node scripts/check-wiki-api.mjs",
     "wiki:sync": "node scripts/sync-ai-synapse-wiki.mjs",
     "build:prompt-actions": "node scripts/build-prompts.mjs",

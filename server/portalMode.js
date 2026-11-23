@@ -1,9 +1,12 @@
 import { PortalModeError, requireLiveDataMode } from './portalDataMode.js'
 
+export function serverEnvironment(env = process.env) {
+  return env.VERCEL_ENV || (env.VERCEL ? 'unknown' : env.NODE_ENV === 'test' ? 'test' : 'development')
+}
+
 export function liveDataDenial(env = process.env) {
-  const environment = env.VERCEL_ENV || (env.VERCEL ? 'unknown' : env.NODE_ENV === 'test' ? 'test' : 'development')
   try {
-    requireLiveDataMode(environment, env.PORTAL_DATA_MODE)
+    requireLiveDataMode(serverEnvironment(env), env.PORTAL_DATA_MODE)
     return null
   } catch (error) {
     if (!(error instanceof PortalModeError)) throw error

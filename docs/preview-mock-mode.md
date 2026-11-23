@@ -17,10 +17,19 @@ The build obtains its environment from VERCEL_ENV. VERCEL without VERCEL_ENV is 
 
 PORTAL_DATA_MODE is authoritative at build time and on the server. Vite reads this non-secret setting from the process or its mode-specific env file, with the process taking precedence, and supplies the resolved setting to its local API handlers. VITE_PORTAL_DATA_MODE is optional; when present it must exactly match PORTAL_DATA_MODE. A VITE-only setting or a mismatch blocks initialization. VITE_PORTAL_DATA_MODE does not authorize a server Function.
 
+## Supabase target
+
+Production keeps its existing fallback to the public Production project URL and publishable key when its env vars are absent. Development and test in explicit `supabase` mode must set both `VITE_SUPABASE_URL`/`VITE_SUPABASE_PUBLISHABLE_KEY` (browser) and `SUPABASE_URL`/`SUPABASE_PUBLISHABLE_KEY` (local login handler); a missing value fails with `invalid_configuration` instead of silently reaching Production (`server/supabaseTarget.js`).
+
+## Mock bundle contents
+
+Runtime selection is a build-time constant: a Mock build never emits the live Supabase bootstrap or client chunk. `npm run check:mock-bundle -- <dist>` scans a built output for Supabase hosts, Auth/REST/Storage/Realtime paths and client symbols, and fails if any are present. The manual Preview workflow runs it on `.vercel/output/static` before deploying. Every file under `api/` is also covered by a test that loads it in Mock Preview and expects 403 with no client or network use, so newly added Functions must use the guard.
+
 ## Local Mock verification
 
 ```sh
 VERCEL_ENV=preview PORTAL_DATA_MODE=mock VITE_PORTAL_DATA_MODE=mock npm run build
+npm run check:mock-bundle -- dist
 VERCEL_ENV=preview PORTAL_DATA_MODE=mock VITE_PORTAL_DATA_MODE=mock npm run preview -- --host 127.0.0.1 --port 5188 --strictPort
 ```
 
