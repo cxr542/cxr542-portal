@@ -28,6 +28,10 @@
       "destination": "/api/prompts/[id]?id=:id"
     },
     {
+      "source": "/api/admin/:path+",
+      "destination": "/api/admin/[...path]"
+    },
+    {
       "source": "/idea-bank",
       "destination": "/idea-bank/index.html"
     },
