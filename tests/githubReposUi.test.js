@@ -2,7 +2,7 @@ import { createElement as h } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import Markdown from '../src/features/github-repos/Markdown.jsx';
-import { parseBlocks, safeHref } from '../src/features/github-repos/markdownParse.js';
+import { htmlToMarkdown, parseBlocks, safeHref } from '../src/features/github-repos/markdownParse.js';
 import { RepoStaleBanner, RepoStatePanel } from '../src/features/github-repos/RepoStatePanel.jsx';
 import RepoMetaEditor from '../src/features/github-repos/RepoMetaEditor.jsx';
 import RepoDetail from '../src/features/github-repos/RepoDetail.jsx';
@@ -14,11 +14,51 @@ const render = (type, props) => renderToStaticMarkup(h(type, props));
 const BASE = 'https://github.com/cxr542/alpha/blob/HEAD/';
 
 describe('safe README markdown', () => {
-  it('renders raw HTML as text, never as markup', () => {
-    const html = render(Markdown, { source: '<script>alert(1)</script>\n\n<img src=x onerror=alert(1)>', baseUrl: BASE });
-    expect(html).not.toContain('<script');
-    expect(html).not.toContain('<img');
-    expect(html).toContain('&lt;script&gt;');
+  it('never renders raw HTML as markup', () => {
+    const html = render(Markdown, { source: '<script>alert(1)</script>\n\n<img src=x onerror=alert(1)>\n\n<a href="javascript:alert(1)">click</a>\n\n<iframe src="https://evil.example"></iframe>', baseUrl: BASE });
+    expect(html).not.toMatch(/<(script|img|iframe)/);
+    expect(html).not.toContain('alert(1)');
+    expect(html).not.toMatch(/href="javascript/i);
+    expect(html).toContain('<span>click</span>');
+  });
+
+  it('turns README HTML (badges, centered logos, headings) into readable text', () => {
+    const source = [
+      '<p align="center">',
+      '  <a href="https://www.npmjs.com/package/x"><img alt="npm version" src="https://img.shields.io/npm/v/x.svg?a=1&amp;b=2" height="28"></a>',
+      '  <img src="./logo.png" alt="Logo">',
+      '</p>',
+      '<h1 align="center">My <em>Tool</em></h1>',
+      '<!-- hidden note -->',
+      '<details><summary>More</summary>Line one<br>Line <b>two</b> &amp; &copy; &#x1F600;</details>',
+    ].join('\n');
+    const html = render(Markdown, { source, baseUrl: BASE });
+    expect(html).not.toMatch(/&lt;\/?(p|a|img|h1|details|summary|br|b|em)\b/);
+    expect(html).toContain('<a href="https://www.npmjs.com/package/x" target="_blank" rel="noopener noreferrer nofollow">이미지: npm version</a>');
+    expect(html).toContain(`href="${BASE}logo.png"`);
+    expect(html).toContain('[이미지: Logo]');
+    expect(html).toContain('<h4 class="repo-md__h1">My Tool</h4>');
+    expect(html).not.toContain('hidden note');
+    expect(html).toContain('<strong>two</strong>');
+    expect(html).toContain('&amp; © 😀');
+  });
+
+  it('leaves code and non-HTML angle brackets alone', () => {
+    const md = htmlToMarkdown('Run `<br>` or npm i <pkg>\n\n```html\n<div class="x">&amp;</div>\n```\n\n<div>after</div>');
+    expect(md).toContain('Run `<br>` or npm i <pkg>');
+    expect(md).toContain('```html\n<div class="x">&amp;</div>\n```');
+    expect(md).toMatch(/\nafter\s*$/);
+  });
+
+  it('keeps link labels and URLs from breaking Markdown syntax', () => {
+    const md = htmlToMarkdown('<a href="https://a.example/x (1)">see [docs]</a>');
+    expect(md).toBe('[see (docs)](https://a.example/x%20%281%29)');
+  });
+
+  it('turns <pre> into a code block and table cells into a line', () => {
+    const md = htmlToMarkdown('<pre><code>a &lt; b</code></pre>\n<table><tr><td>A</td><td>B</td></tr></table>');
+    expect(md).toContain('```\na < b\n```');
+    expect(md).toContain('A · B ·');
   });
 
   it('allows only http(s) links and resolves relative ones against the repository', () => {
