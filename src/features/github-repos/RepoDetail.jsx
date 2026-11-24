@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Markdown from './Markdown.jsx';
 import RepoMetaEditor from './RepoMetaEditor.jsx';
-import { DETAIL_TABS, errorView, formatDate } from './repoUi.js';
+import { DETAIL_TABS, errorView, formatDate, visibilityLabel } from './repoUi.js';
 import { RepoSourceError } from './repoErrors.js';
 
 /** Loads one per-repository resource lazily; stale responses for other repos are ignored. */
@@ -79,14 +79,13 @@ export default function RepoDetail({ repo, source, verified, persistent, categor
 
   return <>
     <div className="repo-glass__detail-title">
-      <span aria-hidden="true">◉</span>
       <div><h2>{repo.name}</h2><p>{repo.description || '설명이 없습니다.'}</p></div>
       <button type="button" className={`repo-fav ${repo.favorite ? 'is-on' : ''}`} aria-pressed={repo.favorite} aria-label={repo.favorite ? `${repo.name} 즐겨찾기 해제` : `${repo.name} 즐겨찾기`}
         onClick={() => onSaveMeta({ favorite: !repo.favorite })}>{repo.favorite ? '★' : '☆'}</button>
     </div>
     <div className="repo-glass__chips">
       <span>{repo.origin}</span><span>{repo.category}</span>{repo.status && <span>{repo.status}</span>}
-      <span>{repo.visibility === 'private' ? 'Private' : 'Public'}</span>{repo.archived && <span>Archived</span>}
+      <span>{visibilityLabel(repo.visibility)}</span>{repo.archived && <span>Archived</span>}
       {repo.tags.map(tag => <span key={tag} className="is-tag">#{tag}</span>)}
     </div>
     <div className="repo-glass__tabs" role="tablist" aria-label="레포지토리 상세 탭">{DETAIL_TABS.map((t, index) => <button key={t} type="button" role="tab" tabIndex={tab === t ? 0 : -1} onKeyDown={event => handleTabKeyDown(event, index)} id={`repo-tab-${t}`} aria-selected={tab === t} aria-controls="repo-detail-panel" onClick={() => onTabChange(t)}>{t}</button>)}</div>
@@ -96,7 +95,7 @@ export default function RepoDetail({ repo, source, verified, persistent, categor
         <p>{repo.description || '설명이 없습니다.'}</p>
         <dl>
           <div><dt>기술</dt><dd>{repo.language || '—'}</dd></div>
-          <div><dt>공개 범위</dt><dd>{repo.visibility === 'private' ? 'Private' : 'Public'}</dd></div>
+          <div><dt>공개 범위</dt><dd>{visibilityLabel(repo.visibility)}</dd></div>
           <div><dt>소유 유형</dt><dd>{repo.origin}{verified ? ' (GitHub fork 필드)' : ''}</dd></div>
           <div><dt>최근 활동</dt><dd>{pushed || (verified ? '—' : '동기화 후 표시')}</dd></div>
           <div><dt>기본 브랜치</dt><dd>{repo.defaultBranch || '—'}</dd></div>
@@ -110,6 +109,6 @@ export default function RepoDetail({ repo, source, verified, persistent, categor
       {tab === 'README' && <Readme source={source} repo={repo} />}
       {tab === '메모' && <RepoMetaEditor key={repo.key} repo={repo} categories={categories} persistent={persistent} onSave={onSaveMeta} />}
     </div>
-    <a className="repo-glass__github-link" href={repo.url} target="_blank" rel="noopener noreferrer">GitHub에서 열기 ↗</a>
+    <a className="secondary" href={repo.url} target="_blank" rel="noopener noreferrer">GitHub에서 열기 ↗</a>
   </>;
 }

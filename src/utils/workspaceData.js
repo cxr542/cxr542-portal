@@ -1,6 +1,6 @@
 import { raceDistanceKm } from './marathon';
 export const TOOL_META = {
-  'github-repos': ['wiki','AI·지식','mauve','3D Glass GitHub 레포지토리 관리 시안'],
+  'github-repos': ['wiki','AI·지식','mauve','GitHub 저장소 탐색과 README·메모 관리'],
   'idea-bank': ['idea','AI·지식','green','떠오른 생각을 놓치지 않게'],
   'prompt-collection': ['prompt','AI·지식','blue','좋은 질문은 다시 쓰세요'],
   marathon: ['run','기록','sand','달린 만큼 쌓이는 기록'],

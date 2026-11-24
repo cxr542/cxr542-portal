@@ -73,7 +73,7 @@ export default function RepoMetaEditor({ repo, categories, persistent, onSave })
     </div>
 
     <div className="repo-meta__row repo-meta__row--end">
-      <button type="button" className="repo-meta__hide" onClick={() => save({ hidden: !repo.hidden }, repo.hidden ? '목록에 다시 표시합니다.' : '목록에서 숨겼습니다. "숨긴 저장소 보기"로 다시 찾을 수 있습니다.')}>
+      <button type="button" className="repo-meta__hide" onClick={() => save({ hidden: !repo.hidden }, repo.hidden ? '목록에 다시 표시합니다.' : '목록에서 숨겼습니다. 숨긴 저장소 포함 옵션으로 다시 찾을 수 있습니다.')}>
         {repo.hidden ? '목록에 다시 표시' : '목록에서 숨기기'}
       </button>
     </div>
