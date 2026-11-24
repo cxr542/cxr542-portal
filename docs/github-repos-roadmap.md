@@ -42,11 +42,19 @@
 - 서버 캐시: ETag 기억(메모리/Supabase 캐시 테이블은 Phase 3에서 판단).
 - 이름 변경: key가 repository id라 메모 유지. 삭제/권한 상실: 목록에서 사라진 key는 UserMeta를 지우지 않고 "GitHub에서 찾을 수 없음" 보관 섹션으로 표시.
 
+### 2-1 구현 메모
+
+- `createGithubClient({ token, env, fetcher })`는 `liveDataDenial(env)`이 거부하면 생성 자체를 거부합니다(Mock·잘못된 배포에서 네트워크 0건).
+- 메서드: `listRepos()`(`/user/repos?affiliation=owner`), `getRepo(id)`(`/repositories/{id}`, 이름 변경 추적), `getReadme(fullName)`(raw, 404 → null, 512KB 상한), `listBranches(fullName)`, `rateLimit()`.
+- 토큰은 `https://api.github.com` 요청 헤더에만 들어가며 반환값·오류에 포함되지 않습니다. 다음 페이지 링크나 리다이렉트가 API origin을 벗어나면 `invalid_response`로 중단합니다.
+- ETag 캐시는 인스턴스 메모리(최대 200개)입니다. Function 콜드 스타트마다 초기화되므로, 지속 캐시가 필요하면 2-2에서 결정합니다.
+- 오류 코드는 UI와 같은 `repoErrors.js`를 공유합니다(Node에서 바로 import 가능하도록 import 없는 모듈로 분리).
+
 ### 작업 순서
 
 | # | 작업 | 예상 변경 파일 | 필요 권한 | 테스트 | 승인 |
 | --- | --- | --- | --- | --- | --- |
-| 2-1 | 서버 GitHub 클라이언트(페이지네이션, ETag, 오류 분류) | `server/github/client.mjs`, 테스트 | 없음(로컬, fetch mock) | 단위: Link 페이지네이션, 304, 401/403/429, 토큰 미노출 | 불필요 |
+| 2-1 ✅ | 서버 GitHub 클라이언트(페이지네이션, ETag, 오류 분류) — 로컬 구현 완료 | `server/github/client.mjs`, `src/features/github-repos/repoErrors.js`, `tests/githubClient.test.js` | 없음(로컬, fetch mock) | 31개: Mock/설정 오류 시 생성 거부, 토큰 미노출, Link 페이지네이션·외부 origin 차단·페이지 상한, ETag 304, 401/403/429/5xx, README 404·크기 상한, 저장소 이름 검증, 브랜치 | 불필요 |
 | 2-2 | `api/github-repos.mjs` + 세션 검증 + Mock 거부 | `api/github-repos.mjs`, `vercel.json` rewrite | 없음 | 자동 Mock 403 테스트, 비소유자 401, Production 경로 | 불필요 |
 | 2-3 | `createServerRepoSource` + 런타임 선택(Mock=fixture) | `repoSource.js`, `GithubReposPage.jsx` | 없음 | 상태별 렌더(Loading/Error/RateLimited/Unauthorized/Empty) | 불필요 |
 | 2-4 | README·브랜치 탭 | `GithubReposPage.jsx`, CSS | 없음 | README 404·마크다운 안전 렌더(HTML 미삽입) | 불필요 |
