@@ -1,7 +1,8 @@
 // Minimal, safe Markdown renderer for README previews.
-// Output is React elements only (no innerHTML), so raw HTML in a README is shown
-// as text. Links allow http(s) only; images become labelled links instead of
-// loading third-party content.
+// Output is React elements only (no innerHTML). Raw HTML in a README is first
+// turned into plain Markdown text (htmlToMarkdown), never rendered as markup.
+// Links allow http(s) only; images become labelled links instead of loading
+// third-party content.
 import { parseBlocks, safeHref } from './markdownParse.js';
 
 function parseInline(text, base, keyPrefix = 'i') {
