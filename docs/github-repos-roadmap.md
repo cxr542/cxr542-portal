@@ -78,9 +78,9 @@
 | 2-3 ✅ | 화면을 서버 API에 연결 (`createServerRepoSource`, `createLiveRepoSource`, `selectRepoSource`) — 로컬 구현 완료 | `repoSource.js`, `GithubReposPage.jsx`, `src/cloud/supabaseBootstrap.js`, `tests/githubReposServerSource.test.js` | 없음 | 27개: 세션 토큰 전달·없음, 오류 코드 변환, 비 GitHub 레코드 제거, id 기반 상세 요청, 설정 전 샘플 대체, 실제 오류는 숨기지 않음, Mock에서는 항상 샘플 소스 | 불필요 |
 | 2-4 ✅ | README·브랜치 탭 | `GithubReposPage.jsx`, CSS | 없음 | README 404·마크다운 안전 렌더(HTML 미삽입). README 안의 HTML(배지·가운데 정렬 로고·`<details>`)은 `htmlToMarkdown`이 텍스트로 바꿈 | 불필요 |
 | 2-5 ✅ | 토큰 발급·등록 (2026-11-24, Production Secret, 만료 2027-02-22) — 절차: [github-repos-token-setup.md](github-repos-token-setup.md) | — | **GitHub PAT 발급, Vercel Production env 추가** | — | **필요** |
-| 2-6 ✅ | 실계정 조회 검증 (2026-11-24, Production) | — | 배포 `d18411e` | 66개(직접 제작 26·Fork 40)가 GitHub API 값과 일치, README·브랜치 로드, 브라우저는 같은 origin `/api/github-repos`만 호출·토큰 미노출, 비로그인 401. 메모 운영 저장은 사용자 확인 대기 | 완료 |
+| 2-6 ✅ | 실계정 조회 검증 (2026-11-24, Production) | — | 배포 `d18411e` | 66개(직접 제작 26·Fork 40)가 GitHub API 값과 일치, README·브랜치 로드, 브라우저는 같은 origin `/api/github-repos`만 호출·토큰 미노출, 비로그인 401. 메모 저장 후 새로고침해도 유지됨(사용자 확인) | 완료 |
 
-## Phase 3 — 사용자 메모·태그 영구 관리 ✅ (로컬 구현 완료)
+## Phase 3 — 사용자 메모·태그 영구 관리 ✅ (운영 반영·확인 완료)
 
 - **저장 위치:** 기존 `PortalCloud`(Supabase `portal_documents`), 이름공간 `github-repos/meta`, 문서 key는 `github:<repository id>`입니다. 이 테이블은 이름공간 제한이 없고(길이 1~100자만 확인), 소유자 RLS와 `portal_write` revision 충돌 방지가 이미 있습니다. 그래서 **DB·RLS·Auth 변경이 없습니다.**
 - **값:** `{ key, category, status, tags[], favorite, note, hidden, name, url, updatedAt }`. `name`과 `url`은 저장소가 사라졌을 때 표시하려고 마지막으로 본 값을 남겨 둡니다. GitHub 메타데이터는 저장하지 않고, 동기화는 이 이름공간에 쓰지 않습니다.
@@ -91,7 +91,7 @@
   - `selectMetaStore`: 포털 저장소가 있으면 그것을 씁니다. Mock 저장소는 `persistent: false`라 "새로고침하면 초기화" 안내가 유지됩니다.
 - **삭제·권한 상실:** 실제 GitHub 데이터를 볼 때, 목록에 없는 `github:` 키의 메모는 "GitHub에서 찾을 수 없는 저장소 메모" 영역에 보여줍니다. 자동으로 지우지 않고, 사용자가 확인한 뒤 삭제합니다(tombstone). 이름이 바뀐 저장소는 ID가 같아서 메모가 유지됩니다.
 - **테스트:** `tests/githubReposMetaStore.test.js` 20개(저장·재로드 복원, 병합, 기본값, 낙관적 업데이트·실패, tombstone, 잘못된 key 거부, 손상된 문서 무시, 사라진 저장소, 이름 변경).
-- **검증 범위:** Mock Preview에서 메모 저장 → `github-repos/meta` 문서 생성 → 다른 메뉴 이동 후 복원을 확인했습니다. 실제 Supabase에 영구 저장되는지는 운영 DB 접속이 필요해 배포 승인 후 확인합니다. 사라진 저장소 영역은 실제 데이터에서만 나타나므로 로직만 단위 테스트로 검증했습니다.
+- **검증 범위:** Mock Preview에서 메모 저장 → `github-repos/meta` 문서 생성 → 다른 메뉴 이동 후 복원을 확인했습니다. Production 배포 후 사용자가 실제 Supabase에서 메모 저장 → 새로고침 → 유지를 확인했습니다(2026-11-24). 사라진 저장소 영역은 실제 데이터에서만 나타나므로 로직만 단위 테스트로 검증했습니다.
 - **남은 일:** 다른 탭에서 바꾼 메모를 실시간으로 반영하는 기능은 없습니다. 기존 포털처럼 새로고침하면 반영됩니다.
 
 ## Phase 4 — 통합·배포 (모두 승인 필요)
