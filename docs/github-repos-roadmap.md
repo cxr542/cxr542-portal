@@ -77,7 +77,7 @@
 | 2-2 ✅ | `api/github-repos.mjs` + 포털 소유자 세션 확인 + Mock 거부 — 로컬 구현 완료 | `api/github-repos.mjs`, `server/github/reposApi.mjs`, `vercel.json`, `vite.config.js`, `tests/githubReposApi.test.js` | 없음 | 27개: Mock·잘못된 설정 거부, 세션 없음/타 사용자/익명/만료 401, 소유자 미설정 503, id 검증, 타 계정 저장소 403, 토큰 미노출, rate limit 429+Retry-After, ETag 재사용, rewrite 순서 | 불필요 |
 | 2-3 ✅ | 화면을 서버 API에 연결 (`createServerRepoSource`, `createLiveRepoSource`, `selectRepoSource`) — 로컬 구현 완료 | `repoSource.js`, `GithubReposPage.jsx`, `src/cloud/supabaseBootstrap.js`, `tests/githubReposServerSource.test.js` | 없음 | 27개: 세션 토큰 전달·없음, 오류 코드 변환, 비 GitHub 레코드 제거, id 기반 상세 요청, 설정 전 샘플 대체, 실제 오류는 숨기지 않음, Mock에서는 항상 샘플 소스 | 불필요 |
 | 2-4 | README·브랜치 탭 | `GithubReposPage.jsx`, CSS | 없음 | README 404·마크다운 안전 렌더(HTML 미삽입) | 불필요 |
-| 2-5 | 토큰 발급·등록 — 절차: [github-repos-token-setup.md](github-repos-token-setup.md) | — | **GitHub PAT 발급, Vercel Production env 추가** | — | **필요** |
+| 2-5 ✅ | 토큰 발급·등록 (2026-11-24, Production Secret, 만료 2027-02-22) — 절차: [github-repos-token-setup.md](github-repos-token-setup.md) | — | **GitHub PAT 발급, Vercel Production env 추가** | — | **필요** |
 | 2-6 | 실계정 조회 검증 | — | 2-5 이후 Production 또는 별도 승인된 환경 | 실제 목록 수·fork 판정 대조 | **필요** |
 
 ## Phase 3 — 사용자 메모·태그 영구 관리 ✅ (로컬 구현 완료)
