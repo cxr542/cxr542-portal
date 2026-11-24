@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
-import { rejectLiveRequest } from '../server/portalMode.js'
+import { rejectLiveRequest, serverEnvironment } from '../server/portalMode.js'
+import { resolveSupabaseTarget } from '../server/supabaseTarget.js'
 
 export function createPortalLogin(config, authenticate) {
   return async (req, res) => {
@@ -34,9 +35,16 @@ export function createPortalLogin(config, authenticate) {
 
 export default function handler(req, res) {
   if (rejectLiveRequest(res)) return
+  let target
+  try {
+    target = resolveSupabaseTarget(serverEnvironment(), process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY)
+  } catch {
+    res.setHeader('Cache-Control', 'no-store')
+    return res.status(503).json({ error: 'invalid_configuration' })
+  }
   const client = createClient(
-    process.env.SUPABASE_URL || 'https://kkcvglldsoxglfjqnsga.supabase.co',
-    process.env.SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_hC-H979C3pDsXpsRM_ntIg_8NnnpQP2',
+    target.url,
+    target.key,
     { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } },
   )
   const authenticate = credentials => client.auth.signInWithPassword(credentials)

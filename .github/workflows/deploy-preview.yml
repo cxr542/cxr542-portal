@@ -56,6 +56,7 @@ jobs:
 
           VERCEL_ENV=preview PORTAL_DATA_MODE=mock \
             npx --yes vercel@"$VERCEL_CLI_VERSION" build --environment=preview --token="$VERCEL_TOKEN"
+          node scripts/check-mock-bundle.mjs .vercel/output/static
           DEPLOY_OUTPUT="$(npx --yes vercel@"$VERCEL_CLI_VERSION" deploy --prebuilt --environment=preview \
             --env PORTAL_DATA_MODE=mock --meta githubDeployment=1 --meta "githubCommitRef=$GITHUB_REF_NAME" \
             --token="$VERCEL_TOKEN")"

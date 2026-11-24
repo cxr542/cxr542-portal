@@ -1,71 +1,131 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import './GithubReposPage.css';
 
-import { filterSampleRepos, REPO_CATEGORIES, SAMPLE_REPOS } from './githubReposData';
+import { REPO_CATEGORIES } from './githubReposData';
+import { filterRepoViews, ORIGIN_FILTERS, SORTS, sortRepoViews, toRepoView } from './repoModel';
+import { RepoSourceError, selectRepoSource } from './repoSource';
+import { findOrphans, selectMetaStore } from './metaStore.js';
+import { RepoStaleBanner, RepoStatePanel } from './RepoStatePanel.jsx';
+import { formatClock } from './repoUi.js';
+import RepoDetail from './RepoDetail.jsx';
 
-const DETAIL_TABS = ['개요', 'README', '메모'];
+const CATEGORY_NAMES = REPO_CATEGORIES.map(group => group.name);
+let sharedMetaStore;
+const defaultMetaStore = () => (sharedMetaStore ||= selectMetaStore(globalThis));
+const noSubscribe = () => () => {};
 
-export default function GithubReposPage() {
+export default function GithubReposPage({ source: sourceProp, metaStore: metaProp }) {
+  const [source] = useState(() => sourceProp || selectRepoSource(globalThis, typeof location === 'undefined' ? '' : location.search));
+  const metaStore = metaProp || defaultMetaStore();
+  const meta = useSyncExternalStore(metaStore.subscribe || noSubscribe, metaStore.all, metaStore.all);
+  const [load,setLoad]=useState({ status:'loading', repos:[], syncedAt:null, error:null, verified:null, notice:null });
   const [query,setQuery]=useState('');
   const [category,setCategory]=useState('전체');
-  const [origin,setOrigin]=useState('전체');
-  const [selected,setSelected]=useState(SAMPLE_REPOS[0].name);
+  const [origin,setOrigin]=useState('all');
+  const [sort,setSort]=useState('name');
+  const [showHidden,setShowHidden]=useState(false);
+  const [selected,setSelected]=useState(null);
   const [tab,setTab]=useState('개요');
-  const handleTabKeyDown = (event, index) => {
-    let nextIndex;
-    switch (event.key) {
-      case 'ArrowRight': nextIndex = (index + 1) % DETAIL_TABS.length; break;
-      case 'ArrowLeft': nextIndex = (index + DETAIL_TABS.length - 1) % DETAIL_TABS.length; break;
-      case 'Home': nextIndex = 0; break;
-      case 'End': nextIndex = DETAIL_TABS.length - 1; break;
-      default: return;
+  const request=useRef(0);
+  const verified=(load.verified ?? source.verified)===true;
+
+  const fetchRepos=useCallback(async()=>{
+    const id=++request.current;
+    try {
+      const result=await source.list();
+      if (id===request.current) setLoad({ status:'ready', repos:result.repos, syncedAt:result.syncedAt, error:null, verified:result.verified ?? null, notice:result.notice || null });
+    } catch (error) {
+      if (id===request.current) setLoad(prev=>({ ...prev, status:'error', error: error instanceof RepoSourceError ? error : new RepoSourceError('unknown') }));
     }
-    event.preventDefault();
-    setTab(DETAIL_TABS[nextIndex]);
-    event.currentTarget.parentElement.querySelectorAll('[role="tab"]')[nextIndex].focus();
+  },[source]);
+  const refresh=()=>{ setLoad(prev=>({ ...prev, status:'loading', error:null })); fetchRepos(); };
+  useEffect(()=>{ const pending=request; fetchRepos(); return ()=>{ pending.current++; }; },[fetchRepos]);
+
+  const allViews=useMemo(()=>load.repos.map(repo=>toRepoView(repo, meta[repo.key])),[load.repos,meta]);
+  const views=useMemo(()=>allViews.filter(repo=>!repo.hidden),[allViews]);
+  const hiddenCount=allViews.length-views.length;
+  const filtered=useMemo(()=>sortRepoViews(filterRepoViews(allViews,{query,category,origin,includeHidden:showHidden}),sort),[allViews,query,category,origin,showHidden,sort]);
+  const sorts=SORTS.filter(s=>s.id!=='pushed'||allViews.some(repo=>repo.pushedAt));
+  const current=filtered.find(repo=>repo.key===selected)||filtered[0]||null;
+  const own=views.filter(r=>!r.fork).length;
+  const external=views.length-own;
+  const mark=verified?'':'*';
+  const busy=load.status==='loading';
+  const hasData=load.repos.length>0;
+  const saveMeta=patch=>current ? metaStore.set(current.key, { ...patch, name: current.name, url: current.url }) : Promise.resolve();
+  // Notes for repositories that are gone from GitHub (deleted or access lost) are kept, never auto-deleted.
+  const orphans=useMemo(()=>{
+    if (!verified || load.status!=='ready' || typeof metaStore.storedKeys!=='function') return [];
+    return findOrphans(metaStore.storedKeys(), load.repos, meta);
+  },[verified,load.status,load.repos,metaStore,meta]);
+  const removeOrphan=async orphan=>{
+    if (typeof metaStore.remove!=='function') return;
+    if (typeof window!=='undefined' && !window.confirm(`'${orphan.name||orphan.key}'의 메모·태그를 삭제할까요? 되돌릴 수 없습니다.`)) return;
+    try { await metaStore.remove(orphan.key); } catch { /* the portal retry toolbar keeps the failed write */ }
   };
-  const filtered=useMemo(()=>filterSampleRepos(SAMPLE_REPOS,{query,category,origin}),[query,category,origin]);
-  const current=filtered.find(repo=>repo.name===selected)||filtered[0]||null;
-  const own=SAMPLE_REPOS.filter(r=>r.origin==='직접 제작 추정').length;
-  const external=SAMPLE_REPOS.length-own;
-  return <section className="repo-glass" aria-label="GitHub 레포지토리 관리 시안">
+  const resetFilters=()=>{setCategory('전체');setOrigin('all');setQuery('');};
+
+  let badge;
+  if (busy) badge='● 불러오는 중…';
+  else if (load.status==='error') badge='● 동기화 실패';
+  else if (verified) badge=`● 마지막 동기화 ${formatClock(load.syncedAt)}`;
+  else badge=`● DEMO · 샘플 데이터 ${views.length}건`;
+
+  let rows;
+  if (load.status==='error' && !hasData) rows=<RepoStatePanel kind="error" code={load.error.code} resetAt={load.error.resetAt} onRetry={refresh}/>;
+  else if (busy && !hasData) rows=<RepoStatePanel kind="loading"/>;
+  else if (!allViews.length) rows=<RepoStatePanel kind="empty" onRetry={refresh}/>;
+  else if (!filtered.length) rows=<div className="repo-glass__empty">{views.length?'조건에 맞는 레포지토리가 없습니다.':'모든 레포지토리가 숨김 상태입니다.'} <button type="button" className="repo-glass__inline-action" onClick={()=>{resetFilters();if(!views.length)setShowHidden(true);}}>{views.length?'필터 초기화':'숨긴 저장소 보기'}</button></div>;
+  else rows=filtered.map(repo=><button type="button" key={repo.key} className={`repo-glass__repo-row ${current?.key===repo.key?'is-selected':''} ${repo.hidden?'is-hidden':''}`} aria-pressed={current?.key===repo.key} onClick={()=>{setSelected(repo.key);setTab('개요')}}>
+    <span className="repo-glass__repo-name"><span aria-hidden="true" className={repo.favorite?'repo-glass__star':''}>{repo.favorite?'★':'◉'}</span><span><strong>{repo.name}{repo.favorite&&<span className="repo-glass__sr-only"> (즐겨찾기)</span>}{repo.hidden&&<span className="repo-glass__hidden-label"> · 숨김</span>}</strong><small>{repo.description}</small></span></span>
+    <span className="repo-glass__tag">{repo.category}</span><span className="repo-glass__status">{repo.status||'—'}</span></button>);
+
+  return <section className="repo-glass" aria-label={verified?'GitHub 레포지토리 관리':'GitHub 레포지토리 관리 시안'}>
     <div className="repo-glass__head">
-      <div><span className="repo-glass__eyebrow">◆ REPOSITORY UNIVERSE / PHASE 1</span><h1>GitHub Repository Manager</h1><p>카테고리별로 프로젝트를 탐색하는 나만의 3D 워크스페이스</p></div>
-      <span className="repo-glass__demo" role="status">● DEMO · 샘플 데이터 {SAMPLE_REPOS.length}건</span>
+      <div><span className="repo-glass__eyebrow">◆ REPOSITORY UNIVERSE{verified?'':' / DEMO'}</span><h1>GitHub Repository Manager</h1><p>카테고리별로 프로젝트를 탐색하는 나만의 3D 워크스페이스</p></div>
+      <div className="repo-glass__sync">
+        <span className={`repo-glass__demo ${load.status==='error'?'is-error':''}`} role="status">{badge}</span>
+        <button type="button" className="repo-glass__refresh" onClick={refresh} disabled={busy} aria-label="저장소 목록 새로고침">↻ 새로고침</button>
+      </div>
     </div>
     <div className="repo-glass__stats">
-      <div className="repo-glass__stat violet"><span>샘플 레포지토리</span><strong>{SAMPLE_REPOS.length}</strong><small>GitHub 실시간 조회 아님</small></div>
-      <div className="repo-glass__stat blue"><span>직접 제작 추정</span><strong>{own}</strong><small>공식 생성 이력 미검증</small></div>
-      <div className="repo-glass__stat cyan"><span>외부 원본 추정</span><strong>{external}</strong><small>공식 fork 여부 미확인</small></div>
+      <div className="repo-glass__stat violet"><span>{verified?'레포지토리':'샘플 레포지토리'}</span><strong>{hasData?views.length:'—'}</strong><small>{verified?'GitHub 동기화 기준':'GitHub 실시간 조회 아님'}</small></div>
+      <div className="repo-glass__stat blue"><span>{verified?'직접 제작':'직접 제작 추정'}</span><strong>{hasData?own:'—'}</strong><small>{verified?'GitHub fork=false':'공식 생성 이력 미검증'}</small></div>
+      <div className="repo-glass__stat cyan"><span>{verified?'Fork':'외부 원본 추정'}</span><strong>{hasData?external:'—'}</strong><small>{verified?'GitHub fork=true':'공식 fork 여부 미확인'}</small></div>
     </div>
-    <div className="repo-glass__section-head"><h2>카테고리로 탐색하기</h2><button type="button" onClick={()=>{setCategory('전체');setOrigin('전체');setQuery('');}}>전체 보기 ↗</button></div>
+    <div className="repo-glass__section-head"><h2>카테고리로 탐색하기</h2><button type="button" onClick={resetFilters}>전체 보기 ↗</button></div>
     <div className="repo-glass__categories">
       {REPO_CATEGORIES.map(group=><button type="button" key={group.name} className={`repo-glass__category ${group.tone} ${category===group.name?'is-active':''}`} aria-pressed={category===group.name} onClick={()=>{setCategory(category===group.name?'전체':group.name);setTab('개요');}}>
-        <span className="repo-glass__category-icon" aria-hidden="true">{group.icon}</span><strong>{group.name}</strong><span className="repo-glass__category-count">{SAMPLE_REPOS.filter(r=>r.category===group.name).length}개</span><small>{group.caption}</small></button>)}
+        <span className="repo-glass__category-icon" aria-hidden="true">{group.icon}</span><strong>{group.name}</strong><span className="repo-glass__category-count">{views.filter(r=>r.category===group.name).length}개</span><small>{group.caption}</small></button>)}
     </div>
     <div className="repo-glass__workspace">
-      <section className="repo-glass__list" aria-label="저장소 목록">
+      <section className="repo-glass__list" aria-label="저장소 목록" aria-busy={busy}>
         <div className="repo-glass__toolbar">
-          <div className="repo-glass__filters" role="group" aria-label="원본 유형 필터">{['전체','직접 제작 추정','외부 원본 추정'].map(o=><button key={o} type="button" aria-pressed={origin===o} onClick={()=>setOrigin(o)}>{o==='전체'?'전체':o==='직접 제작 추정'?'내 프로젝트*':'외부 원본*'}</button>)}</div>
-          <label className="repo-glass__search"><span className="repo-glass__sr-only">레포지토리 검색</span><input type="search" placeholder="이름, 설명, 기술 검색…" value={query} onChange={e=>setQuery(e.target.value)}/></label>
+          <div className="repo-glass__filters" role="group" aria-label="원본 유형 필터">{ORIGIN_FILTERS.map(o=><button key={o.id} type="button" aria-pressed={origin===o.id} onClick={()=>setOrigin(o.id)}>{o.label}{o.id==='all'?'':mark}</button>)}</div>
+          <label className="repo-glass__search"><span className="repo-glass__sr-only">레포지토리 검색</span><input type="search" placeholder="이름, 설명, 기술, 태그 검색…" value={query} onChange={e=>setQuery(e.target.value)}/></label>
+          <label className="repo-glass__sort"><span className="repo-glass__sr-only">정렬</span><select value={sort} onChange={e=>setSort(e.target.value)}>{sorts.map(s=><option key={s.id} value={s.id}>{s.label}</option>)}</select></label>
+          {hiddenCount>0&&<button type="button" className="repo-glass__hidden-toggle" aria-pressed={showHidden} onClick={()=>setShowHidden(v=>!v)}>{showHidden?'숨긴 저장소 감추기':`숨긴 저장소 ${hiddenCount}개 보기`}</button>}
         </div>
+        {load.notice==='not_configured'&&<p className="repo-notice" role="note">GitHub 연동 설정 전이라 샘플 데이터를 표시합니다. 연동이 완료되면 실제 저장소로 바뀝니다.</p>}
+        {load.status==='error'&&hasData&&<RepoStaleBanner code={load.error.code} resetAt={load.error.resetAt} onRetry={refresh}/>}
         {current && <button type="button" className="repo-glass__detail-jump" aria-controls="repo-detail-panel" onClick={() => document.getElementById('repo-detail-panel').focus()}>선택한 저장소 상세로 이동 ↓</button>}
-        <div className="repo-glass__table-head"><span>레포지토리</span><span>카테고리</span><span>상태*</span></div>
-        <div className="repo-glass__rows">
-          {filtered.length?filtered.map(repo=><button type="button" key={repo.name} className={`repo-glass__repo-row ${current?.name===repo.name?'is-selected':''}`} aria-pressed={current?.name===repo.name} onClick={()=>{setSelected(repo.name);setTab('개요')}}><span className="repo-glass__repo-name"><span aria-hidden="true">◉</span><span><strong>{repo.name}</strong><small>{repo.description}</small></span></span><span className="repo-glass__tag">{repo.category}</span><span className="repo-glass__status">{repo.status}</span></button>):<div className="repo-glass__empty">조건에 맞는 레포지토리가 없습니다. 필터를 초기화해 보세요.</div>}
-        </div>
-        <p className="repo-glass__footnote">*분류·상태는 시연용 추정값입니다. GitHub 데이터 동기화·편집·저장은 Phase 1에 포함되지 않습니다.</p>
+        <div className="repo-glass__table-head"><span>레포지토리</span><span>카테고리</span><span>상태{mark}</span></div>
+        <div className="repo-glass__rows">{rows}</div>
+        {orphans.length>0&&<details className="repo-orphans">
+          <summary>GitHub에서 찾을 수 없는 저장소 메모 {orphans.length}개</summary>
+          <p className="repo-orphans__hint">삭제되었거나 접근 권한이 없어진 저장소입니다. 메모는 자동으로 지우지 않습니다.</p>
+          <ul>{orphans.map(orphan=><li key={orphan.key}>
+            <div><strong>{orphan.name||orphan.key}</strong>{orphan.note&&<p>{orphan.note}</p>}{orphan.tags.length>0&&<small>{orphan.tags.map(tag=>`#${tag}`).join(' ')}</small>}</div>
+            <button type="button" onClick={()=>removeOrphan(orphan)} aria-label={`${orphan.name||orphan.key} 메모 삭제`}>메모 삭제</button>
+          </li>)}</ul>
+        </details>}
+        {!verified && <p className="repo-glass__footnote">*분류·상태는 시연용 추정값입니다. 실제 GitHub 동기화와 영구 저장은 아직 연결되지 않았습니다.</p>}
       </section>
       <p className="repo-glass__sr-only" role="status" aria-live="polite" aria-atomic="true">{current ? `${current.name} 저장소 상세가 갱신되었습니다.` : '선택 가능한 저장소가 없습니다.'}</p>
       <aside className="repo-glass__detail" aria-label="선택한 저장소 상세">
-        {current?<><div className="repo-glass__detail-title"><span aria-hidden="true">◉</span><div><h2>{current.name}</h2><p>{current.description}</p></div></div>
-          <div className="repo-glass__chips"><span>{current.origin}</span><span>{current.category}</span><span>{current.status}</span></div>
-          <div className="repo-glass__tabs" role="tablist" aria-label="레포지토리 상세 탭">{DETAIL_TABS.map((t, index)=><button key={t} type="button" role="tab" tabIndex={tab===t ? 0 : -1} onKeyDown={event => handleTabKeyDown(event, index)} id={`repo-tab-${t}`} aria-selected={tab===t} aria-controls="repo-detail-panel" onClick={()=>setTab(t)}>{t}</button>)}</div>
-          <div id="repo-detail-panel" role="tabpanel" tabIndex={0} aria-labelledby={`repo-tab-${tab}`} className="repo-glass__detail-body">
-            {tab==='개요'?<><h3>프로젝트 개요</h3><p>{current.description}</p><dl><div><dt>기술</dt><dd>{current.language}</dd></div><div><dt>관리 상태</dt><dd>{current.status} · 예시</dd></div><div><dt>분류 근거</dt><dd>README·기존 정리 기반 추정</dd></div></dl></>:tab==='README'?<><h3>README 미리보기</h3><p>실제 README 가져오기는 Phase 2에서 지원합니다. 현재는 확인된 용도 요약만 보여줍니다.</p><p>{current.description}</p></>:<><h3>개인 관리 메모</h3><p>Phase 3에서 저장 가능한 메모와 우선순위 설정을 추가합니다. 현재는 읽기 전용 데모입니다.</p></>}
-          </div>
-          <a className="repo-glass__github-link" href={current.url} target="_blank" rel="noopener noreferrer">GitHub에서 열기 ↗</a>
-        </>:<div className="repo-glass__empty">선택 가능한 레포지토리가 없습니다.</div>}
+        {current
+          ? <RepoDetail repo={current} source={source} verified={verified} persistent={metaStore.persistent===true} categories={CATEGORY_NAMES} tab={tab} onTabChange={setTab} onSaveMeta={saveMeta}/>
+          : <div className="repo-glass__empty">{busy?'저장소를 불러오는 중입니다…':load.status==='error'?'목록을 불러오면 상세 정보가 여기에 표시됩니다.':'선택 가능한 레포지토리가 없습니다.'}</div>}
       </aside>
     </div>
   </section>;

@@ -3,6 +3,7 @@ import { rejectLiveRequest } from './server/portalMode.js'
 import react from '@vitejs/plugin-react'
 import { promptsDevPlugin } from './server/prompts/dev.mjs'
 import portalLogin from './api/portal-login.js'
+import githubRepos from './api/github-repos.mjs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -94,6 +95,18 @@ function portalLoginPlugin() {
   }
 }
 
+function githubReposPlugin() {
+  const middleware = (req, res, next) => {
+    if (req.url?.split('?')[0] !== '/api/github-repos') return next()
+    return githubRepos(req, res)
+  }
+  return {
+    name: 'github-repos',
+    configureServer(server) { server.middlewares.use(middleware) },
+    configurePreviewServer(server) { server.middlewares.use(middleware) },
+  }
+}
+
 function runningOpsAuthPlugin() {
   const middleware = async (req, res, next) => {
     if (req.method !== 'POST' || req.url !== '/api/running-ops-auth') {
@@ -157,7 +170,7 @@ export default defineConfig(({ command, mode }) => {
     })
   }
   return {
-  plugins: [{ name: 'portal-data-mode', configureServer: apiGate, configurePreviewServer: apiGate }, react(), promptsDevPlugin(), portalLoginPlugin(), runningOpsAuthPlugin(), portalStaticAppsPlugin()],
+  plugins: [{ name: 'portal-data-mode', configureServer: apiGate, configurePreviewServer: apiGate }, react(), promptsDevPlugin(), portalLoginPlugin(), githubReposPlugin(), runningOpsAuthPlugin(), portalStaticAppsPlugin()],
   define: {
     __PORTAL_BUILD_ENV__: JSON.stringify(portalBuildEnv),
     'import.meta.env.PORTAL_DATA_MODE': JSON.stringify(buildMode),

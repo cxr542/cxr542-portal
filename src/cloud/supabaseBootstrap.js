@@ -13,6 +13,15 @@ let remoteChanged = false
 
 function installGlobals() {
   globalThis.PortalCloud = cloud
+  // Lets same-origin features call owner-only server APIs with the existing session.
+  // The session already lives in this origin's storage, so this exposes nothing new.
+  globalThis.PortalSession = Object.freeze({
+    mode: 'supabase',
+    async getAccessToken() {
+      const { data, error } = await client.auth.getSession()
+      return error ? null : data.session?.access_token || null
+    },
+  })
   const settings = cloud.settings
   const aliases = new Map(collections.map(([namespace, , key]) => [key, namespace]))
   globalThis.PortalStorage = {

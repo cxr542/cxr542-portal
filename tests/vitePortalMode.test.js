@@ -12,11 +12,16 @@ afterEach(() => {
 })
 
 it.each([
-  ['supabase', undefined, 503, 'account_not_configured', 1],
-  ['mock', undefined, 403, 'mock_live_access_denied', 0],
-  ['mock', 'supabase', 503, 'invalid_configuration', 0],
-])('applies trusted file-only mode %s consistently through the actual local login middleware', async (mode, clientMode, status, error, clients) => {
-  for (const key of ['VERCEL', 'VERCEL_ENV', 'PORTAL_DATA_MODE', 'VITE_PORTAL_DATA_MODE', 'PORTAL_LOGIN_ID', 'PORTAL_ACCOUNT_EMAIL', 'PORTAL_OWNER_USER_ID']) vi.stubEnv(key, undefined)
+  ['supabase', undefined, true, 503, 'account_not_configured', 1],
+  ['supabase', undefined, false, 503, 'invalid_configuration', 0],
+  ['mock', undefined, true, 403, 'mock_live_access_denied', 0],
+  ['mock', 'supabase', true, 503, 'invalid_configuration', 0],
+])('applies trusted file-only mode %s (client %s, explicit target %s) consistently through the actual local login middleware', async (mode, clientMode, explicitTarget, status, error, clients) => {
+  for (const key of ['VERCEL', 'VERCEL_ENV', 'PORTAL_DATA_MODE', 'VITE_PORTAL_DATA_MODE', 'PORTAL_LOGIN_ID', 'PORTAL_ACCOUNT_EMAIL', 'PORTAL_OWNER_USER_ID', 'SUPABASE_URL', 'SUPABASE_PUBLISHABLE_KEY']) vi.stubEnv(key, undefined)
+  if (explicitTarget) {
+    vi.stubEnv('SUPABASE_URL', 'https://unit.invalid')
+    vi.stubEnv('SUPABASE_PUBLISHABLE_KEY', 'sb_publishable_unit')
+  }
   fileEnv.PORTAL_DATA_MODE = mode
   if (clientMode !== undefined) fileEnv.VITE_PORTAL_DATA_MODE = clientMode
   const { default: configure } = await import('../vite.config.js')
