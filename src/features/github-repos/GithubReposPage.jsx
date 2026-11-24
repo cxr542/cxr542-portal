@@ -3,7 +3,7 @@ import './GithubReposPage.css';
 
 import { REPO_CATEGORIES } from './githubReposData';
 import { filterRepoViews, ORIGIN_FILTERS, SORTS, sortRepoViews, toRepoView } from './repoModel';
-import { createFixtureMetaStore, createFixtureRepoSource, demoStateFromSearch, RepoSourceError } from './repoSource';
+import { createFixtureMetaStore, RepoSourceError, selectRepoSource } from './repoSource';
 import { RepoStaleBanner, RepoStatePanel } from './RepoStatePanel.jsx';
 import { formatClock } from './repoUi.js';
 import RepoDetail from './RepoDetail.jsx';
@@ -14,13 +14,10 @@ const fixtureMetaStore = () => (sharedMetaStore ||= createFixtureMetaStore());
 const noSubscribe = () => () => {};
 
 export default function GithubReposPage({ source: sourceProp, metaStore: metaProp }) {
-  const [source] = useState(() => sourceProp || createFixtureRepoSource({
-    state: typeof location === 'undefined' ? null : demoStateFromSearch(location.search),
-    delayMs: 300,
-  }));
+  const [source] = useState(() => sourceProp || selectRepoSource(globalThis, typeof location === 'undefined' ? '' : location.search));
   const metaStore = metaProp || fixtureMetaStore();
   const meta = useSyncExternalStore(metaStore.subscribe || noSubscribe, metaStore.all, metaStore.all);
-  const [load,setLoad]=useState({ status:'loading', repos:[], syncedAt:null, error:null });
+  const [load,setLoad]=useState({ status:'loading', repos:[], syncedAt:null, error:null, verified:null, notice:null });
   const [query,setQuery]=useState('');
   const [category,setCategory]=useState('전체');
   const [origin,setOrigin]=useState('all');
@@ -29,13 +26,13 @@ export default function GithubReposPage({ source: sourceProp, metaStore: metaPro
   const [selected,setSelected]=useState(null);
   const [tab,setTab]=useState('개요');
   const request=useRef(0);
-  const verified=source.verified===true;
+  const verified=(load.verified ?? source.verified)===true;
 
   const fetchRepos=useCallback(async()=>{
     const id=++request.current;
     try {
-      const { repos, syncedAt }=await source.list();
-      if (id===request.current) setLoad({ status:'ready', repos, syncedAt, error:null });
+      const result=await source.list();
+      if (id===request.current) setLoad({ status:'ready', repos:result.repos, syncedAt:result.syncedAt, error:null, verified:result.verified ?? null, notice:result.notice || null });
     } catch (error) {
       if (id===request.current) setLoad(prev=>({ ...prev, status:'error', error: error instanceof RepoSourceError ? error : new RepoSourceError('unknown') }));
     }
@@ -98,6 +95,7 @@ export default function GithubReposPage({ source: sourceProp, metaStore: metaPro
           <label className="repo-glass__sort"><span className="repo-glass__sr-only">정렬</span><select value={sort} onChange={e=>setSort(e.target.value)}>{sorts.map(s=><option key={s.id} value={s.id}>{s.label}</option>)}</select></label>
           {hiddenCount>0&&<button type="button" className="repo-glass__hidden-toggle" aria-pressed={showHidden} onClick={()=>setShowHidden(v=>!v)}>{showHidden?'숨긴 저장소 감추기':`숨긴 저장소 ${hiddenCount}개 보기`}</button>}
         </div>
+        {load.notice==='not_configured'&&<p className="repo-notice" role="note">GitHub 연동 설정 전이라 샘플 데이터를 표시합니다. 연동이 완료되면 실제 저장소로 바뀝니다.</p>}
         {load.status==='error'&&hasData&&<RepoStaleBanner code={load.error.code} resetAt={load.error.resetAt} onRetry={refresh}/>}
         {current && <button type="button" className="repo-glass__detail-jump" aria-controls="repo-detail-panel" onClick={() => document.getElementById('repo-detail-panel').focus()}>선택한 저장소 상세로 이동 ↓</button>}
         <div className="repo-glass__table-head"><span>레포지토리</span><span>카테고리</span><span>상태{mark}</span></div>

@@ -8,7 +8,7 @@
 import { SAMPLE_REPOS } from './githubReposData';
 
 export { classifyGithubResponse, RepoSourceError, SOURCE_ERRORS } from './repoErrors.js';
-import { RepoSourceError } from './repoErrors.js';
+import { RepoSourceError, SOURCE_ERRORS } from './repoErrors.js';
 import { EMPTY_META, normalizeTags } from './repoModel.js';
 
 /** Demo-only records: no network, credentials, or persistence. Origin values are estimates. */
@@ -107,4 +107,89 @@ export function createMemoryMetaStore(initial = {}) {
 
 export function createFixtureMetaStore() {
   return createMemoryMetaStore(Object.fromEntries(SAMPLE_REPOS.map(repo => [`fixture:${repo.name}`, { category: repo.category, status: repo.status, tags: [], favorite: false, note: '', hidden: false }])));
+}
+
+const STATUS_CODES = { 401: 'session_required', 403: 'forbidden', 429: 'rate_limited', 502: 'network', 503: 'not_configured' };
+
+/** Browser source backed by the owner-only /api/github-repos proxy. The GitHub token stays on the server. */
+export function createServerRepoSource({ getAccessToken, fetcher = (...args) => globalThis.fetch(...args), endpoint = '/api/github-repos' } = {}) {
+  async function request(params) {
+    let token;
+    try { token = await getAccessToken?.(); } catch { token = null; }
+    if (typeof token !== 'string' || !token) throw new RepoSourceError('session_required');
+    let response;
+    try {
+      response = await fetcher(`${endpoint}?${new URLSearchParams(params)}`, { cache: 'no-store', headers: { authorization: `Bearer ${token}` } });
+    } catch {
+      throw new RepoSourceError('network');
+    }
+    const body = await response.json().catch(() => null);
+    if (!response.ok) {
+      const code = typeof body?.error === 'string' && Object.hasOwn(SOURCE_ERRORS, body.error) ? body.error : STATUS_CODES[response.status] || 'unknown';
+      throw new RepoSourceError(code, { resetAt: typeof body?.resetAt === 'string' ? body.resetAt : null });
+    }
+    if (!body || typeof body !== 'object') throw new RepoSourceError('invalid_response');
+    return body;
+  }
+  const idOf = repo => {
+    if (!Number.isSafeInteger(repo?.id) || repo.id <= 0) throw new RepoSourceError('invalid_response');
+    return String(repo.id);
+  };
+  return {
+    kind: 'server',
+    verified: true,
+    async list() {
+      const body = await request({ resource: 'list' });
+      if (!Array.isArray(body.repos)) throw new RepoSourceError('invalid_response');
+      const repos = body.repos.filter(repo => repo && typeof repo.key === 'string' && repo.key.startsWith('github:') && typeof repo.name === 'string');
+      return { repos, syncedAt: body.syncedAt || new Date().toISOString(), verified: true, rateLimit: body.rateLimit || null };
+    },
+    async readme(repo) {
+      const body = await request({ resource: 'readme', id: idOf(repo) });
+      return body.readme && typeof body.readme.text === 'string' ? { text: body.readme.text } : null;
+    },
+    async branches(repo) {
+      const body = await request({ resource: 'branches', id: idOf(repo) });
+      return { items: Array.isArray(body.items) ? body.items : [] };
+    },
+  };
+}
+
+/**
+ * Live source: real GitHub data through the server. Until the server has a GitHub
+ * token (not_configured), it shows the fixture data and says so, instead of an error.
+ * Detail requests follow the record's key prefix, so each record uses its own source.
+ */
+export function createLiveRepoSource({ server, fixture }) {
+  const pick = repo => (String(repo?.key).startsWith('github:') ? server : fixture);
+  return {
+    kind: 'live',
+    verified: true,
+    async list() {
+      try {
+        return await server.list();
+      } catch (error) {
+        if (error?.code !== 'not_configured') throw error;
+        const result = await fixture.list();
+        return { ...result, verified: false, notice: 'not_configured' };
+      }
+    },
+    readme: repo => pick(repo).readme(repo),
+    branches: repo => pick(repo).branches(repo),
+  };
+}
+
+/**
+ * Chooses the page's source from the runtime globals. Mock runtimes, or any
+ * runtime without a portal session, always get the fixture source.
+ */
+export function selectRepoSource(globals = globalThis, search = '') {
+  const session = globals.PortalSession;
+  if (globals.PortalCloud?.mode !== 'mock' && session?.mode === 'supabase' && typeof session.getAccessToken === 'function') {
+    return createLiveRepoSource({
+      server: createServerRepoSource({ getAccessToken: () => session.getAccessToken() }),
+      fixture: createFixtureRepoSource(),
+    });
+  }
+  return createFixtureRepoSource({ state: demoStateFromSearch(search), delayMs: 300 });
 }

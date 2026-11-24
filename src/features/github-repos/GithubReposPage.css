@@ -99,3 +99,4 @@
 @media(max-width:620px){.repo-meta__row{grid-template-columns:1fr}.repo-glass__hidden-toggle{width:100%}.repo-glass__detail-body{max-height:none;overflow:visible}}
 @media(max-width:1050px){.repo-glass__detail-body{max-height:none;overflow:visible}}
 @media(prefers-reduced-motion:reduce){.repo-skeleton span{animation:none}}
+.repo-notice{margin:0 16px 12px;padding:8px 12px;border-radius:10px;border:1px solid #ffc66b55;background:#ffc66b14;color:#ffe2ad;font-size:12px;line-height:1.6}

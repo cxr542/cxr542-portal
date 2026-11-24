@@ -60,13 +60,22 @@
 - 필요한 서버 환경변수(Production만): `GITHUB_REPOS_TOKEN`(2-5 승인 후 등록), `PORTAL_OWNER_USER_ID`·`SUPABASE_URL`·`SUPABASE_PUBLISHABLE_KEY`(기존), 선택 `GITHUB_REPOS_OWNER`.
 - 로컬 `npm run dev`에서도 같은 핸들러가 `/api/github-repos`로 동작합니다(`PORTAL_DATA_MODE=supabase`와 위 변수가 셸 환경에 있어야 함).
 
+### 2-3 구현 메모
+
+- 실데이터 런타임(`supabaseBootstrap.js`)만 `globalThis.PortalSession = { mode: 'supabase', getAccessToken() }`을 노출합니다. 세션은 이미 같은 origin 저장소에 있으므로 새로 노출되는 정보는 없습니다. Mock 런타임은 이 객체를 만들지 않습니다.
+- `selectRepoSource`: `PortalCloud.mode === 'mock'`이거나 세션이 없으면 항상 샘플 소스(`?repoState=` 미리보기 포함)를 씁니다. 그 외에는 서버 소스를 씁니다.
+- 서버에 GitHub 토큰이 아직 없으면(`503 not_configured`) 오류 화면 대신 샘플 데이터와 "GitHub 연동 설정 전" 안내를 보여줍니다. 그래서 2-5 승인 전에 병합해도 Production 화면이 깨지지 않습니다. 세션 만료·한도 초과·네트워크 같은 실제 오류는 숨기지 않습니다.
+- README·브랜치는 레코드 key 접두사(`github:` / `fixture:`)로 어느 소스에 물을지 정합니다.
+- 실데이터에서도 사용자 메모·태그는 아직 메모리 저장입니다(Phase 3).
+- 브라우저 검증 범위: Mock Preview에서 가짜 `PortalSession`을 심어도 샘플 소스가 유지되고 `/api/` 요청이 0건인 것을 확인했습니다. 실제 로그인 상태의 화면은 운영 Supabase 접속이 필요해 검증하지 않았습니다(배포 승인 후 확인).
+
 ### 작업 순서
 
 | # | 작업 | 예상 변경 파일 | 필요 권한 | 테스트 | 승인 |
 | --- | --- | --- | --- | --- | --- |
 | 2-1 ✅ | 서버 GitHub 클라이언트(페이지네이션, ETag, 오류 분류) — 로컬 구현 완료 | `server/github/client.mjs`, `src/features/github-repos/repoErrors.js`, `tests/githubClient.test.js` | 없음(로컬, fetch mock) | 31개: Mock/설정 오류 시 생성 거부, 토큰 미노출, Link 페이지네이션·외부 origin 차단·페이지 상한, ETag 304, 401/403/429/5xx, README 404·크기 상한, 저장소 이름 검증, 브랜치 | 불필요 |
 | 2-2 ✅ | `api/github-repos.mjs` + 포털 소유자 세션 확인 + Mock 거부 — 로컬 구현 완료 | `api/github-repos.mjs`, `server/github/reposApi.mjs`, `vercel.json`, `vite.config.js`, `tests/githubReposApi.test.js` | 없음 | 27개: Mock·잘못된 설정 거부, 세션 없음/타 사용자/익명/만료 401, 소유자 미설정 503, id 검증, 타 계정 저장소 403, 토큰 미노출, rate limit 429+Retry-After, ETag 재사용, rewrite 순서 | 불필요 |
-| 2-3 | `createServerRepoSource` + 런타임 선택(Mock=fixture) | `repoSource.js`, `GithubReposPage.jsx` | 없음 | 상태별 렌더(Loading/Error/RateLimited/Unauthorized/Empty) | 불필요 |
+| 2-3 ✅ | 화면을 서버 API에 연결 (`createServerRepoSource`, `createLiveRepoSource`, `selectRepoSource`) — 로컬 구현 완료 | `repoSource.js`, `GithubReposPage.jsx`, `src/cloud/supabaseBootstrap.js`, `tests/githubReposServerSource.test.js` | 없음 | 27개: 세션 토큰 전달·없음, 오류 코드 변환, 비 GitHub 레코드 제거, id 기반 상세 요청, 설정 전 샘플 대체, 실제 오류는 숨기지 않음, Mock에서는 항상 샘플 소스 | 불필요 |
 | 2-4 | README·브랜치 탭 | `GithubReposPage.jsx`, CSS | 없음 | README 404·마크다운 안전 렌더(HTML 미삽입) | 불필요 |
 | 2-5 | 토큰 발급·등록 | — | **GitHub PAT 발급, Vercel Production env 추가** | — | **필요** |
 | 2-6 | 실계정 조회 검증 | — | 2-5 이후 Production 또는 별도 승인된 환경 | 실제 목록 수·fork 판정 대조 | **필요** |
