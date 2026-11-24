@@ -50,12 +50,22 @@
 - ETag 캐시는 인스턴스 메모리(최대 200개)입니다. Function 콜드 스타트마다 초기화되므로, 지속 캐시가 필요하면 2-2에서 결정합니다.
 - 오류 코드는 UI와 같은 `repoErrors.js`를 공유합니다(Node에서 바로 import 가능하도록 import 없는 모듈로 분리).
 
+### 2-2 구현 메모
+
+- `GET /api/github-repos?resource=list|readme|branches[&id=<repository id>]`. 진입점이 `rejectLiveRequest`로 Mock을 먼저 거부하고, 핸들러도 한 번 더 확인합니다.
+- 세션 확인: `Authorization: Bearer <포털 Supabase access token>`을 포털 Supabase `/auth/v1/user`로 검증하고, `user.id === PORTAL_OWNER_USER_ID`일 때만 통과합니다. 실패하면 GitHub를 호출하지 않고 `401 session_required`를 반환합니다. GitHub 토큰 오류(`502 unauthorized`)와는 구분됩니다.
+- README·브랜치는 저장소 **id**로 요청하고, 서버가 `/repositories/{id}`로 현재 이름을 찾은 뒤 `GITHUB_REPOS_OWNER`(기본값 `cxr542`) 소유인지 확인합니다. 다른 계정 저장소는 `403 forbidden`입니다.
+- 오류 상태 코드: `session_required` 401, `forbidden` 403, `rate_limited` 429(+`Retry-After`, `resetAt`), `not_configured` 503, GitHub 토큰 거부·네트워크·응답 오류 502.
+- 응답은 `Cache-Control: private, no-store`입니다. 효율은 서버의 ETag 재검증(웜 인스턴스에서 클라이언트 재사용)으로 확보합니다.
+- 필요한 서버 환경변수(Production만): `GITHUB_REPOS_TOKEN`(2-5 승인 후 등록), `PORTAL_OWNER_USER_ID`·`SUPABASE_URL`·`SUPABASE_PUBLISHABLE_KEY`(기존), 선택 `GITHUB_REPOS_OWNER`.
+- 로컬 `npm run dev`에서도 같은 핸들러가 `/api/github-repos`로 동작합니다(`PORTAL_DATA_MODE=supabase`와 위 변수가 셸 환경에 있어야 함).
+
 ### 작업 순서
 
 | # | 작업 | 예상 변경 파일 | 필요 권한 | 테스트 | 승인 |
 | --- | --- | --- | --- | --- | --- |
 | 2-1 ✅ | 서버 GitHub 클라이언트(페이지네이션, ETag, 오류 분류) — 로컬 구현 완료 | `server/github/client.mjs`, `src/features/github-repos/repoErrors.js`, `tests/githubClient.test.js` | 없음(로컬, fetch mock) | 31개: Mock/설정 오류 시 생성 거부, 토큰 미노출, Link 페이지네이션·외부 origin 차단·페이지 상한, ETag 304, 401/403/429/5xx, README 404·크기 상한, 저장소 이름 검증, 브랜치 | 불필요 |
-| 2-2 | `api/github-repos.mjs` + 세션 검증 + Mock 거부 | `api/github-repos.mjs`, `vercel.json` rewrite | 없음 | 자동 Mock 403 테스트, 비소유자 401, Production 경로 | 불필요 |
+| 2-2 ✅ | `api/github-repos.mjs` + 포털 소유자 세션 확인 + Mock 거부 — 로컬 구현 완료 | `api/github-repos.mjs`, `server/github/reposApi.mjs`, `vercel.json`, `vite.config.js`, `tests/githubReposApi.test.js` | 없음 | 27개: Mock·잘못된 설정 거부, 세션 없음/타 사용자/익명/만료 401, 소유자 미설정 503, id 검증, 타 계정 저장소 403, 토큰 미노출, rate limit 429+Retry-After, ETag 재사용, rewrite 순서 | 불필요 |
 | 2-3 | `createServerRepoSource` + 런타임 선택(Mock=fixture) | `repoSource.js`, `GithubReposPage.jsx` | 없음 | 상태별 렌더(Loading/Error/RateLimited/Unauthorized/Empty) | 불필요 |
 | 2-4 | README·브랜치 탭 | `GithubReposPage.jsx`, CSS | 없음 | README 404·마크다운 안전 렌더(HTML 미삽입) | 불필요 |
 | 2-5 | 토큰 발급·등록 | — | **GitHub PAT 발급, Vercel Production env 추가** | — | **필요** |

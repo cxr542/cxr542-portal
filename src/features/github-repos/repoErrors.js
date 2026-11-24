@@ -1,5 +1,6 @@
 // No imports: shared by the browser UI and Node server Functions.
 export const SOURCE_ERRORS = {
+  session_required: '포털 로그인이 만료되었습니다. 다시 로그인해 주세요.',
   unauthorized: 'GitHub 인증이 필요하거나 만료되었습니다.',
   forbidden: '이 저장소 목록을 볼 권한이 없습니다.',
   rate_limited: 'GitHub API 요청 한도에 도달했습니다. 잠시 후 다시 시도하세요.',

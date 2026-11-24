@@ -1,6 +1,7 @@
 // Shared UI constants and formatters (no JSX).
 
 const ERROR_VIEWS = {
+  session_required: { icon: '🔑', title: '포털에 다시 로그인해 주세요', hint: '로그인 세션이 만료되었거나 소유자 계정이 아닙니다.' },
   unauthorized: { icon: '🔒', title: 'GitHub 인증이 필요합니다', hint: 'GitHub 연결 토큰이 없거나 만료되었습니다. 포털 관리자가 토큰을 다시 등록하면 복구됩니다.' },
   forbidden: { icon: '⛔', title: '접근 권한이 없습니다', hint: '토큰에 이 저장소 목록을 읽을 권한이 없습니다. Private 저장소는 읽기 권한이 필요합니다.' },
   rate_limited: { icon: '⏳', title: 'GitHub 요청 한도에 도달했습니다', hint: '한도가 초기화되면 다시 불러올 수 있습니다.' },

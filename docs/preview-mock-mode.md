@@ -37,7 +37,7 @@ Use a fresh browser profile. The Mock banner must appear without a login form. T
 
 The mode is resolved before importing the runtime. Mock never imports the Supabase bootstrap or constructs its client, restores an Auth session, migrates data, subscribes to Realtime, or initializes live Storage/RPC. A failed Mock import displays an initialization error and does not select the live runtime. Direct client-module imports in Preview fail before createClient.
 
-Live server entry points for portal login, prompts/Auth/OAuth/MCP, wiki administration, running operations, sheets, and task notifications reject Mock requests before operational work. The prompt upstream boundary independently rejects live calls. Production uses the existing Supabase runtime in supabaseBootstrap.js, including the reconnect action on startup failure. Local verification exercises client, login, and reconnect behavior with synthetic responses.
+Live server entry points for portal login, prompts/Auth/OAuth/MCP, wiki administration, GitHub repositories, running operations, sheets, and task notifications reject Mock requests before operational work. The prompt upstream boundary independently rejects live calls. Production uses the existing Supabase runtime in supabaseBootstrap.js, including the reconnect action on startup failure. Local verification exercises client, login, and reconnect behavior with synthetic responses.
 
 ## Deployment gate
 

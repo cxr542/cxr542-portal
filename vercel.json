@@ -32,6 +32,10 @@
       "destination": "/api/admin/[...path]"
     },
     {
+      "source": "/api/github-repos",
+      "destination": "/api/github-repos"
+    },
+    {
       "source": "/idea-bank",
       "destination": "/idea-bank/index.html"
     },
