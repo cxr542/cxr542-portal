@@ -105,8 +105,13 @@ export function createMemoryMetaStore(initial = {}) {
   };
 }
 
+/** Demo categories/status for fixture records; never written to storage unless the user edits them. */
+export function fixtureMetaDefaults() {
+  return Object.fromEntries(SAMPLE_REPOS.map(repo => [`fixture:${repo.name}`, { category: repo.category, status: repo.status, tags: [], favorite: false, note: '', hidden: false }]));
+}
+
 export function createFixtureMetaStore() {
-  return createMemoryMetaStore(Object.fromEntries(SAMPLE_REPOS.map(repo => [`fixture:${repo.name}`, { category: repo.category, status: repo.status, tags: [], favorite: false, note: '', hidden: false }])));
+  return createMemoryMetaStore(fixtureMetaDefaults());
 }
 
 const STATUS_CODES = { 401: 'session_required', 403: 'forbidden', 429: 'rate_limited', 502: 'network', 503: 'not_configured' };

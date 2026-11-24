@@ -80,13 +80,19 @@
 | 2-5 | 토큰 발급·등록 | — | **GitHub PAT 발급, Vercel Production env 추가** | — | **필요** |
 | 2-6 | 실계정 조회 검증 | — | 2-5 이후 Production 또는 별도 승인된 환경 | 실제 목록 수·fork 판정 대조 | **필요** |
 
-## Phase 3 — 사용자 메모·태그 영구 관리
+## Phase 3 — 사용자 메모·태그 영구 관리 ✅ (로컬 구현 완료)
 
-- 저장 위치: 기존 `PortalCloud`(Supabase `portal_documents` + RLS 소유자) 네임스페이스 `github-repos/meta`, 문서 key = `github:<id>`. 새 테이블·RLS 변경 없이 기존 구조 재사용이 1안. DB 구조 변경이 필요해지면 별도 승인.
-- 값: `{ category, status, tags[], favorite, note, hidden, updatedAt }`. GitHub 메타데이터는 저장하지 않음(동기화가 사용자 데이터를 덮어쓰지 않음).
-- `createCloudMetaStore(PortalCloud)`: `get/all/set`, 낙관적 업데이트, 실패 시 롤백 + 기존 `remoteChanges` 경고 재사용. Mock에서는 `createMockStorage` 기반 메모리 저장.
-- UI: 메모 편집(저장/취소), 태그 입력, 즐겨찾기 토글, 숨김·보관 보기, 카테고리 변경.
-- 테스트: 동기화 후 메타 보존, 이름 변경 후 메모 유지, 삭제 저장소 보관 표시, Mock에서 클라우드 미호출.
+- **저장 위치:** 기존 `PortalCloud`(Supabase `portal_documents`), 이름공간 `github-repos/meta`, 문서 key는 `github:<repository id>`입니다. 이 테이블은 이름공간 제한이 없고(길이 1~100자만 확인), 소유자 RLS와 `portal_write` revision 충돌 방지가 이미 있습니다. 그래서 **DB·RLS·Auth 변경이 없습니다.**
+- **값:** `{ key, category, status, tags[], favorite, note, hidden, name, url, updatedAt }`. `name`과 `url`은 저장소가 사라졌을 때 표시하려고 마지막으로 본 값을 남겨 둡니다. GitHub 메타데이터는 저장하지 않고, 동기화는 이 이름공간에 쓰지 않습니다.
+- **구현:** `src/features/github-repos/metaStore.js`
+  - `createCloudMetaStore(cloud)`: 낙관적 업데이트를 합니다. 저장에 실패하면 화면 값은 유지하고, 포털 상단의 기존 실패·재시도 장치가 같은 쓰기를 보관합니다. 편집기는 실패를 안내합니다.
+  - 저장된 문서는 읽을 때 다시 검사합니다(`sanitizeMeta`). key 형식, 길이, `https://github.com/` URL만 허용합니다.
+  - 샘플 데이터는 기존 예시 카테고리를 기본값으로 보여주며, 사용자가 수정하기 전에는 저장하지 않습니다.
+  - `selectMetaStore`: 포털 저장소가 있으면 그것을 씁니다. Mock 저장소는 `persistent: false`라 "새로고침하면 초기화" 안내가 유지됩니다.
+- **삭제·권한 상실:** 실제 GitHub 데이터를 볼 때, 목록에 없는 `github:` 키의 메모는 "GitHub에서 찾을 수 없는 저장소 메모" 영역에 보여줍니다. 자동으로 지우지 않고, 사용자가 확인한 뒤 삭제합니다(tombstone). 이름이 바뀐 저장소는 ID가 같아서 메모가 유지됩니다.
+- **테스트:** `tests/githubReposMetaStore.test.js` 20개(저장·재로드 복원, 병합, 기본값, 낙관적 업데이트·실패, tombstone, 잘못된 key 거부, 손상된 문서 무시, 사라진 저장소, 이름 변경).
+- **검증 범위:** Mock Preview에서 메모 저장 → `github-repos/meta` 문서 생성 → 다른 메뉴 이동 후 복원을 확인했습니다. 실제 Supabase에 영구 저장되는지는 운영 DB 접속이 필요해 배포 승인 후 확인합니다. 사라진 저장소 영역은 실제 데이터에서만 나타나므로 로직만 단위 테스트로 검증했습니다.
+- **남은 일:** 다른 탭에서 바꾼 메모를 실시간으로 반영하는 기능은 없습니다. 기존 포털처럼 새로고침하면 반영됩니다.
 
 ## Phase 4 — 통합·배포 (모두 승인 필요)
 

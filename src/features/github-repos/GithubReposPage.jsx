@@ -3,19 +3,20 @@ import './GithubReposPage.css';
 
 import { REPO_CATEGORIES } from './githubReposData';
 import { filterRepoViews, ORIGIN_FILTERS, SORTS, sortRepoViews, toRepoView } from './repoModel';
-import { createFixtureMetaStore, RepoSourceError, selectRepoSource } from './repoSource';
+import { RepoSourceError, selectRepoSource } from './repoSource';
+import { findOrphans, selectMetaStore } from './metaStore.js';
 import { RepoStaleBanner, RepoStatePanel } from './RepoStatePanel.jsx';
 import { formatClock } from './repoUi.js';
 import RepoDetail from './RepoDetail.jsx';
 
 const CATEGORY_NAMES = REPO_CATEGORIES.map(group => group.name);
 let sharedMetaStore;
-const fixtureMetaStore = () => (sharedMetaStore ||= createFixtureMetaStore());
+const defaultMetaStore = () => (sharedMetaStore ||= selectMetaStore(globalThis));
 const noSubscribe = () => () => {};
 
 export default function GithubReposPage({ source: sourceProp, metaStore: metaProp }) {
   const [source] = useState(() => sourceProp || selectRepoSource(globalThis, typeof location === 'undefined' ? '' : location.search));
-  const metaStore = metaProp || fixtureMetaStore();
+  const metaStore = metaProp || defaultMetaStore();
   const meta = useSyncExternalStore(metaStore.subscribe || noSubscribe, metaStore.all, metaStore.all);
   const [load,setLoad]=useState({ status:'loading', repos:[], syncedAt:null, error:null, verified:null, notice:null });
   const [query,setQuery]=useState('');
@@ -51,7 +52,17 @@ export default function GithubReposPage({ source: sourceProp, metaStore: metaPro
   const mark=verified?'':'*';
   const busy=load.status==='loading';
   const hasData=load.repos.length>0;
-  const saveMeta=patch=>current ? metaStore.set(current.key, patch) : Promise.resolve();
+  const saveMeta=patch=>current ? metaStore.set(current.key, { ...patch, name: current.name, url: current.url }) : Promise.resolve();
+  // Notes for repositories that are gone from GitHub (deleted or access lost) are kept, never auto-deleted.
+  const orphans=useMemo(()=>{
+    if (!verified || load.status!=='ready' || typeof metaStore.storedKeys!=='function') return [];
+    return findOrphans(metaStore.storedKeys(), load.repos, meta);
+  },[verified,load.status,load.repos,metaStore,meta]);
+  const removeOrphan=async orphan=>{
+    if (typeof metaStore.remove!=='function') return;
+    if (typeof window!=='undefined' && !window.confirm(`'${orphan.name||orphan.key}'의 메모·태그를 삭제할까요? 되돌릴 수 없습니다.`)) return;
+    try { await metaStore.remove(orphan.key); } catch { /* the portal retry toolbar keeps the failed write */ }
+  };
   const resetFilters=()=>{setCategory('전체');setOrigin('all');setQuery('');};
 
   let badge;
@@ -100,6 +111,14 @@ export default function GithubReposPage({ source: sourceProp, metaStore: metaPro
         {current && <button type="button" className="repo-glass__detail-jump" aria-controls="repo-detail-panel" onClick={() => document.getElementById('repo-detail-panel').focus()}>선택한 저장소 상세로 이동 ↓</button>}
         <div className="repo-glass__table-head"><span>레포지토리</span><span>카테고리</span><span>상태{mark}</span></div>
         <div className="repo-glass__rows">{rows}</div>
+        {orphans.length>0&&<details className="repo-orphans">
+          <summary>GitHub에서 찾을 수 없는 저장소 메모 {orphans.length}개</summary>
+          <p className="repo-orphans__hint">삭제되었거나 접근 권한이 없어진 저장소입니다. 메모는 자동으로 지우지 않습니다.</p>
+          <ul>{orphans.map(orphan=><li key={orphan.key}>
+            <div><strong>{orphan.name||orphan.key}</strong>{orphan.note&&<p>{orphan.note}</p>}{orphan.tags.length>0&&<small>{orphan.tags.map(tag=>`#${tag}`).join(' ')}</small>}</div>
+            <button type="button" onClick={()=>removeOrphan(orphan)} aria-label={`${orphan.name||orphan.key} 메모 삭제`}>메모 삭제</button>
+          </li>)}</ul>
+        </details>}
         {!verified && <p className="repo-glass__footnote">*분류·상태는 시연용 추정값입니다. 실제 GitHub 동기화와 영구 저장은 아직 연결되지 않았습니다.</p>}
       </section>
       <p className="repo-glass__sr-only" role="status" aria-live="polite" aria-atomic="true">{current ? `${current.name} 저장소 상세가 갱신되었습니다.` : '선택 가능한 저장소가 없습니다.'}</p>

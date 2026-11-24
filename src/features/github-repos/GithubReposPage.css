@@ -100,3 +100,13 @@
 @media(max-width:1050px){.repo-glass__detail-body{max-height:none;overflow:visible}}
 @media(prefers-reduced-motion:reduce){.repo-skeleton span{animation:none}}
 .repo-notice{margin:0 16px 12px;padding:8px 12px;border-radius:10px;border:1px solid #ffc66b55;background:#ffc66b14;color:#ffe2ad;font-size:12px;line-height:1.6}
+/* Notes for repositories that disappeared from GitHub */
+.repo-orphans{margin:0 16px 12px;border:1px dashed #9aa6d8;border-radius:12px;padding:0 12px;color:#d9e2ff;font-size:12px}
+.repo-orphans summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:600}
+.repo-orphans__hint{margin:0 0 8px;color:var(--rg-muted);font-size:11px}
+.repo-orphans ul{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:8px}
+.repo-orphans li{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:10px;border-radius:10px;background:#ffffff0a}
+.repo-orphans li>div{min-width:0;overflow-wrap:anywhere}
+.repo-orphans li p{margin:4px 0;color:#c6cdea}
+.repo-orphans li small{color:#9fe3ee}
+.repo-orphans button{flex:none;min-height:44px;border:1px solid #ff8fa880;border-radius:9px;background:#5a223666;color:#ffe3e8;padding:8px 12px;font-size:12px;cursor:pointer}

@@ -15,7 +15,7 @@ export default function RepoMetaEditor({ repo, categories, persistent, onSave })
       await onSave(patch);
       setMessage(done);
     } catch {
-      setMessage('저장하지 못했습니다. 다시 시도해 주세요.');
+      setMessage(persistent ? '클라우드에 저장하지 못했습니다. 상단 저장 상태에서 다시 시도해 주세요.' : '저장하지 못했습니다. 다시 시도해 주세요.');
     }
   };
   const addTags = () => {
