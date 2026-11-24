@@ -43,6 +43,20 @@ export function originLabel(repo) {
   return repo.fork ? '외부 원본 추정' : '직접 제작 추정';
 }
 
+export const MAX_TAGS = 12;
+
+export function normalizeTags(tags) {
+  const seen = new Set();
+  const out = [];
+  for (const raw of Array.isArray(tags) ? tags : []) {
+    const tag = String(raw || '').trim().replace(/\s+/g, ' ').slice(0, 30);
+    const id = tag.toLocaleLowerCase();
+    if (tag && !seen.has(id)) { seen.add(id); out.push(tag); }
+    if (out.length >= MAX_TAGS) break;
+  }
+  return out;
+}
+
 export const EMPTY_META = Object.freeze({ category: '', status: '', tags: [], favorite: false, note: '', hidden: false });
 
 export function toRepoView(repo, meta) {

@@ -71,7 +71,7 @@ describe('fixture repository source', () => {
   });
 
   it('surfaces typed errors for UI states', async () => {
-    await expect(createFixtureRepoSource({ fail: 'rate_limited' }).list()).rejects.toBeInstanceOf(RepoSourceError);
+    await expect(createFixtureRepoSource({ state: 'rate_limited' }).list()).rejects.toBeInstanceOf(RepoSourceError);
     expect(new RepoSourceError('bogus').code).toBe('unknown');
   });
 });
