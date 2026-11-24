@@ -30,3 +30,20 @@ export function formatDate(iso) {
 }
 
 export const REPO_STATUSES = ['개발 중', '운영 중', '운영 확인 필요', '실험', '검토', '보관 검토', '보관'];
+
+const count = new Intl.NumberFormat('ko-KR');
+const dateTime = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short' });
+
+export function formatDateTime(value) {
+  const date = new Date(value);
+  return value && Number.isFinite(date.getTime()) ? dateTime.format(date) : '';
+}
+const visibilityLabels = { public: 'Public', private: 'Private', internal: 'Internal' };
+
+export function formatCount(value) {
+  return Number.isFinite(value) ? count.format(value) : '—';
+}
+
+export function visibilityLabel(value) {
+  return visibilityLabels[value] ?? '—';
+}

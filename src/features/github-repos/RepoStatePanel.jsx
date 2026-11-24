@@ -15,7 +15,7 @@ export function RepoStatePanel({ kind, code = 'unknown', resetAt = null, onRetry
     return <div className="repo-state">
       <span className="repo-state__icon" aria-hidden="true">◌</span>
       <h3>아직 표시할 저장소가 없습니다</h3>
-      <p>GitHub 계정에 소유한 저장소가 없거나, 모두 숨김 처리되었습니다.</p>
+      <p>GitHub에서 가져온 저장소가 없습니다.</p>
       {onRetry && <button type="button" className="repo-state__action" onClick={onRetry}>다시 불러오기</button>}
     </div>;
   }

@@ -133,12 +133,12 @@ export const PORTAL_NAV_ITEMS = [
     id: 'github-repos',
     icon: '🧊',
     defaultLabel: 'GitHub 레포지토리',
-    tooltip: '3D Glass 관리대장 · 샘플 데이터 시연',
+    tooltip: 'GitHub 저장소 탐색과 README·메모 관리',
     homeCta: 'GitHub 레포지토리 열기 →',
     boardSection: 'experiments',
     boardStatus: 'Experiment',
-    boardDescription: 'GitHub 레포지토리 관리대장 Phase 1 시안입니다.',
-    boardNextAction: 'GitHub 공식 메타데이터 연동은 Phase 2에서 검토합니다.',
+    boardDescription: 'GitHub 저장소를 탐색하고 README와 개인 메모를 확인합니다.',
+    boardNextAction: '저장소 목록에서 분류, 상태, 태그와 메모를 관리합니다.',
   },
 ];
 
