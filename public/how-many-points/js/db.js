@@ -2,6 +2,7 @@
   "use strict";
 
   var EXPORT_FORMAT_VERSION = 1;
+  var importPlans = new WeakMap();
 
   var CONTENT_TYPES = ["movie", "series", "book", "webtoon", "other"];
 
@@ -46,10 +47,6 @@
       (raw.externalId ? "watcha-" + raw.externalId : null) ||
       slugFromTitle(raw.title || "제목 없음", existingIds || {});
 
-    if (existingIds && existingIds[id] && raw._mergeId) {
-      id = raw._mergeId;
-    }
-
     return {
       id: id,
       contentType: type,
@@ -86,48 +83,49 @@
     return global.PortalCloud.write("how-many-points", id, null);
   }
 
-  function clearAll() {
-    return global.PortalCloud.clear("how-many-points");
+  async function prepareImport(items, options) {
+    await global.PortalCloud.flush();
+    await global.PortalCloud.load();
+    var existing = await listRatings();
+    var plan = global.HowManyPointsImportPlan.build(existing, items, options || {});
+    var preview = Object.freeze(Object.assign({}, plan.summary));
+    plan.records = global.PortalCloud.snapshot("how-many-points");
+    plan.overwrite = !!(options && options.overwrite === true);
+    plan.backup = Object.assign(exportPayload(plan.records.filter(function (r) { return r.value !== null; }).map(function (r) { return r.value; })), { records: plan.records });
+    importPlans.set(preview, plan);
+    return preview;
   }
 
-  function buildIdMap(list) {
-    var map = {};
-    list.forEach(function (r) {
-      map[r.id] = true;
-      if (r.externalId) map["watcha-" + r.externalId] = r.id;
-    });
-    return map;
+  async function createImportBackup(preview) {
+    var plan = importPlans.get(preview);
+    if (!plan) throw new Error("미리보기를 다시 생성하세요.");
+    var id = plan.backupAttemptKey || global.crypto.randomUUID();
+    plan.backupAttemptKey = id;
+    await global.PortalCloud.retry("how-many-points-backups", id);
+    if (!global.PortalCloud.has("how-many-points-backups", id)) {
+      await global.PortalCloud.write("how-many-points-backups", id, plan.backup);
+    }
+    plan.backupKey = id;
+    return JSON.stringify(plan.backup, null, 2);
   }
 
-  function importItems(items, replace) {
-    if (!Array.isArray(items)) return Promise.reject(new Error("invalid"));
-    var run = replace ? clearAll() : Promise.resolve();
-    return run.then(function () {
-      return listRatings().then(function (existing) {
-        var idMap = buildIdMap(existing);
-        return Promise.all(
-          items.map(function (raw) {
-            var ext = raw.externalId || raw.watchaId;
-            var mergeId = ext && idMap["watcha-" + ext] ? idMap["watcha-" + ext] : null;
-            if (mergeId) raw._mergeId = mergeId;
-            var item = normalizeItem(raw, idMap);
-            idMap[item.id] = true;
-            if (item.externalId) idMap["watcha-" + item.externalId] = item.id;
-            item.updatedAt = new Date().toISOString();
-            if (mergeId) {
-              return getRating(mergeId).then(function (prev) {
-                if (prev) {
-                  item.createdAt = prev.createdAt;
-                  if (!item.posterUrl && prev.posterUrl) item.posterUrl = prev.posterUrl;
-                }
-                return putRating(item);
-              });
-            }
-            return putRating(item);
-          })
-        );
-      });
+  async function commitImport(preview) {
+    var plan = importPlans.get(preview);
+    if (!plan || !plan.backupKey) throw new Error("JSON 백업을 먼저 저장하세요.");
+    importPlans.delete(preview);
+    return global.PortalCloud.mergeRatings({
+      p_snapshot: plan.records,
+      p_changes: plan.writes,
+      p_backup_key: plan.backupKey,
+      p_overwrite: plan.overwrite,
     });
+  }
+
+  async function importItems(items, replace) {
+    if (replace) throw new Error("전체 교체는 지원하지 않습니다. 미리보기에서 병합하세요.");
+    var preview = await prepareImport(items);
+    await createImportBackup(preview);
+    return commitImport(preview);
   }
 
   function exportPayload(ratings) {
@@ -141,8 +139,10 @@
   }
 
   function importPayload(data, replace) {
-    var ratings = (data && data.ratings) || [];
-    return importItems(ratings, replace);
+    if (!data || (data.version !== undefined && data.version !== EXPORT_FORMAT_VERSION) || !Array.isArray(data.ratings)) {
+      return Promise.reject(new Error("지원하지 않는 JSON 백업 형식입니다."));
+    }
+    return importItems(data.ratings, replace);
   }
 
   function seedIfEmpty() { return listRatings(); }
@@ -154,6 +154,9 @@
     putRating: putRating,
     deleteRating: deleteRating,
     importItems: importItems,
+    prepareImport: prepareImport,
+    createImportBackup: createImportBackup,
+    commitImport: commitImport,
     exportPayload: exportPayload,
     importPayload: importPayload,
     seedIfEmpty: seedIfEmpty,

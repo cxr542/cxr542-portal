@@ -392,6 +392,7 @@
       '<div class="import-actions">' +
       '<label class="btn btn--primary">왓챠 CSV 가져오기<input type="file" id="import-csv" accept=".csv,text/csv" hidden /></label>' +
       '<label class="btn">JSON 가져오기<input type="file" id="import-json" accept="application/json,.json" hidden /></label>' +
+      '<button type="button" class="btn" id="import-backup-download">최근 자동 백업 다운로드</button>' +
       "</div></div>";
 
     $("btn-copy-watcha-script").onclick = function () {
@@ -420,60 +421,18 @@
           window.alert("스크립트를 불러오지 못했습니다. 새로고침 후 다시 시도하세요.");
         });
     };
-    $("import-csv").onchange = function (e) {
-      var f = e.target.files && e.target.files[0];
-      if (!f) return;
-      var reader = new FileReader();
-      reader.onload = function () {
-        try {
-          var items = HowManyPointsWatchaImport.parseWatchaCsv(reader.result);
-          if (!items.length) {
-            window.alert("CSV에서 항목을 찾지 못했습니다.");
-            return;
-          }
-          var merge = !window.confirm(
-            items.length +
-              "건을 가져옵니다.\n\n확인 = 기존 데이터와 병합(같은 왓챠 ID는 덮어쓰기)\n취소 = 전체 교체 후 가져오기"
-          );
-          HowManyPointsDb.importItems(items, !merge).then(function () {
-            state.view = "library";
-            render();
-            if (window.ProjectShell) {
-              ProjectShell.notifyTaskDone({
-                module: "너는몇점?",
-                action: "왓챠 CSV 가져오기 완료",
-                title: items.length + "건 반영",
-              });
-            }
-            window.alert(items.length + "건을 반영했습니다.");
-          });
-        } catch (err) {
-          console.error(err);
-          window.alert("CSV 처리 중 오류가 났습니다.");
-        }
-      };
-      reader.readAsText(f, "UTF-8");
-      e.target.value = "";
-    };
-    $("import-json").onchange = function (e) {
-      var f = e.target.files && e.target.files[0];
-      if (!f) return;
-      var reader = new FileReader();
-      reader.onload = function () {
-        try {
-          var data = JSON.parse(reader.result);
-          var replace = window.confirm("기존 데이터를 모두 지우고 가져올까요?\n취소 = 병합");
-          HowManyPointsDb.importPayload(data, replace).then(function () {
-            state.view = "library";
-            render();
-          });
-        } catch (err) {
-          window.alert("JSON 형식이 올바르지 않습니다.");
-        }
-      };
-      reader.readAsText(f);
-      e.target.value = "";
-    };
+    $("import-backup-download").onclick = HowManyPointsImportFlow.downloadLatestBackup;
+    $("import-csv").onchange = function (e) { openImportFile(e, "csv"); };
+    $("import-json").onchange = function (e) { openImportFile(e, "json"); };
+  }
+
+  function openImportFile(event, format) {
+    var file = event.target.files && event.target.files[0];
+    event.target.value = "";
+    return HowManyPointsImportFlow.open(file, format, function () {
+      state.view = "library";
+      return render();
+    });
   }
 
   function ratingPickerHtml(value) {
@@ -774,20 +733,7 @@
     $("btn-new").onclick = newRating;
     $("btn-export").onclick = exportJson;
     $("import-json-toolbar").onchange = function (e) {
-      var f = e.target.files && e.target.files[0];
-      if (!f) return;
-      var reader = new FileReader();
-      reader.onload = function () {
-        try {
-          var data = JSON.parse(reader.result);
-          var replace = window.confirm("기존 데이터를 모두 지우고 가져올까요?\n취소 = 병합");
-          HowManyPointsDb.importPayload(data, replace).then(render);
-        } catch (err) {
-          window.alert("JSON 형식이 올바르지 않습니다.");
-        }
-      };
-      reader.readAsText(f);
-      e.target.value = "";
+      return openImportFile(e, "json");
     };
   }
 
