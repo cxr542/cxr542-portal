@@ -15,7 +15,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/shared/css/project-shell.css?v=portal2" />
-    <link rel="stylesheet" href="/vision-font/css/app.css?v=portal2" />
+    <link rel="stylesheet" href="/vision-font/css/app.css?v=preview1" />
   <link rel="stylesheet" href="/shared/cloud.css" />
   <link rel="stylesheet" href="/shared/css/workspace-embed.css"><script src="/shared/js/workspace-embed.js" defer></script>
 </head>
@@ -149,8 +149,31 @@
               </div>
             </div>
             <div class="vf-card">
-              <h2>미리보기</h2>
-              <div class="vf-preview-box" id="vf-settings-preview"></div>
+              <h2>기사 미리보기</h2>
+              <fieldset class="vf-preview-stages" id="vf-preview-stages">
+                <legend>같은 문장에 설정을 하나씩 적용해 보세요.</legend>
+                <label class="vf-preview-stage">
+                  <input type="radio" name="vf-preview-stage" value="base" />
+                  <span>기본</span>
+                </label>
+                <label class="vf-preview-stage">
+                  <input type="radio" name="vf-preview-stage" value="size" />
+                  <span>글자 크기</span>
+                </label>
+                <label class="vf-preview-stage">
+                  <input type="radio" name="vf-preview-stage" value="lines" />
+                  <span>줄 간격까지</span>
+                </label>
+                <label class="vf-preview-stage">
+                  <input type="radio" name="vf-preview-stage" value="custom" checked />
+                  <span>맞춤 설정</span>
+                </label>
+              </fieldset>
+              <p class="vf-preview-caption" id="vf-preview-caption" role="status"></p>
+              <div class="vf-preview-box">
+                <p id="vf-settings-preview"></p>
+              </div>
+              <h3 class="vf-css-label">맞춤 설정 CSS</h3>
               <code class="vf-css-out" id="vf-css-output"></code>
             </div>
           </section>
@@ -210,7 +233,7 @@
 
     <script type="application/portal-script" data-cloud-src="/shared/js/project-shell.js?v=portal2"></script>
     <script type="application/portal-script" data-cloud-src="/vision-font/js/settings.js?v=portal2"></script>
-    <script type="application/portal-script" data-cloud-src="/vision-font/js/app.js?v=portal2"></script>
+    <script type="application/portal-script" data-cloud-src="/vision-font/js/app.js?v=preview1"></script>
   <script type="module" src="/shared/cloud.js"></script>
   </body>
 </html>

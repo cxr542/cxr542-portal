@@ -11,6 +11,8 @@
     "설정은 로그인한 계정의 Supabase에 저장되며, JSON으로 보내기·가져오기할 수 있습니다.",
   ];
 
+  var PREVIEW_BASE = { fontSize: 16, lineHeight: 1.5, letterSpacing: 0 };
+
   var state = {
     view: "test",
     testStep: 1,
@@ -108,17 +110,25 @@
       $("vf-val-spacing").textContent = s.letterSpacing.toFixed(2) + "em";
     }
 
-    var preview = $("vf-settings-preview");
-    var cssOut = $("vf-css-output");
-    if (preview) {
-      preview.innerHTML =
-        "<p>맞춤 설정이 적용된 미리보기입니다. 눈이 편한지 확인한 뒤 기사 읽기로 이동하세요.</p>" +
-        "<p>" +
-        escapeHtml(SAMPLE_ARTICLE[1]) +
-        "</p>";
-      S.applyToElement(preview, s);
-    }
-    if (cssOut) cssOut.textContent = S.toCss(s);
+    renderSettingsPreview();
+    $("vf-css-output").textContent = S.toCss(s);
+  }
+
+  function renderSettingsPreview() {
+    var stage = $("vf-preview-stages").querySelector(":checked").value;
+    var s = state.settings;
+    var previewSettings = {
+      fontFamily: s.fontFamily,
+      fontSize: stage === "base" ? PREVIEW_BASE.fontSize : s.fontSize,
+      lineHeight: stage === "lines" || stage === "custom" ? s.lineHeight : PREVIEW_BASE.lineHeight,
+      letterSpacing: stage === "custom" ? s.letterSpacing : PREVIEW_BASE.letterSpacing,
+    };
+    S.applyToElement($("vf-settings-preview"), previewSettings);
+
+    var caption = $("vf-preview-caption");
+    var summary = "글자 크기 " + previewSettings.fontSize + "px · 줄 간격 " +
+      previewSettings.lineHeight.toFixed(2) + " · 자간 " + previewSettings.letterSpacing.toFixed(2) + "em";
+    if (caption.textContent !== summary) caption.textContent = summary;
   }
 
   function syncSettingsFromSliders() {
@@ -230,6 +240,18 @@
     var stopBtn = $("btn-test-stop");
     if (nextBtn) nextBtn.addEventListener("click", onTestNext);
     if (stopBtn) stopBtn.addEventListener("click", onTestStop);
+
+    $("vf-settings-preview").textContent = SAMPLE_ARTICLE[1];
+    $("vf-preview-stages").addEventListener("change", function () {
+      renderSettingsPreview();
+      if (window.matchMedia("(prefers-reduced-motion: no-preference)").matches) {
+        var sample = $("vf-settings-preview");
+        sample.getAnimations().forEach(function (animation) {
+          animation.cancel();
+        });
+        sample.animate([{ opacity: 0.55 }, { opacity: 1 }], { duration: 160, easing: "ease-out" });
+      }
+    });
 
     ["vf-range-font", "vf-range-line", "vf-range-spacing"].forEach(function (id) {
       var el = $(id);
