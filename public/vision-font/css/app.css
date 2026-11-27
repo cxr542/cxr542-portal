@@ -100,6 +100,59 @@ body.project-app.theme-vision-font {
   accent-color: var(--app-accent, #e8935a);
 }
 
+.vf-preview-stages {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
+  gap: 0.5rem;
+  min-inline-size: 0;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  border: 0;
+}
+
+.vf-preview-stages legend {
+  margin-bottom: 0.65rem;
+  padding: 0;
+  color: var(--shell-muted);
+  font-size: 0.9rem;
+}
+
+.vf-preview-stage {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--shell-border);
+  border-radius: 8px;
+  color: var(--shell-text);
+  cursor: pointer;
+}
+
+.vf-preview-stage:hover {
+  background: rgba(var(--app-accent-rgb), 0.08);
+}
+
+.vf-preview-stage:has(:checked) {
+  background: rgba(var(--app-accent-rgb), 0.14);
+  border-color: var(--app-accent);
+}
+
+.vf-preview-stage:has(:focus-visible) {
+  outline: 2px solid var(--app-accent);
+  outline-offset: 2px;
+}
+
+.vf-preview-stage input {
+  flex: none;
+  margin: 0;
+  accent-color: var(--app-accent);
+}
+
+.vf-card .vf-preview-caption {
+  font-variant-numeric: tabular-nums;
+}
+
 .vf-preview-box {
   padding: 1.1rem 1rem;
   border-radius: 12px;
@@ -108,18 +161,21 @@ body.project-app.theme-vision-font {
   min-height: 5rem;
 }
 
-.vf-preview-box p {
-  margin: 0 0 0.75rem;
+.vf-card .vf-preview-box p {
+  margin: 0;
   color: inherit;
+  overflow-wrap: anywhere;
 }
 
-.vf-preview-box p:last-child {
-  margin-bottom: 0;
+.vf-css-label {
+  margin: 0.85rem 0 0.35rem;
+  color: var(--shell-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 .vf-css-out {
   display: block;
-  margin-top: 0.75rem;
   padding: 0.65rem 0.75rem;
   font-size: 0.78rem;
   background: rgba(0, 0, 0, 0.35);
